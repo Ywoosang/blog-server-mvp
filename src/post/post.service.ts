@@ -1,0 +1,116 @@
+import { 
+    Injectable, 
+    NotFoundException, 
+    ForbiddenException
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { PostStatus } from './post-status.enum';
+import { CreatePostDto } from './dto/create-post.dto';
+import { FindOneOptions, Repository } from 'typeorm';
+import { Post } from './entities/post.entity';
+import { User } from 'src/users/entities/user.entity';
+import { PaginationResponseDto } from './dto/pagination-response.dto';
+import { NullableType } from 'src/utils/types/nullable.type';
+import { UsersService } from 'src/users/users.service';
+
+@Injectable()
+export class PostService {
+    constructor(
+        @InjectRepository(Post)
+        private postRepository: Repository<Post>,         
+        private usersService: UsersService
+    ) {}
+
+    async findOne(findOptions: FindOneOptions<Post>): Promise<NullableType<Post>> {
+        return this.postRepository.findOne(findOptions);
+    }
+
+    async findPublicPost(postId: number) {
+        const post = await this.findOne({
+			where: { 
+				id: postId 
+			}
+		});
+		if(!post) throw new NotFoundException("존재하지 않는 게시물입니다.");
+		if(post.status != PostStatus.PUBLIC) throw new ForbiddenException("비공개 게시물 입니다.")
+        return post;
+    }
+
+    async findPublicPosts(page: number = 1, limit: number = 15): Promise<PaginationResponseDto> {
+        const skip = (page - 1) * limit;
+        const [posts, total] = await this.postRepository.findAndCount({
+            take: limit,
+            skip,
+            where: {
+                status: PostStatus.PUBLIC,
+            },
+        });
+        return {
+            posts,
+            total,
+        };
+    }
+
+    async findUserPost(postId: number, user: User) {
+        const post = await this.findOne({
+			where: { 
+				id: postId 
+			},
+			relations: ['user']
+		});
+		if(!post) throw new NotFoundException();
+		if(post.status == PostStatus.PRIVATE && post.user.id !== user.id) {
+            throw new ForbiddenException("비공개 게시물에 접근할 수 없습니다.");
+        }
+        return post;
+    }
+
+    async findUserPosts(user: User): Promise<NullableType<Post[]>> {
+        return user.posts;
+    }
+
+    async findPublicUserPosts(userId: number): Promise<NullableType<Post[]>> {
+        const user: User =  await this.usersService.findOne({
+			where: {
+				id: userId
+			},
+			relations: ['posts']
+		});
+        if(!user) throw new NotFoundException("존재하지 않는 사용자입니다.");
+        return user.posts.filter((post) => post.status === PostStatus.PUBLIC);
+    }
+
+    async create(createPostDto: CreatePostDto, user: User): Promise<Post> {
+        return this.postRepository.save(
+            this.postRepository.create({
+                ...createPostDto,
+                user,
+            })
+        );
+    }
+
+    async updateStatus(id: number, status: PostStatus): Promise<Post> {
+        const post = await this.findOne({
+            where: {
+                id,
+            },
+        });
+        post.status = status;
+        await this.postRepository.save(post);
+        return post;
+    }
+
+    async delete(id: number, user: User): Promise<void> {
+        const post = await this.findOne({
+            where: [
+                { id },
+                {
+                    user: {
+                        id: user.id,
+                    },
+                },
+            ],
+        })
+        await this.postRepository.remove(post);
+    }
+}
