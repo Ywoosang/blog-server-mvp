@@ -1,4 +1,5 @@
 import { 
+    BadRequestException,
     CanActivate, 
     ExecutionContext, 
     Injectable,
@@ -13,6 +14,9 @@ export class PublicPostGuard implements CanActivate {
   
     async canActivate(context: ExecutionContext): Promise<boolean>  {
     const request = context.switchToHttp().getRequest();
+    if(isNaN(request.params.id)) {
+        throw new BadRequestException('올바르지 않은 요청입니다.');
+    };
     const postId = +request.params.id;  
     const post = await this.postService.findOne({
         where: { 
