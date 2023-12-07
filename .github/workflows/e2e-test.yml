@@ -7,19 +7,22 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest   
+    runs-on: ubuntu-latest
 
     steps:
-    - name: 소스 코드 Checkout  
-      uses: actions/checkout@v2  
+      - name: 소스 코드 Checkout
+        uses: actions/checkout@v2
 
-    - name: Node.js 설치
-      uses: actions/setup-node@v2
-      with:
-        node-version: '16'  # 사용할 Node.js 버전
+      - name: Node.js 설치
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16"
 
-    - name: 종속성 설치
-      run: npm i
+      - name: 종속성 설치
+        run: npm ci
 
-    - name: 유닛 테스트 실행
-      run: npm run test:e2e
+      - name: Lint 체크
+        run: npm run lint
+
+      - name: e2e 테스트 실행
+        run: npm run test:e2e
