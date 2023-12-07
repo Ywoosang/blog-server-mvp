@@ -14,14 +14,16 @@ export class Comment {
     parentCommentId: number;
 
     @ManyToOne(() => User, user => user.comments)
-    @JoinColumn({ name: "userId" })
+    @JoinColumn({ name: 'userId' })
     user: User;
 
     @ManyToOne(() => Post, post => post.comments)
-    @JoinColumn({ name: "postId" })
+    @JoinColumn({ name: 'postId' })
     post: Post;
 
-    @ManyToOne(() => Comment, comment => comment.replies,  { onDelete: 'CASCADE' })
+    @ManyToOne(() => Comment, comment => comment.replies, {
+        onDelete: 'CASCADE'
+    })
     @JoinColumn({ name: 'parentCommentId' })
     parentComment: Comment;
 

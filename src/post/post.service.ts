@@ -1,8 +1,4 @@
-import { 
-    Injectable, 
-    NotFoundException, 
-    ForbiddenException
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PostStatus } from './post-status.enum';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -17,7 +13,7 @@ import { UsersService } from 'src/users/users.service';
 export class PostService {
     constructor(
         @InjectRepository(Post)
-        private postRepository: Repository<Post>,         
+        private postRepository: Repository<Post>,
         private usersService: UsersService
     ) {}
 
@@ -25,66 +21,44 @@ export class PostService {
         return this.postRepository.findOne(findOptions);
     }
 
-    async findPublicPost(postId: number) {
-        const post = await this.findOne({
-			where: { 
-				id: postId 
-			}
-		});
-		if(!post) throw new NotFoundException("존재하지 않는 게시물입니다.");
-		if(post.status != PostStatus.PUBLIC) throw new ForbiddenException("비공개 게시물 입니다.")
-        return post;
-    }
-
-    async findPublicPosts(page: number = 1, limit: number = 15): Promise<PaginationResponseDto> {
+    async findPostsPaginated(
+        page: number = 1,
+        limit: number = 15,
+        isAdmin: boolean = false
+    ): Promise<PaginationResponseDto> {
         const skip = (page - 1) * limit;
+        const whereCondition: any = {};
+        if (!isAdmin) {
+            whereCondition.status = PostStatus.PUBLIC;
+        }
         const [posts, total] = await this.postRepository.findAndCount({
             take: limit,
             skip,
-            where: {
-                status: PostStatus.PUBLIC,
-            },
+            where: whereCondition
         });
+
         return {
             posts,
-            total,
+            total
         };
     }
-
-    async findUserPost(postId: number, user: User) {
-        const post = await this.findOne({
-			where: { 
-				id: postId 
-			},
-			relations: ['user']
-		});
-		if(!post) throw new NotFoundException();
-		if(post.status == PostStatus.PRIVATE && post.user.id !== user.id) {
-            throw new ForbiddenException("비공개 게시물에 접근할 수 없습니다.");
-        }
-        return post;
-    }
-
-    async findUserPosts(user: User): Promise<NullableType<Post[]>> {
-        return user.posts;
-    }
-
     async findPublicUserPosts(userId: number): Promise<NullableType<Post[]>> {
-        const user: User =  await this.usersService.findOne({
-			where: {
-				id: userId
-			},
-			relations: ['posts']
-		});
-        if(!user) throw new NotFoundException("존재하지 않는 사용자입니다.");
-        return user.posts.filter((post) => post.status === PostStatus.PUBLIC);
+        const user: User = await this.usersService.findOne({
+            where: {
+                id: userId
+            },
+            relations: ['posts']
+        });
+        if (!user) throw new NotFoundException('존재하지 않는 사용자입니다.');
+
+        return user.posts.filter(post => post.status === PostStatus.PUBLIC);
     }
 
     async create(createPostDto: CreatePostDto, user: User): Promise<Post> {
         return this.postRepository.save(
             this.postRepository.create({
                 ...createPostDto,
-                user,
+                user
             })
         );
     }
@@ -92,11 +66,13 @@ export class PostService {
     async updateStatus(id: number, status: PostStatus): Promise<Post> {
         const post = await this.findOne({
             where: {
-                id,
-            },
+                id
+            }
         });
+        if (!post) throw new NotFoundException('존재하지 않는 게시물입니다.');
         post.status = status;
         await this.postRepository.save(post);
+
         return post;
     }
 
@@ -106,11 +82,11 @@ export class PostService {
                 { id },
                 {
                     user: {
-                        id: user.id,
-                    },
-                },
-            ],
-        })
+                        id: user.id
+                    }
+                }
+            ]
+        });
         await this.postRepository.remove(post);
     }
 }

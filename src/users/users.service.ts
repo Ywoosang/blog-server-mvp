@@ -11,19 +11,17 @@ import { FindOneOptions } from 'typeorm';
 export class UsersService {
     constructor(
         @InjectRepository(User)
-        private usersRepository: Repository<User>,
-    ) { }
+        private usersRepository: Repository<User>
+    ) {}
 
     async create(createUserDto: CreateUserDto): Promise<User> {
-        return this.usersRepository.save(
-            this.usersRepository.create(createUserDto)
-        );
+        return this.usersRepository.save(this.usersRepository.create(createUserDto));
     }
 
     async findOne(findOptions: FindOneOptions<User>): Promise<NullableType<User>> {
         return await this.usersRepository.findOne(findOptions);
     }
-    
+
     async findAll() {
         return this.usersRepository.find();
     }
@@ -34,9 +32,10 @@ export class UsersService {
                 id
             }
         });
+
         return this.usersRepository.save({
             ...user,
             ...updateUserDto
         });
-    }   
+    }
 }

@@ -1,7 +1,7 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
-import { PassportStrategy } from "@nestjs/passport";
-import { InjectRepository } from "@nestjs/typeorm";
-import { ExtractJwt, Strategy } from "passport-jwt";
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ExtractJwt, Strategy } from 'passport-jwt';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 
@@ -9,14 +9,14 @@ import { Repository } from 'typeorm';
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     constructor(
         @InjectRepository(User)
-        private userRepository: Repository<User>,
+        private userRepository: Repository<User>
     ) {
         super({
-			// 토큰이 유효한지 체크 
+            // 토큰이 유효한지 체크
             secretOrKey: 'secret',
-            // bearer 
-			jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken() 
-        })
+            // bearer
+            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken()
+        });
     }
 
     async validate(payload: any) {
@@ -25,8 +25,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
             where: {
                 userLoginId
             }
-        })
-        if(!user) throw new UnauthorizedException();
+        });
+        if (!user) throw new UnauthorizedException();
+
         return user;
     }
 }

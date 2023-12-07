@@ -1,14 +1,13 @@
-import { 
-	BaseEntity, 
-	Entity, 
-	Column, 
-	PrimaryGeneratedColumn,
-	ManyToOne,
-	OneToMany,
-	JoinColumn,
-	CreateDateColumn,
-	UpdateDateColumn,
-	BeforeUpdate
+import {
+    BaseEntity,
+    Entity,
+    Column,
+    PrimaryGeneratedColumn,
+    ManyToOne,
+    OneToMany,
+    JoinColumn,
+    CreateDateColumn,
+    UpdateDateColumn
 } from 'typeorm';
 
 import { PostStatus } from '../post-status.enum';
@@ -18,32 +17,31 @@ import { Like } from 'src/like/entities/like.entity';
 
 @Entity()
 export class Post extends BaseEntity {
-	@PrimaryGeneratedColumn()
-	id:number;
-	
-	@Column()
-	title: string;
-	
-	@Column()
-	content: string;
-	
-	@Column()
-	status: PostStatus;
+    @PrimaryGeneratedColumn()
+    id: number;
 
-	@CreateDateColumn()
-	createdAt: Date;
+    @Column()
+    title: string;
 
-	@UpdateDateColumn()
-	updatedAt: Date;
-	
-	@ManyToOne(type => User, user=> user.posts, { eager: true })
-	@JoinColumn({ name: "userId" })
-	user: User;
-	
-	@OneToMany(() => Comment, comment => comment.post, { eager: false})
-	comments: Comment[];
+    @Column()
+    content: string;
 
-	@OneToMany(() => Like, like => like.post)
-	likes: Like[];
+    @Column()
+    status: PostStatus;
+
+    @CreateDateColumn()
+    createdAt: Date;
+
+    @UpdateDateColumn()
+    updatedAt: Date;
+
+    @ManyToOne(() => User, user => user.posts, { eager: true })
+    @JoinColumn({ name: 'userId' })
+    user: User;
+
+    @OneToMany(() => Comment, comment => comment.post, { eager: false })
+    comments: Comment[];
+
+    @OneToMany(() => Like, like => like.post)
+    likes: Like[];
 }
-

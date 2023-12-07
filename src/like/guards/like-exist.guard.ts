@@ -1,13 +1,9 @@
-import {
-    Injectable,
-    CanActivate,
-    ExecutionContext
-} from '@nestjs/common';
-import { LikeService } from './like.service';
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { LikeService } from '../like.service';
 
 @Injectable()
 export class LikeExistGuard implements CanActivate {
-    constructor(private likeService: LikeService) { }
+    constructor(private likeService: LikeService) {}
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
         const postId = request.params.postId;
@@ -15,13 +11,14 @@ export class LikeExistGuard implements CanActivate {
         const like = await this.likeService.findOne({
             where: {
                 post: {
-                    id: postId,
+                    id: postId
                 },
                 user: {
                     id: userId
                 }
-            },
+            }
         });
+
         return !!!like;
     }
 }
