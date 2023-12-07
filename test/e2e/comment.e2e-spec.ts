@@ -9,11 +9,13 @@ import { CommentService } from 'src/comment/comment.service';
 import { User } from 'src/users/entities/user.entity';
 import UserSeeder from '../seeds/users.seed';
 import PostSeeder from '../seeds/post.seed';
-import CommentSeeder from '../seeds/comment.seed'; 
-// ctrl + alt + shift + r
+import CommentSeeder from '../seeds/comment.seed';
+import { UsersRole } from 'src/users/users-role.enum';
+import * as faker from 'faker';
+
 describe('CommentController (e2e)', () => {
     let app: INestApplication;
-    let accessToken: string;
+    let accessTokenUser: string;
     let userSeeder: UserSeeder;
     let postSeeder: PostSeeder;
     let commentSeeder: CommentSeeder;
@@ -21,8 +23,8 @@ describe('CommentController (e2e)', () => {
 
     beforeAll(async () => {
         jest.setTimeout(1000000);
-		const moduleFixture = await Test.createTestingModule({
-            imports: [AppModule],
+        const moduleFixture = await Test.createTestingModule({
+            imports: [AppModule]
         }).compile();
 
         const usersService = moduleFixture.get<UsersService>(UsersService);
@@ -31,8 +33,10 @@ describe('CommentController (e2e)', () => {
         userSeeder = new UserSeeder(usersService);
         postSeeder = new PostSeeder(postService);
         commentSeeder = new CommentSeeder(commentService);
-        testUser = await userSeeder.createTestUser(1);
-        await postSeeder.createTestPosts(testUser, 5, PostStatus.PUBLIC);
+        // 사용자 생성
+        testUser = await userSeeder.createTestUser(UsersRole.USER);
+        // 게시물 생성
+        await postSeeder.createTestPosts(5, testUser, PostStatus.PUBLIC);
         app = moduleFixture.createNestApplication();
         await app.init();
     });
@@ -42,174 +46,159 @@ describe('CommentController (e2e)', () => {
     });
 
     describe('/comments (POST)', () => {
+        const content = faker.lorem.paragraph();
         it('게시물에 대한 댓글을 생성한다.', async () => {
-			const response = await request(app.getHttpServer())
+            const response = await request(app.getHttpServer())
                 .post('/auth/signin')
                 .send({
-                    userLoginId: 'user1',
-                    password: 'password1'
+                    userLoginId: testUser.userLoginId,
+                    password: 'test@1234'
                 })
                 .expect(200);
-            accessToken = response.body.accessToken;
-
+            accessTokenUser = response.body.accessToken;
             await request(app.getHttpServer())
                 .post('/comments')
-                .set('Authorization', `Bearer ${accessToken}`)
+                .set('Authorization', `Bearer ${accessTokenUser}`)
                 .send({
-					content: '테스트 댓글 내용',
-					postId: 1
-                })
-                .expect(201);
-        })
-
-        it('로그인하지 않은 사용자가 댓글을 생성할 때 401 Unauthrized 에러를 반환한다.', async () => {
-               await request(app.getHttpServer())
-                .post('/comments')
-                .send({
-					content: '테스트 댓글 내용',
-					postId: 1
-                })
-                .expect(401);
-        })
-
-        it('내용이 없을 때 400 BadRequest 에러를 반환한다.', async() => {
-            await request(app.getHttpServer())
-            .post('/comments')
-            .set('Authorization', `Bearer ${accessToken}`)
-            .send({
-                content: "",
-                postId: 1
-            })
-            .expect(400);
-        })
-
-        it('게시물 아이디가 없을 때 400 BadRequest 에러를 반환한다.', async() => {
-            await request(app.getHttpServer())
-            .post('/comments')
-            .set('Authorization', `Bearer ${accessToken}`)
-            .send({
-               content: '테스트 댓글 내용',
-            })
-            .expect(400);
-        })
-	});
-	
-	describe('/comments/:parentCommentId/replies (POST)', () => {
-        it('대댓글을 생성한다.', async () => {
-            await request(app.getHttpServer())
-                .post('/comments/1/replies')
-                .set('Authorization', `Bearer ${accessToken}`)
-                .send({
-					content: '테스트 답글 내용',
+                    content,
+                    postId: 1
                 })
                 .expect(201);
         });
 
-        it('없는 댓글에 대한 대댓글이라면 404 NotFound 에러를 반환한다.', async() => {
+        it('로그인하지 않은 사용자가 댓글을 생성할 때 401 Unauthrized 에러를 반환한다.', async () => {
+            await request(app.getHttpServer())
+                .post('/comments')
+                .send({
+                    content,
+                    postId: 1
+                })
+                .expect(401);
+        });
+
+        it('내용이 없을 때 400 BadRequest 에러를 반환한다.', async () => {
+            await request(app.getHttpServer())
+                .post('/comments')
+                .set('Authorization', `Bearer ${accessTokenUser}`)
+                .send({
+                    content: '',
+                    postId: 1
+                })
+                .expect(400);
+        });
+
+        it('게시물 아이디가 없을 때 400 BadRequest 에러를 반환한다.', async () => {
+            await request(app.getHttpServer())
+                .post('/comments')
+                .set('Authorization', `Bearer ${accessTokenUser}`)
+                .send({
+                    content
+                })
+                .expect(400);
+        });
+    });
+
+    describe('/comments/:parentCommentId/replies (POST)', () => {
+        const content = faker.lorem.paragraph();
+        it('대댓글을 생성한다.', async () => {
+            await request(app.getHttpServer())
+                .post('/comments/1/replies')
+                .set('Authorization', `Bearer ${accessTokenUser}`)
+                .send({
+                    content
+                })
+                .expect(201);
+        });
+
+        it('없는 댓글에 대한 대댓글이라면 404 NotFound 에러를 반환한다.', async () => {
             await request(app.getHttpServer())
                 .post('/comment/100/replies')
-                .set('Authorization', `Bearer ${accessToken}`)
+                .set('Authorization', `Bearer ${accessTokenUser}`)
                 .send({
-					content: '테스트 답글 내용'
+                    content
                 })
                 .expect(404);
-        })
+        });
 
-           it('내용이 없을 때 400 BadRequest 에러를 반환한다.', async() => {
+        it('내용이 없을 때 400 BadRequest 에러를 반환한다.', async () => {
             await request(app.getHttpServer())
-            .post('/comments/1/replies')
-            .set('Authorization', `Bearer ${accessToken}`)
-            .send({
-                content: "",
-            })
-            .expect(400);
-        })
-	 });
-	
-	describe('/comments/posts/:postId (GET)', () => {
-		it('게시물에 달린 댓글들을 반환한다.', async() => {
-			const response = await request(app.getHttpServer())
-				.get('/comments/posts/1')
+                .post('/comments/1/replies')
+                .set('Authorization', `Bearer ${accessTokenUser}`)
+                .send({
+                    content: ''
+                })
+                .expect(400);
+        });
+    });
+
+    describe('/comments/posts/:postId (GET)', () => {
+        it('게시물에 달린 댓글들을 반환한다.', async () => {
+            const response = await request(app.getHttpServer()).get('/comments/posts/1');
             expect(response.statusCode).toBe(200);
             const comments = response.body;
             expect(Array.isArray(comments)).toBe(true);
-            comments.forEach((comment) => {
+            comments.forEach(comment => {
                 expect(comment).toHaveProperty('id');
                 expect(comment).toHaveProperty('content');
                 expect(comment).toHaveProperty('parentCommentId');
                 expect(comment).toHaveProperty('replies');
                 expect(comment).toHaveProperty('post');
-            })
-		});
-	})
-
+            });
+        });
+    });
 
     describe('/comments/:id (PUT)', () => {
-		it('댓글 내용을 수정한다.', async() => {
-			const response = await request(app.getHttpServer())
-            .put('/comments/1')
-            .set('Authorization', `Bearer ${accessToken}`)
-            .send({
-                content: '수정된 내용'
-            })
+        it('댓글 내용을 수정한다.', async () => {
+            const response = await request(app.getHttpServer())
+                .put('/comments/1')
+                .set('Authorization', `Bearer ${accessTokenUser}`)
+                .send({
+                    content: '수정된 내용'
+                });
             expect(response.statusCode).toBe(200);
             expect(response.body.content).toBe('수정된 내용');
-		});
+        });
 
-        it('댓글 작성자가 아니라면 403 Forbidden 에러를 반환한다.', async() => {
-            const user = await userSeeder.createTestUser(2);
-            await postSeeder.createTestPost(user,PostStatus.PUBLIC);
-			await commentSeeder.createTestComment(user);
+        it('댓글 작성자가 아니라면 403 Forbidden 에러를 반환한다.', async () => {
+            const user = await userSeeder.createTestUser(UsersRole.USER);
+            await postSeeder.createTestPost(user, PostStatus.PUBLIC);
+            await commentSeeder.createTestComment(user);
             await request(app.getHttpServer())
-            .put('/comments/3')
-            .set('Authorization', `Bearer ${accessToken}`)
-            .send({
-                content: '수정된 내용'
-            })
-            .expect(403);
-		});
+                .put('/comments/3')
+                .set('Authorization', `Bearer ${accessTokenUser}`)
+                .send({
+                    content: '수정된 내용'
+                })
+                .expect(403);
+        });
 
-        it('빈 내용으로 수정하려고 할 때 400 BadRequest 에러를 반환한다.', async() => {
-			const response = await request(app.getHttpServer())
-            .put('/comments/1')
-            .set('Authorization', `Bearer ${accessToken}`)
-            .send({
-                content: ''
-            })
-            expect(response.statusCode).toBe(400); 
-		});
-	})
+        it('빈 내용으로 수정하려고 할 때 400 BadRequest 에러를 반환한다.', async () => {
+            const response = await request(app.getHttpServer())
+                .put('/comments/1')
+                .set('Authorization', `Bearer ${accessTokenUser}`)
+                .send({
+                    content: ''
+                });
+            expect(response.statusCode).toBe(400);
+        });
+    });
 
     describe('/comments/:id (DELETE)', () => {
-		it('댓글을 삭제한다.', async() => {
-			await request(app.getHttpServer())
-				.delete('/comments/1')
-                .set('Authorization', `Bearer ${accessToken}`)
+        it('댓글을 삭제한다.', async () => {
+            await request(app.getHttpServer())
+                .delete('/comments/1')
+                .set('Authorization', `Bearer ${accessTokenUser}`)
                 .expect(200);
-		});
+        });
 
-        it('댓글 작성자가 아니라면 403 Forbidden 에러를 반환한다.', async() => {
+        it('댓글 작성자가 아니라면 403 Forbidden 에러를 반환한다.', async () => {
             await request(app.getHttpServer())
-            .delete('/comments/3')
-            .set('Authorization', `Bearer ${accessToken}`)
-            .send({
-                content: '수정된 내용'
-            })
-            .expect(403);
-        })
-
-        it('없는 댓글을 삭제하려는 경우 404 NotFound 를 반환한다.', async() => {
-            await request(app.getHttpServer())
-            .delete('/comments/200')
-            .set('Authorization', `Bearer ${accessToken}`)
-            .send({
-                content: '수정된 내용'
-            })
-            .expect(404);
-        })
-	})
-
- 
-
-
+                .delete('/comments/3')
+                .set('Authorization', `Bearer ${accessTokenUser}`)
+                .send({
+                    content: '수정된 내용'
+                })
+                .expect(403);
+        });
+    });
 });
