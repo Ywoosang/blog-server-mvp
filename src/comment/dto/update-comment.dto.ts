@@ -1,6 +1,6 @@
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsNotEmpty } from 'class-validator';
 
 export class UpdateCommentDto {
-  @IsNotEmpty()
-  content: string;
+    @IsNotEmpty()
+    content: string;
 }

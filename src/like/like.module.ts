@@ -7,14 +7,9 @@ import { AuthModule } from 'src/auth/auth.module';
 import { PostModule } from 'src/post/post.module';
 
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([Like]),
-        AuthModule,
-        PostModule
-    ],
+    imports: [TypeOrmModule.forFeature([Like]), AuthModule, PostModule],
     providers: [LikeService],
     exports: [LikeService],
     controllers: [LikeController]
 })
-
 export class LikeModule {}

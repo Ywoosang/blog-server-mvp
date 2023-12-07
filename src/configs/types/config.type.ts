@@ -15,7 +15,7 @@ export type DatabaseConfig = {
     username?: string;
     password?: string;
     name?: string;
-    synchronize? : boolean;
+    synchronize?: boolean;
 };
 
 export type AllConfigType = {

@@ -1,17 +1,17 @@
-import { 
-	Controller, 
-	Post,
-	Put,
-	Get, 
-	Body, 
-	Delete,
-	Param,
-	UseGuards,
-	UsePipes,
-	ValidationPipe,
-	ParseIntPipe,
-	HttpCode,
-  	HttpStatus
+import {
+    Controller,
+    Post,
+    Put,
+    Get,
+    Body,
+    Delete,
+    Param,
+    UseGuards,
+    UsePipes,
+    ValidationPipe,
+    ParseIntPipe,
+    HttpCode,
+    HttpStatus
 } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -22,13 +22,10 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 import { CreateReplyDto } from './dto/create-reply.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { GetUser } from 'src/auth/get-user.decorator';
- 
 
 @Controller('comments')
 export class CommentController {
-    constructor(
-        private commentService: CommentService
-    ) {}
+    constructor(private commentService: CommentService) {}
 
     /**
      * Creates a new comment.
@@ -41,10 +38,7 @@ export class CommentController {
     @UseGuards(AuthGuard('jwt'))
     @UsePipes(ValidationPipe)
     @HttpCode(HttpStatus.CREATED)
-    async createComment(
-        @Body() createCommentDto: CreateCommentDto,
-        @GetUser() user: User
-    ): Promise<Comment> {
+    async createComment(@Body() createCommentDto: CreateCommentDto, @GetUser() user: User): Promise<Comment> {
         return this.commentService.create(createCommentDto, user);
     }
 
@@ -77,9 +71,7 @@ export class CommentController {
     @Get('posts/:postId')
     @UsePipes(ValidationPipe)
     @HttpCode(HttpStatus.OK)
-    async getCommentsByPostId(
-        @Param('postId', ParseIntPipe) postId: number
-    ): Promise<Comment[]> {
+    async getCommentsByPostId(@Param('postId', ParseIntPipe) postId: number): Promise<Comment[]> {
         return this.commentService.findMany(postId);
     }
 
@@ -96,8 +88,7 @@ export class CommentController {
     @UsePipes(ValidationPipe)
     async updateComment(
         @Param('id', ParseIntPipe) id: number,
-        @Body() updateCommentDto: UpdateCommentDto,
-        @GetUser() user: User
+        @Body() updateCommentDto: UpdateCommentDto
     ): Promise<Comment> {
         return this.commentService.update(id, updateCommentDto);
     }
@@ -109,9 +100,7 @@ export class CommentController {
      */
     @Delete(':id')
     @UseGuards(AuthGuard('jwt'), CommentOwnerGuard)
-    async deleteComment(
-        @Param('id', ParseIntPipe) id: number,
-    ): Promise<void> {
+    async deleteComment(@Param('id', ParseIntPipe) id: number): Promise<void> {
         return this.commentService.delete(id);
     }
 }

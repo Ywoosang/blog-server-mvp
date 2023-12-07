@@ -1,37 +1,20 @@
+import * as faker from 'faker';
+import { UsersRole } from 'src/users/users-role.enum';
 import { UsersService } from 'src/users/users.service';
 
 class UserSeeder {
     constructor(private usersService: UsersService) {}
 
-    async createTestUsers(count: number) {        
-        const userPromises = Array.from({ length: count }, async (_, i) => {
-            const user = {
-                email: `user${i+1}@example.com`,
-                userLoginId: `user${i+1}`,
-                nickname: `테스트사용자${i+1}`,
-                password: `password${i+1}`
-            }
-            return this.usersService.create(user);
-        });
-        return Promise.all(userPromises);
-    }
-
-    async createTestUser(id: number) {
+    async createTestUser(role: UsersRole) {
         const user = {
-            email: `user${id}@example.com`,
-            userLoginId: `user${id}`,
-            nickname: `테스트사용자${id}`,
-            password: `password${id}`
-        }
-        return this.usersService.create(user);
-    }
+            email: faker.internet.email(),
+            userLoginId: faker.random.alphaNumeric(faker.datatype.number({ min: 4, max: 20 })),
+            nickname: faker.name.findName(),
+            password: 'test@1234',
+            role
+        };
 
-    async getTestUser(id: number) {
-        return this.usersService.findOne({
-            where: {
-                id
-            }
-        });
+        return this.usersService.create(user);
     }
 }
 
