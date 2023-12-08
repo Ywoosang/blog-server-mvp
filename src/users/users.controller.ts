@@ -2,8 +2,8 @@ import { Controller, Get, Patch, Body, UseGuards, HttpCode, HttpStatus } from '@
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { GetUser } from 'src/auth/get-user.decorator';
 import { User } from 'src/users/entities/user.entity';
+import { GetUser } from 'src/utils/decorators/get-user.decorator';
 
 @Controller('users')
 export class UsersController {

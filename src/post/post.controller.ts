@@ -21,10 +21,10 @@ import { PostStatusValidationPipe } from './pipes/post-status-validation.pipe';
 import { Post as PostEntity } from './entities/post.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/users/entities/user.entity';
-import { GetUser } from 'src/auth/get-user.decorator';
 import { PaginationResponseDto } from './dto/pagination-response.dto';
 import { AdminGuard } from '../utils/guards/admin.guard';
 import { NullableType } from 'src/utils/types/nullable.type';
+import { GetUser } from 'src/utils/decorators/get-user.decorator';
 
 @Controller('posts')
 export class PostController {

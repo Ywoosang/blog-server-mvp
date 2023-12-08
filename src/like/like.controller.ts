@@ -1,9 +1,9 @@
 import { Controller, Get, Post, Delete, Param, ParseIntPipe, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 
 import { LikeService } from './like.service';
-import { GetUser } from 'src/auth/get-user.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/users/entities/user.entity';
+import { GetUser } from 'src/utils/decorators/get-user.decorator';
 import { PostExistGuard } from 'src/post/guards/post-exist.guard';
 import { PublicPostGuard } from 'src/post/guards/public-post.guard';
 import { LikeExistGuard } from './guards/like-exist.guard';

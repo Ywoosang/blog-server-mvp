@@ -21,7 +21,7 @@ import { Comment } from './entities/comment.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { CreateReplyDto } from './dto/create-reply.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
-import { GetUser } from 'src/auth/get-user.decorator';
+import { GetUser } from 'src/utils/decorators/get-user.decorator';
 
 @Controller('comments')
 export class CommentController {
