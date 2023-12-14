@@ -5,7 +5,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { FindOneOptions, Repository } from 'typeorm';
 import { Post } from './entities/post.entity';
 import { User } from 'src/users/entities/user.entity';
-import { PaginationResponseDto } from './dto/pagination-response.dto';
+import { FindPostsDto } from './dto/find-posts.dto';
 import { NullableType } from 'src/utils/types/nullable.type';
 import { UsersService } from 'src/users/users.service';
 
@@ -21,11 +21,7 @@ export class PostService {
         return this.postRepository.findOne(findOptions);
     }
 
-    async findPostsPaginated(
-        page: number = 1,
-        limit: number = 15,
-        isAdmin: boolean = false
-    ): Promise<PaginationResponseDto> {
+    async findPostsPaginated(page: number = 1, limit: number = 15, isAdmin: boolean = false): Promise<FindPostsDto> {
         const skip = (page - 1) * limit;
         const whereCondition: any = {};
         if (!isAdmin) {

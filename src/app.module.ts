@@ -3,6 +3,7 @@ import { PostModule } from './post/post.module';
 import { UsersModule } from './users/users.module';
 import { CommentModule } from './comment/comment.module';
 import { LikeModule } from './like/like.module';
+import { CategoryModule } from './category/category.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseTestModule } from './database/database-test.module';
@@ -23,7 +24,8 @@ import databaseConfig from 'src/configs/database.config';
         UsersModule,
         PostModule,
         CommentModule,
-        LikeModule
+        LikeModule,
+        CategoryModule
     ]
 })
 export class AppModule {}
