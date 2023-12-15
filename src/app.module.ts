@@ -16,7 +16,7 @@ import databaseConfig from 'src/configs/database.config';
     imports: [
         ConfigModule.forRoot({
             isGlobal: true,
-            load: process.env.NODE_ENV === 'test' ? [] : [appConfig, authConfig, databaseConfig],
+            load: process.env.NODE_ENV === 'test' ? [authConfig] : [appConfig, authConfig, databaseConfig],
             envFilePath: `.env.${process.env.NODE_ENV}`
         }),
         process.env.NODE_ENV === 'test' ? DatabaseTestModule : DatabaseModule,
