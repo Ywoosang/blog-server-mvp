@@ -4,18 +4,18 @@ export type AppConfig = {
 };
 
 export type AuthConfig = {
-    secret?: string;
-    expires?: string;
+    secret: string;
+    expires: string;
 };
 
 export type DatabaseConfig = {
-    type?: string;
-    host?: string;
-    port?: number;
-    username?: string;
-    password?: string;
-    name?: string;
-    synchronize?: boolean;
+    type: string;
+    host: string;
+    port: number;
+    username: string;
+    password: string;
+    name: string;
+    synchronize: boolean;
 };
 
 export type AllConfigType = {
