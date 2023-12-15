@@ -21,7 +21,7 @@ import { PostStatusValidationPipe } from './pipes/post-status-validation.pipe';
 import { Post as PostEntity } from './entities/post.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/users/entities/user.entity';
-import { PaginationResponseDto } from './dto/pagination-response.dto';
+import { FindPostsDto } from './dto/find-posts.dto';
 import { AdminGuard } from '../utils/guards/admin.guard';
 import { NullableType } from 'src/utils/types/nullable.type';
 import { GetUser } from 'src/utils/decorators/get-user.decorator';
@@ -40,21 +40,14 @@ export class PostController {
 
     @Get('/public')
     @HttpCode(HttpStatus.OK)
-    getPublicPosts(
-        @Query('page') page: number = 1,
-        @Query('limit') limit: number = 15
-    ): Promise<PaginationResponseDto> {
+    getPublicPosts(@Query('page') page: number = 1, @Query('limit') limit: number = 15): Promise<FindPostsDto> {
         return this.postService.findPostsPaginated(page, limit);
     }
 
     @Get('/')
     @UseGuards(AuthGuard('jwt'), AdminGuard)
     @HttpCode(HttpStatus.OK)
-    // eslint-disable-next-line prettier/prettier
-    getPosts(
-        @Query('page') page: number = 1, 
-        @Query('limit') limit: number = 15
-    ): Promise<PaginationResponseDto> {
+    getPosts(@Query('page') page: number = 1, @Query('limit') limit: number = 15): Promise<FindPostsDto> {
         return this.postService.findPostsPaginated(page, limit, true);
     }
 

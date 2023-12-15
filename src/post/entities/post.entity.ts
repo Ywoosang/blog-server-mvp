@@ -14,6 +14,7 @@ import { PostStatus } from '../post-status.enum';
 import { User } from 'src/users/entities/user.entity';
 import { Comment } from 'src/comment/entities/comment.entity';
 import { Like } from 'src/like/entities/like.entity';
+import { Category } from 'src/category/entities/category.entity';
 
 @Entity()
 export class Post extends BaseEntity {
@@ -39,7 +40,11 @@ export class Post extends BaseEntity {
     @JoinColumn({ name: 'userId' })
     user: User;
 
-    @OneToMany(() => Comment, comment => comment.post, { eager: false })
+    @ManyToOne(() => Category, category => category.posts, { onDelete: 'SET NULL' })
+    @JoinColumn({ name: 'categoryId' })
+    category: Category;
+
+    @OneToMany(() => Comment, comment => comment.post)
     comments: Comment[];
 
     @OneToMany(() => Like, like => like.post)
