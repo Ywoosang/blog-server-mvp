@@ -28,6 +28,9 @@ export class User extends BaseEntity {
     @Column()
     role: UsersRole;
 
+    @Column({ nullable: true })
+    refreshToken: string;
+
     @OneToMany(() => Post, post => post.user)
     posts: Post[];
 

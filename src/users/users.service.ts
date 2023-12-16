@@ -6,6 +6,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { NullableType } from 'src/utils/types/nullable.type';
 import { FindOneOptions } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -36,6 +37,13 @@ export class UsersService {
         return this.usersRepository.save({
             ...user,
             ...updateUserDto
+        });
+    }
+
+    async updateRefreshToken(id: number, refreshToken: string): Promise<void> {
+        const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+        await this.usersRepository.update(id, {
+            refreshToken: hashedRefreshToken
         });
     }
 }
