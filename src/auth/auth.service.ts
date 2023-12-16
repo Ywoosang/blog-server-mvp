@@ -8,13 +8,27 @@ import { AuthLoginDto } from './dto/auth-login.dto';
 import { AuthLoginResponseDto } from './dto/auth-login-response.dto';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { UsersRole } from 'src/users/users-role.enum';
+import { ConfigService } from '@nestjs/config';
+import { AllConfigType } from 'src/configs/types/config.type';
 
 @Injectable()
 export class AuthService {
     constructor(
         private jwtService: JwtService,
-        private userService: UsersService
+        private userService: UsersService,
+        private configService: ConfigService<AllConfigType>
     ) {}
+
+    async generateAccessToken(payload: any) {
+        return this.jwtService.signAsync(payload);
+    }
+
+    async generateRefreshToken(payload: any) {
+        return this.jwtService.sign(payload, {
+            secret: this.configService.get('auth.refreshSecret', { infer: true }),
+            expiresIn: this.configService.get('auth.refreshExpires', { infer: true })
+        });
+    }
 
     async signUp(registerDto: AuthRegisterDto): Promise<User> {
         const { email, userLoginId } = registerDto;
@@ -29,6 +43,7 @@ export class AuthService {
 
         return this.userService.create(createUserDto);
     }
+
     async signIn(loginDto: AuthLoginDto): Promise<AuthLoginResponseDto> {
         const { userLoginId, password } = loginDto;
         const user = await this.userService.findOne({
@@ -39,13 +54,20 @@ export class AuthService {
         if (!user) {
             throw new UnauthorizedException('해당 아이디를 가진 사용자가 존재하지 않습니다.');
         }
-        const isValidatePassword = await bcrypt.compare(password, user.password);
-        if (!isValidatePassword) {
+
+        const isValidPassword = await bcrypt.compare(password, user.password);
+        if (!isValidPassword) {
             throw new UnauthorizedException('비밀번호가 틀렸습니다.');
         }
-        const payload = { userLoginId };
-        const accessToken = await this.jwtService.signAsync(payload);
 
-        return { accessToken };
+        const payload = { userLoginId };
+        const accessToken = await this.generateAccessToken(payload);
+        const refreshToken = await this.generateRefreshToken(payload);
+        await this.userService.updateRefreshToken(user.id, refreshToken);
+
+        return {
+            accessToken,
+            refreshToken
+        };
     }
 }
