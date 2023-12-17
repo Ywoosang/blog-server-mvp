@@ -26,3 +26,8 @@ jobs:
 
       - name: e2e 테스트 실행
         run: npm run test:e2e
+        env:
+          AUTH_JWT_SECRET: ${{ secrets.AUTH_JWT_SECRET }}
+          AUTH_JWT_TOKEN_EXPIRES_IN: ${{ secrets.AUTH_JWT_TOKEN_EXPIRES_IN }}
+          AUTH_REFRESH_SECRET: ${{ secrets.AUTH_REFRESH_SECRET }}
+          AUTH_REFRESH_TOKEN_EXPIRES_IN: ${{ secrets.AUTH_REFRESH_TOKEN_EXPIRES_IN }}
