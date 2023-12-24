@@ -1,5 +1,6 @@
 import * as faker from 'faker';
 import { UsersRole } from 'src/users/users-role.enum';
+import { UsersStatus } from 'src/users/users-status.enum';
 import { UsersService } from 'src/users/users.service';
 
 class UserSeeder {
@@ -11,7 +12,8 @@ class UserSeeder {
             userLoginId: faker.random.alphaNumeric(faker.datatype.number({ min: 4, max: 20 })),
             nickname: faker.name.findName(),
             password: 'test@1234',
-            role
+            role,
+            status: UsersStatus.ACTIVE
         };
 
         return this.usersService.create(user);

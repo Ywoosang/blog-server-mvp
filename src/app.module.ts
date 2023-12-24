@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { PostModule } from './post/post.module';
 import { UsersModule } from './users/users.module';
 import { CommentModule } from './comment/comment.module';
@@ -11,12 +11,16 @@ import { DatabaseModule } from './database/database.module';
 import appConfig from 'src/configs/app.config';
 import authConfig from 'src/configs/auth.config';
 import databaseConfig from 'src/configs/database.config';
+import mailConfig from './configs/mail.config';
+import { MailModule } from './mail/mail.moudle';
+import { MailerModule } from './mailer/mailer.module';
+import { HttpLoggerMiddleware } from './common/middlewares/http-logger.middleware';
 
 @Module({
     imports: [
         ConfigModule.forRoot({
             isGlobal: true,
-            load: process.env.NODE_ENV === 'test' ? [authConfig] : [appConfig, authConfig, databaseConfig],
+            load: process.env.NODE_ENV === 'test' ? [authConfig] : [appConfig, authConfig, databaseConfig, mailConfig],
             envFilePath: `.env.${process.env.NODE_ENV}`
         }),
         process.env.NODE_ENV === 'test' ? DatabaseTestModule : DatabaseModule,
@@ -25,7 +29,13 @@ import databaseConfig from 'src/configs/database.config';
         PostModule,
         CommentModule,
         LikeModule,
-        CategoryModule
+        CategoryModule,
+        MailModule,
+        MailerModule
     ]
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+    configure(consumer: MiddlewareConsumer) {
+        consumer.apply(HttpLoggerMiddleware).forRoutes('*');
+    }
+}

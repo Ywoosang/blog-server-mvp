@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { UsersService } from 'src/users/users.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { JwtModule } from '@nestjs/jwt';
@@ -10,6 +9,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { UsersModule } from 'src/users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AllConfigType } from 'src/configs/types/config.type';
+import { MailModule } from 'src/mail/mail.moudle';
 
 @Module({
     imports: [
@@ -25,10 +25,11 @@ import { AllConfigType } from 'src/configs/types/config.type';
             inject: [ConfigService]
         }),
         TypeOrmModule.forFeature([User]),
-        UsersModule
+        UsersModule,
+        MailModule
     ],
     controllers: [AuthController],
-    providers: [AuthService, JwtStrategy, UsersService],
+    providers: [AuthService, JwtStrategy],
     exports: [JwtStrategy]
 })
 export class AuthModule {}

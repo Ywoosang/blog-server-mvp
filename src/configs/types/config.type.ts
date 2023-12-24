@@ -1,6 +1,7 @@
 export type AppConfig = {
     port: number;
     backendDomain: string;
+    workingDirectory: string;
 };
 
 export type AuthConfig = {
@@ -8,6 +9,8 @@ export type AuthConfig = {
     expires: string;
     refreshSecret: string;
     refreshExpires: string;
+    confirmEmailSecret: string;
+    emailExpires: string;
 };
 
 export type DatabaseConfig = {
@@ -20,8 +23,16 @@ export type DatabaseConfig = {
     synchronize: boolean;
 };
 
+export type MailConfig = {
+    service: string;
+    user: string;
+    password: string;
+    defaultEmail: string;
+};
+
 export type AllConfigType = {
     app: AppConfig;
     auth: AuthConfig;
     database: DatabaseConfig;
+    mail: MailConfig;
 };

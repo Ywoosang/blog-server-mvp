@@ -23,6 +23,7 @@ export default registerAs<AppConfig>('app', () => {
     return {
         nodeEnv: process.env.NODE_ENV || 'dev',
         port: process.env.APP_PORT ? parseInt(process.env.APP_PORT, 10) : 3000,
+        workingDirectory: process.env.PWD || process.cwd(),
         backendDomain: process.env.APP_BACKEND_DOMAIN || 'http://localhost'
     };
 });
