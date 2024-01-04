@@ -6,6 +6,7 @@ import { Post } from 'src/post/entities/post.entity';
 import { Comment } from 'src/comment/entities/comment.entity';
 import { Like } from 'src/like/entities/like.entity';
 import { Category } from 'src/category/entities/category.entity';
+import { Tag } from 'src/tag/entities/tag.entity';
 
 @Module({
     imports: [
@@ -20,7 +21,7 @@ import { Category } from 'src/category/entities/category.entity';
                 database: config.get('database.name', { infer: true }),
                 charset: 'utf8mb4',
                 synchronize: config.get('database.synchronize', { infer: true }),
-                entities: [User, Post, Category, Comment, Like]
+                entities: [User, Post, Category, Comment, Like, Tag]
             }),
             inject: [ConfigService]
         })
