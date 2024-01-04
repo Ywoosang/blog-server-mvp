@@ -5,7 +5,9 @@ import {
     PrimaryGeneratedColumn,
     ManyToOne,
     OneToMany,
+    ManyToMany,
     JoinColumn,
+    JoinTable,
     CreateDateColumn,
     UpdateDateColumn
 } from 'typeorm';
@@ -15,6 +17,7 @@ import { User } from 'src/users/entities/user.entity';
 import { Comment } from 'src/comment/entities/comment.entity';
 import { Like } from 'src/like/entities/like.entity';
 import { Category } from 'src/category/entities/category.entity';
+import { Tag } from 'src/tag/entities/tag.entity';
 
 @Entity()
 export class Post extends BaseEntity {
@@ -43,6 +46,10 @@ export class Post extends BaseEntity {
     @ManyToOne(() => Category, category => category.posts, { onDelete: 'SET NULL' })
     @JoinColumn({ name: 'categoryId' })
     category: Category;
+
+    @ManyToMany(() => Tag, tag => tag.posts)
+    @JoinTable({ name: 'post_tag' })
+    tags: Tag[];
 
     @OneToMany(() => Comment, comment => comment.post)
     comments: Comment[];

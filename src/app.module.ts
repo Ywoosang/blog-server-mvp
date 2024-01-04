@@ -15,6 +15,7 @@ import mailConfig from './configs/mail.config';
 import { MailModule } from './mail/mail.moudle';
 import { MailerModule } from './mailer/mailer.module';
 import { HttpLoggerMiddleware } from './common/middlewares/http-logger.middleware';
+import { TagModule } from './tag/tag.module';
 
 @Module({
     imports: [
@@ -30,6 +31,7 @@ import { HttpLoggerMiddleware } from './common/middlewares/http-logger.middlewar
         CommentModule,
         LikeModule,
         CategoryModule,
+        TagModule,
         MailModule,
         MailerModule
     ]
