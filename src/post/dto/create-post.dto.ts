@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { PostStatus } from '../post-status.enum';
 
 export class CreatePostDto {
@@ -10,4 +10,13 @@ export class CreatePostDto {
 
     @IsEnum(PostStatus)
     status: PostStatus;
+
+    @IsOptional()
+    @IsNotEmpty()
+    categoryId?: number;
+
+    @IsOptional()
+    @IsString({ each: true })
+    @IsNotEmpty({ each: true })
+    tagNames?: string[];
 }
