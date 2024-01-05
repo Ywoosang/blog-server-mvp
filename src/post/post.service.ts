@@ -8,13 +8,18 @@ import { User } from 'src/users/entities/user.entity';
 import { FindPostsDto } from './dto/find-posts.dto';
 import { NullableType } from 'src/utils/types/nullable.type';
 import { UsersService } from 'src/users/users.service';
+import { CategoryService } from 'src/category/category.service';
+import { TagService } from 'src/tag/tag.service';
+import { Tag } from 'src/tag/entities/tag.entity';
 
 @Injectable()
 export class PostService {
     constructor(
         @InjectRepository(Post)
         private postRepository: Repository<Post>,
-        private usersService: UsersService
+        private usersService: UsersService,
+        private categoryService: CategoryService,
+        private tagService: TagService
     ) {}
 
     async findOne(findOptions: FindOneOptions<Post>): Promise<NullableType<Post>> {
@@ -51,10 +56,32 @@ export class PostService {
     }
 
     async create(createPostDto: CreatePostDto, user: User): Promise<Post> {
+        const { title, content, status, categoryId, tagNames } = createPostDto;
+
+        let category;
+        if (categoryId) {
+            category = await this.categoryService.findOneById(categoryId);
+            if (!category) {
+                throw new NotFoundException('존재하지 않는 카테고리입니다.');
+            }
+        }
+
+        const tags: Tag[] = [];
+        if (tagNames) {
+            tagNames.forEach(async tagName => {
+                const tag = await this.tagService.createIfNotExistByName({ name: tagName });
+                tags.push(tag);
+            });
+        }
+
         return this.postRepository.save(
             this.postRepository.create({
-                ...createPostDto,
-                user
+                title,
+                content,
+                status,
+                user,
+                category,
+                tags
             })
         );
     }

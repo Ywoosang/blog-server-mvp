@@ -5,6 +5,8 @@ import { NullableType } from 'src/utils/types/nullable.type';
 import { Repository } from 'typeorm';
 import { FindTagPostsDto } from './dto/find-tag-posts.dto';
 import { Tag } from './entities/tag.entity';
+import { FindTagsResponseDto } from './dto/find-tags-response.dto';
+import { CreateTagDto } from './dto/create-tag.dto';
 
 @Injectable()
 export class TagService {
@@ -13,18 +15,44 @@ export class TagService {
         private tagRepository: Repository<Tag>
     ) {}
 
-    async findAll(): Promise<{ tags: NullableType<Tag[]> }> {
-        const tags = await this.tagRepository
+    async createIfNotExistByName(createTagDto: CreateTagDto): Promise<Tag> {
+        const { name } = createTagDto;
+        const tag = await this.tagRepository.findOne({
+            where: {
+                name
+            }
+        });
+        if (tag) {
+            return tag;
+        }
+
+        return this.tagRepository.save(this.tagRepository.create(createTagDto));
+    }
+
+    async findTagsWithOneOrMorePosts(): Promise<FindTagsResponseDto> {
+        const query = await this.tagRepository
             .createQueryBuilder('tag')
             .innerJoin('tag.posts', 'post_tag')
-            .select(['tag.id', 'tag.name'])
+            .select(['tag.id', 'tag.name', 'COUNT(post_tag.id) as postCount'])
+            .groupBy('tag.id, tag.name')
+            .having('postCount > 0')
             .distinct(true)
-            .getMany();
+            .getRawMany();
+
+        const tags = query.map(tag => ({
+            id: tag.tag_id as number,
+            name: tag.tag_name as string,
+            postCount: parseInt(tag.postCount)
+        }));
 
         return { tags };
     }
 
-    async findOne(id: number, findTagPostsDto: FindTagPostsDto, isAdmin: boolean = false): Promise<NullableType<Tag>> {
+    async findOneWithPosts(
+        id: number,
+        findTagPostsDto: FindTagPostsDto,
+        isAdmin: boolean = false
+    ): Promise<NullableType<Tag>> {
         let { page, limit } = findTagPostsDto;
         page = page ? page : 1;
         limit = limit ? limit : 15;
