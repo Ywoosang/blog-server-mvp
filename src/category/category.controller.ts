@@ -1,16 +1,4 @@
-import {
-    Controller,
-    Get,
-    Post,
-    Param,
-    Body,
-    Put,
-    Delete,
-    UseGuards,
-    Query,
-    UsePipes,
-    ValidationPipe
-} from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Put, Delete, UseGuards, Query, ParseIntPipe } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { Category } from './entities/category.entity';
 import { AuthGuard } from '@nestjs/passport';
@@ -21,7 +9,6 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 
 @Controller('categories')
-@UsePipes(ValidationPipe)
 export class CategoryController {
     constructor(private readonly categoryService: CategoryService) {}
 
@@ -38,16 +25,16 @@ export class CategoryController {
 
     @Get('/public/:id')
     async findOneWithPostsByPublic(
-        @Param('id') id: string,
-        @Query() findCategoryPosts: FindCategoryPostsDto
+        @Param('id', ParseIntPipe) id: number,
+        @Query() findCategoryPostsDto: FindCategoryPostsDto
     ): Promise<Category> {
-        return this.categoryService.findOneWithPosts(+id, findCategoryPosts);
+        return this.categoryService.findOneWithPosts(+id, findCategoryPostsDto);
     }
 
     @Get('/:id')
     @UseGuards(AuthGuard('jwt'), AdminGuard)
     async findOneWithPosts(
-        @Param('id') id: string,
+        @Param('id', ParseIntPipe) id: number,
         @Query() findCategoryPostsDto: FindCategoryPostsDto
     ): Promise<Category> {
         return this.categoryService.findOneWithPosts(+id, findCategoryPostsDto, true);
@@ -55,13 +42,16 @@ export class CategoryController {
 
     @Put(':id')
     @UseGuards(AuthGuard('jwt'), AdminGuard)
-    async update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto): Promise<Category> {
+    async update(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() updateCategoryDto: UpdateCategoryDto
+    ): Promise<Category> {
         return this.categoryService.update(+id, updateCategoryDto);
     }
 
     @Delete(':id')
     @UseGuards(AuthGuard('jwt'), AdminGuard)
-    async delete(@Param('id') id: string): Promise<void> {
+    async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
         return this.categoryService.remove(+id);
     }
 }
