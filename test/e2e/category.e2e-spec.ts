@@ -1,4 +1,4 @@
-import { type INestApplication } from '@nestjs/common';
+import { ValidationPipe, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from 'src/app.module';
@@ -6,6 +6,7 @@ import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
 import UserSeeder from '../seeds/users.seed';
 import { UsersRole } from 'src/users/users-role.enum';
+import validationOptions from 'src/utils/validation-options';
 
 describe('CategoryController (e2e)', () => {
     let app: INestApplication;
@@ -26,7 +27,9 @@ describe('CategoryController (e2e)', () => {
         // 관리자 생성
         testAdminUser = await userSeeder.createTestUser(UsersRole.ADMIN);
         testUser = await userSeeder.createTestUser(UsersRole.USER);
+
         app = moduleFixture.createNestApplication();
+        app.useGlobalPipes(new ValidationPipe(validationOptions));
         await app.init();
     });
 
@@ -125,6 +128,18 @@ describe('CategoryController (e2e)', () => {
         it('없는 페이지일 경우 200 OK 를 반환한다.', async () => {
             await request(app.getHttpServer()).get('/categories/public/1?page=100').expect(200);
         });
+
+        it('page 값이 숫자가 아닌 문자일 경우 400 BadRequest 를 반환한다.', async () => {
+            await request(app.getHttpServer())
+                .get(`/categories/public/1?page=${encodeURIComponent('가나다')}`)
+                .expect(400);
+        });
+
+        it('limit 값이 숫자가 아닌 문자일 경우 400 BadRequest 를 반환한다.', async () => {
+            await request(app.getHttpServer())
+                .get(`/categories/public/1?page=100&limit=${encodeURIComponent('가나다')}`)
+                .expect(400);
+        });
     });
 
     describe('/categories/:id?page= &limit= (GET)', () => {
@@ -163,25 +178,6 @@ describe('CategoryController (e2e)', () => {
                 .get('/categories/1?page=100')
                 .set('Authorization', `Bearer ${accessTokenAdmin}`)
                 .expect(200);
-        });
-
-        describe('/categories/public/:id?page= &limit= (GET)', () => {
-            it('카테고리와 페이지에 해당하는 카테고리 게시글들을 반환한다.', async () => {
-                const response = await request(app.getHttpServer()).get('/categories/public/1').expect(200);
-                const data = response.body;
-                expect(data).toHaveProperty('id');
-                expect(data).toHaveProperty('name');
-                expect(data).toHaveProperty('posts');
-                expect(Array.isArray(data.posts)).toBe(true);
-            });
-
-            it('없는 카테고리일 경우 404 Not Found 에러를 반환한다.', async () => {
-                await request(app.getHttpServer()).get('/categories/public/2').expect(404);
-            });
-
-            it('없는 페이지일 경우 200 OK 를 반환한다.', async () => {
-                await request(app.getHttpServer()).get('/categories/public/1?page=100').expect(200);
-            });
         });
     });
 
