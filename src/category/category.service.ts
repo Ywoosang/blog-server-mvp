@@ -25,7 +25,15 @@ export class CategoryService {
         return { categories };
     }
 
-    async findOne(
+    async findOneById(id: number): Promise<NullableType<Category>> {
+        return this.categoryRepository.findOne({
+            where: {
+                id
+            }
+        });
+    }
+
+    async findOneWithPosts(
         id: number,
         findCategoryPostsDto: FindCategoryPostsDto,
         isAdmin: boolean = false
