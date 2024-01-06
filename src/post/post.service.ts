@@ -43,6 +43,7 @@ export class PostService {
             total
         };
     }
+
     async findPublicUserPosts(userId: number): Promise<NullableType<Post[]>> {
         const user: User = await this.usersService.findOne({
             where: {
@@ -65,13 +66,12 @@ export class PostService {
                 throw new NotFoundException('존재하지 않는 카테고리입니다.');
             }
         }
-
         const tags: Tag[] = [];
         if (tagNames) {
-            tagNames.forEach(async tagName => {
+            for (const tagName of tagNames) {
                 const tag = await this.tagService.createIfNotExistByName({ name: tagName });
                 tags.push(tag);
-            });
+            }
         }
 
         return this.postRepository.save(
