@@ -4,10 +4,10 @@ export class FindCategoryPostsDto {
     @IsOptional()
     @IsInt()
     @Min(1)
-    page?: number = 1;
+    page?: number;
 
     @IsOptional()
     @IsInt()
     @Min(1)
-    limit?: number = 15;
+    limit?: number;
 }
