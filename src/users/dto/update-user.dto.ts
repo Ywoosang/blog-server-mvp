@@ -8,5 +8,6 @@ export class UpdateUserDto {
     nickname?: string;
 
     @IsOptional()
+    @IsString()
     description?: string;
 }

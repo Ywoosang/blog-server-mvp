@@ -4,7 +4,7 @@ import { UsersStatus } from 'src/users/users-status.enum';
 import { UsersService } from 'src/users/users.service';
 
 class UserSeeder {
-    constructor(private usersService: UsersService) {}
+    constructor(private readonly usersService: UsersService) {}
 
     async createTestUser(role: UsersRole) {
         const user = {

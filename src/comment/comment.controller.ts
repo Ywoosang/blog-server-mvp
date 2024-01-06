@@ -7,8 +7,6 @@ import {
     Delete,
     Param,
     UseGuards,
-    UsePipes,
-    ValidationPipe,
     ParseIntPipe,
     HttpCode,
     HttpStatus
@@ -36,7 +34,6 @@ export class CommentController {
      */
     @Post()
     @UseGuards(AuthGuard('jwt'))
-    @UsePipes(ValidationPipe)
     @HttpCode(HttpStatus.CREATED)
     async createComment(@Body() createCommentDto: CreateCommentDto, @GetUser() user: User): Promise<Comment> {
         return this.commentService.create(createCommentDto, user);
@@ -52,7 +49,6 @@ export class CommentController {
      */
     @Post(':parentCommentId/replies')
     @UseGuards(AuthGuard('jwt'))
-    @UsePipes(ValidationPipe)
     @HttpCode(HttpStatus.CREATED)
     async createReply(
         @Param('parentCommentId', ParseIntPipe) parentCommentId: number,
@@ -69,7 +65,6 @@ export class CommentController {
      * @returns A list of comments for the specified post.
      */
     @Get('posts/:postId')
-    @UsePipes(ValidationPipe)
     @HttpCode(HttpStatus.OK)
     async getCommentsByPostId(@Param('postId', ParseIntPipe) postId: number): Promise<Comment[]> {
         return this.commentService.findMany(postId);
@@ -85,7 +80,6 @@ export class CommentController {
      */
     @Put(':id')
     @UseGuards(AuthGuard('jwt'), CommentOwnerGuard)
-    @UsePipes(ValidationPipe)
     async updateComment(
         @Param('id', ParseIntPipe) id: number,
         @Body() updateCommentDto: UpdateCommentDto

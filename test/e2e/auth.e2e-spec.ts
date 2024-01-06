@@ -1,7 +1,8 @@
-import { type INestApplication } from '@nestjs/common';
+import { ValidationPipe, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from 'src/app.module';
+import validationOptions from 'src/utils/validation-options';
 
 describe('AuthController (e2e)', () => {
     let app: INestApplication;
@@ -12,6 +13,7 @@ describe('AuthController (e2e)', () => {
             imports: [AppModule]
         }).compile();
         app = moduleFixture.createNestApplication();
+        app.useGlobalPipes(new ValidationPipe(validationOptions));
         await app.init();
     });
 

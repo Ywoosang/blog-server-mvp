@@ -6,9 +6,7 @@ import {
     Post,
     Delete,
     Patch,
-    UsePipes,
     ParseIntPipe,
-    ValidationPipe,
     Query,
     UseGuards,
     HttpCode,
@@ -32,7 +30,6 @@ export class PostController {
 
     @Post()
     @UseGuards(AuthGuard('jwt'), AdminGuard)
-    @UsePipes(ValidationPipe)
     @HttpCode(HttpStatus.CREATED)
     async createPost(@Body() createPostDto: CreatePostDto, @GetUser() user: User): Promise<PostEntity> {
         return this.postService.create(createPostDto, user);

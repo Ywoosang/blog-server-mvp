@@ -3,6 +3,7 @@ import { PostStatus } from '../post-status.enum';
 
 export class CreatePostDto {
     @IsNotEmpty()
+    @IsString()
     title: string;
 
     @IsNotEmpty()

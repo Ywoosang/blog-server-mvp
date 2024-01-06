@@ -1,4 +1,4 @@
-import { type INestApplication } from '@nestjs/common';
+import { ValidationPipe, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from 'src/app.module';
@@ -9,6 +9,7 @@ import { User } from 'src/users/entities/user.entity';
 import UserSeeder from '../seeds/users.seed';
 import PostSeeder from '../seeds/post.seed';
 import { UsersRole } from 'src/users/users-role.enum';
+import validationOptions from 'src/utils/validation-options';
 
 describe('LikeController (e2e)', () => {
     let app: INestApplication;
@@ -29,10 +30,13 @@ describe('LikeController (e2e)', () => {
         postSeeder = new PostSeeder(postService);
         // 사용자 생성
         testUser = await userSeeder.createTestUser(UsersRole.USER);
-        // 게시물 생성
-        await postSeeder.createTestPost(testUser, PostStatus.PUBLIC);
+        // 공개 게시물 생성
+        await postSeeder.createTestPost(testUser);
+        // 비공개 게시물 생성
         await postSeeder.createTestPost(testUser, PostStatus.PRIVATE);
+
         app = moduleFixture.createNestApplication();
+        app.useGlobalPipes(new ValidationPipe(validationOptions));
         await app.init();
     });
 

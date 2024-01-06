@@ -1,4 +1,4 @@
-import { type INestApplication } from '@nestjs/common';
+import { ValidationPipe, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from 'src/app.module';
@@ -9,6 +9,7 @@ import { User } from 'src/users/entities/user.entity';
 import UserSeeder from '../seeds/users.seed';
 import PostSeeder from '../seeds/post.seed';
 import { UsersRole } from 'src/users/users-role.enum';
+import validationOptions from 'src/utils/validation-options';
 import * as faker from 'faker';
 
 describe('PostController (e2e)', () => {
@@ -32,11 +33,21 @@ describe('PostController (e2e)', () => {
         postSeeder = new PostSeeder(postService);
         // 관리자 생성
         testAdminUser = await userSeeder.createTestUser(UsersRole.ADMIN);
+        // 사용자 생성
         testUser = await userSeeder.createTestUser(UsersRole.USER);
-        // 게시물 생성
-        await postSeeder.createTestPosts(5, testAdminUser, PostStatus.PUBLIC);
-        await postSeeder.createTestPosts(5, testAdminUser, PostStatus.PRIVATE);
+        // 공개 게시물 생성
+        const publicPostPromises = Array.from({ length: 5 }).map(() => {
+            return postSeeder.createTestPost(testAdminUser);
+        });
+        // 비공개 게시물 생성
+        await Promise.all(publicPostPromises);
+        const privatePostPromises = Array.from({ length: 5 }).map(() => {
+            return postSeeder.createTestPost(testAdminUser, PostStatus.PRIVATE);
+        });
+        await Promise.all(privatePostPromises);
+
         app = moduleFixture.createNestApplication();
+        app.useGlobalPipes(new ValidationPipe(validationOptions));
         await app.init();
     });
 

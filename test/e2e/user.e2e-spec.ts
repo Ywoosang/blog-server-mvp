@@ -1,4 +1,4 @@
-import { type INestApplication } from '@nestjs/common';
+import { ValidationPipe, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from 'src/app.module';
@@ -6,6 +6,7 @@ import { UsersService } from 'src/users/users.service';
 import UserSeeder from '../seeds/users.seed';
 import { User } from 'src/users/entities/user.entity';
 import { UsersRole } from 'src/users/users-role.enum';
+import validationOptions from 'src/utils/validation-options';
 
 describe('UserController (e2e)', () => {
     let app: INestApplication;
@@ -14,14 +15,17 @@ describe('UserController (e2e)', () => {
     let testUser: User;
 
     beforeAll(async () => {
-        jest.setTimeout(1000000);
         const moduleFixture = await Test.createTestingModule({
             imports: [AppModule]
         }).compile();
+
         const usersService = moduleFixture.get<UsersService>(UsersService);
         userSeeder = new UserSeeder(usersService);
+        // 사용자 생성
         testUser = await userSeeder.createTestUser(UsersRole.USER);
+
         app = moduleFixture.createNestApplication();
+        app.useGlobalPipes(new ValidationPipe(validationOptions));
         await app.init();
     });
 

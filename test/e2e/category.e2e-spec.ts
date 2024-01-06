@@ -17,7 +17,6 @@ describe('CategoryController (e2e)', () => {
     let testUser: User;
 
     beforeAll(async () => {
-        jest.setTimeout(1000000);
         const moduleFixture = await Test.createTestingModule({
             imports: [AppModule]
         }).compile();

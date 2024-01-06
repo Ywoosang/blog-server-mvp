@@ -1,4 +1,4 @@
-import { type INestApplication } from '@nestjs/common';
+import { ValidationPipe, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from 'src/app.module';
@@ -11,6 +11,7 @@ import UserSeeder from '../seeds/users.seed';
 import PostSeeder from '../seeds/post.seed';
 import CommentSeeder from '../seeds/comment.seed';
 import { UsersRole } from 'src/users/users-role.enum';
+import validationOptions from 'src/utils/validation-options';
 import * as faker from 'faker';
 
 describe('CommentController (e2e)', () => {
@@ -36,8 +37,14 @@ describe('CommentController (e2e)', () => {
         // 사용자 생성
         testUser = await userSeeder.createTestUser(UsersRole.USER);
         // 게시물 생성
-        await postSeeder.createTestPosts(5, testUser, PostStatus.PUBLIC);
+        // 공개 게시물 생성
+        const publicPostPromises = Array.from({ length: 5 }).map(() => {
+            return postSeeder.createTestPost(testUser);
+        });
+        await Promise.all(publicPostPromises);
+
         app = moduleFixture.createNestApplication();
+        app.useGlobalPipes(new ValidationPipe(validationOptions));
         await app.init();
     });
 
