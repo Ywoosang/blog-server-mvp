@@ -6,6 +6,7 @@ import { AdminGuard } from 'src/utils/guards/admin.guard';
 import { FindCategoryPostsDto } from './dto/find-category-posts.dto';
 import { NullableType } from 'src/utils/types/nullable.type';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { CreateCategoryDto } from './dto/create-category.dto';
 
 @Controller('categories')
 export class CategoryController {
@@ -13,8 +14,8 @@ export class CategoryController {
 
     @Post()
     @UseGuards(AuthGuard('jwt'), AdminGuard)
-    async create(@Body() category: Category): Promise<Category> {
-        return this.categoryService.create(category);
+    async create(@Body() createCategoryDto: CreateCategoryDto): Promise<Category> {
+        return this.categoryService.create(createCategoryDto);
     }
 
     @Get()
@@ -23,17 +24,20 @@ export class CategoryController {
     }
 
     @Get('/public/:id')
-    async findOneByPublic(
+    async findOneWithPostsByPublic(
         @Param('id') id: string,
         @Query() findCategoryPosts: FindCategoryPostsDto
     ): Promise<Category> {
-        return this.categoryService.findOne(+id, findCategoryPosts);
+        return this.categoryService.findOneWithPosts(+id, findCategoryPosts);
     }
 
     @Get('/:id')
     @UseGuards(AuthGuard('jwt'), AdminGuard)
-    async findOne(@Param('id') id: string, @Query() findCategoryPostsDto: FindCategoryPostsDto): Promise<Category> {
-        return this.categoryService.findOne(+id, findCategoryPostsDto, true);
+    async findOneWithPosts(
+        @Param('id') id: string,
+        @Query() findCategoryPostsDto: FindCategoryPostsDto
+    ): Promise<Category> {
+        return this.categoryService.findOneWithPosts(+id, findCategoryPostsDto, true);
     }
 
     @Put(':id')
