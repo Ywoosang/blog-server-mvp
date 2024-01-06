@@ -7,6 +7,8 @@ import { FindTagPostsDto } from './dto/find-tag-posts.dto';
 import { Tag } from './entities/tag.entity';
 import { FindTagsResponseDto } from './dto/find-tags-response.dto';
 import { CreateTagDto } from './dto/create-tag.dto';
+import { User } from 'src/users/entities/user.entity';
+import { UsersRole } from 'src/users/users-role.enum';
 
 @Injectable()
 export class TagService {
@@ -29,17 +31,23 @@ export class TagService {
         return this.tagRepository.save(this.tagRepository.create(createTagDto));
     }
 
-    async findTagsWithOneOrMorePosts(): Promise<FindTagsResponseDto> {
-        const query = await this.tagRepository
+    async findTagsWithOneOrMorePosts(user?: User): Promise<FindTagsResponseDto> {
+        let query = this.tagRepository
             .createQueryBuilder('tag')
             .innerJoin('tag.posts', 'post_tag')
-            .select(['tag.id', 'tag.name', 'COUNT(post_tag.id) as postCount'])
-            .groupBy('tag.id, tag.name')
-            .having('postCount > 0')
-            .distinct(true)
-            .getRawMany();
+            .select(['tag.id', 'tag.name']);
 
-        const tags = query.map(tag => ({
+        if (user && user.role == UsersRole.ADMIN) {
+            query = query.addSelect(['COUNT(post_tag.id) as postCount']);
+        } else {
+            query = query
+                .addSelect(['COUNT(CASE WHEN post_tag.status = :status THEN 1 END) as postCount'])
+                .setParameter('status', PostStatus.PUBLIC);
+        }
+
+        const queryResult = await query.groupBy('tag.id, tag.name').having('postCount > 0').distinct(true).getRawMany();
+
+        const tags = queryResult.map(tag => ({
             id: tag.tag_id as number,
             name: tag.tag_name as string,
             postCount: parseInt(tag.postCount)
