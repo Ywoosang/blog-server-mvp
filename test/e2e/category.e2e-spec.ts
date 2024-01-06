@@ -67,7 +67,7 @@ describe('CategoryController (e2e)', () => {
 
         it('로그인하지 않은 사용자가 카테고리를 생성할 때 401 Unauthrized 에러를 반환한다.', async () => {
             await request(app.getHttpServer())
-                .post('/posts')
+                .post('/categories')
                 .send({
                     name
                 })
@@ -76,7 +76,7 @@ describe('CategoryController (e2e)', () => {
 
         it('관리자가 아닌 사용자가 카테고리를 생성할 때 403 Forbiden 에러를 반환한다.', async () => {
             await request(app.getHttpServer())
-                .post('/posts')
+                .post('/categories')
                 .set('Authorization', `Bearer ${accessTokenUser}`)
                 .send({
                     name
@@ -86,7 +86,7 @@ describe('CategoryController (e2e)', () => {
 
         it('카테고리 이름이 없을 때 400 BadRequest 에러를 반환한다.', async () => {
             await request(app.getHttpServer())
-                .post('/posts')
+                .post('/categories')
                 .set('Authorization', `Bearer ${accessTokenAdmin}`)
                 .send({
                     name: ''
