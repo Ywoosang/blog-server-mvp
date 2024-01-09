@@ -12,17 +12,35 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 export class CategoryController {
     constructor(private readonly categoryService: CategoryService) {}
 
+    /**
+     * 카테고리 생성 엔드포인트
+     *
+     * @param createCategoryDto - 새로운 카테고리 생성을 위한 데이터.
+     * @returns 생성된 카테고리 정보.
+     */
     @Post()
     @UseGuards(AuthGuard('jwt'), AdminGuard)
     async create(@Body() createCategoryDto: CreateCategoryDto): Promise<Category> {
         return this.categoryService.create(createCategoryDto);
     }
 
+    /**
+     * 모든 카테고리 조회 엔드포인트
+     *
+     * @returns 모든 카테고리 정보.
+     */
     @Get()
     async findAll(): Promise<{ categories: NullableType<Category[]> }> {
         return this.categoryService.findAll();
     }
 
+    /**
+     * 공개된 카테고리와 해당 카테고리의 포스트 조회 엔드포인트
+     *
+     * @param id - 조회할 카테고리의 식별자.
+     * @param findCategoryPostsDto - 카테고리와 관련된 포스트 조회에 사용될 데이터.
+     * @returns 조회된 카테고리와 해당 카테고리의 포스트 정보.
+     */
     @Get('/public/:id')
     async findOneWithPostsByPublic(
         @Param('id', ParseIntPipe) id: number,
@@ -31,6 +49,13 @@ export class CategoryController {
         return this.categoryService.findOneWithPosts(+id, findCategoryPostsDto);
     }
 
+    /**
+     * 특정 카테고리와 해당 카테고리의 포스트 조회 엔드포인트
+     *
+     * @param id - 조회할 카테고리의 식별자.
+     * @param findCategoryPostsDto - 카테고리와 관련된 포스트 조회에 사용될 데이터.
+     * @returns 조회된 카테고리와 해당 카테고리의 포스트 정보.
+     */
     @Get('/:id')
     @UseGuards(AuthGuard('jwt'), AdminGuard)
     async findOneWithPosts(
@@ -40,6 +65,13 @@ export class CategoryController {
         return this.categoryService.findOneWithPosts(+id, findCategoryPostsDto, true);
     }
 
+    /**
+     * 카테고리 정보 업데이트 엔드포인트
+     *
+     * @param id - 업데이트할 카테고리의 식별자.
+     * @param updateCategoryDto - 업데이트할 카테고리 정보.
+     * @returns 업데이트된 카테고리 정보.
+     */
     @Put(':id')
     @UseGuards(AuthGuard('jwt'), AdminGuard)
     async update(
@@ -49,6 +81,11 @@ export class CategoryController {
         return this.categoryService.update(+id, updateCategoryDto);
     }
 
+    /**
+     * 특정 카테고리 삭제 엔드포인트
+     *
+     * @param id - 삭제할 카테고리의 식별자.
+     */
     @Delete(':id')
     @UseGuards(AuthGuard('jwt'), AdminGuard)
     async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
