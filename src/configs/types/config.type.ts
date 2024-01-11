@@ -1,6 +1,7 @@
 export type AppConfig = {
     port: number;
     backendDomain: string;
+    frontendDomain: string;
     workingDirectory: string;
 };
 

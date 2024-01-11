@@ -16,12 +16,16 @@ import { MailModule } from './mail/mail.moudle';
 import { MailerModule } from './mailer/mailer.module';
 import { HttpLoggerMiddleware } from './common/middlewares/http-logger.middleware';
 import { TagModule } from './tag/tag.module';
+import { FilesModule } from './files/files.module';
 
 @Module({
     imports: [
         ConfigModule.forRoot({
             isGlobal: true,
-            load: process.env.NODE_ENV === 'test' ? [authConfig] : [appConfig, authConfig, databaseConfig, mailConfig],
+            load:
+                process.env.NODE_ENV === 'test'
+                    ? [appConfig, authConfig]
+                    : [appConfig, authConfig, databaseConfig, mailConfig],
             envFilePath: `.env.${process.env.NODE_ENV}`
         }),
         process.env.NODE_ENV === 'test' ? DatabaseTestModule : DatabaseModule,
@@ -33,7 +37,8 @@ import { TagModule } from './tag/tag.module';
         CategoryModule,
         TagModule,
         MailModule,
-        MailerModule
+        MailerModule,
+        FilesModule
     ]
 })
 export class AppModule implements NestModule {
