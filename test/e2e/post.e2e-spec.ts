@@ -36,12 +36,12 @@ describe('PostController (e2e)', () => {
         // 사용자 생성
         testUser = await userSeeder.createTestUser(UsersRole.USER);
         // 공개 게시물 생성
-        const publicPostPromises = Array.from({ length: 5 }).map(() => {
+        const publicPostPromises = Array.from({ length: 20 }).map(() => {
             return postSeeder.createTestPost(testAdminUser);
         });
         // 비공개 게시물 생성
         await Promise.all(publicPostPromises);
-        const privatePostPromises = Array.from({ length: 5 }).map(() => {
+        const privatePostPromises = Array.from({ length: 10 }).map(() => {
             return postSeeder.createTestPost(testAdminUser, PostStatus.PRIVATE);
         });
         await Promise.all(privatePostPromises);
@@ -148,9 +148,18 @@ describe('PostController (e2e)', () => {
             });
         });
 
+        it('limit 또는 page 가 주어지지 않는다면 1페이지, 15 개 게시물을 반환한다.', async () => {
+            const response = await request(app.getHttpServer()).get('/posts/public').expect(200);
+            const data = response.body;
+            expect(data).toHaveProperty('posts');
+            expect(data).toHaveProperty('total');
+            expect(Array.isArray(data.posts)).toBeTruthy();
+            expect(data.posts.length).toBe(15);
+        });
+
         it('없는 페이지일 경우 빈 게시물 목록과 총 게시글 수를 반환한다.', async () => {
             await request(app.getHttpServer())
-                .get('/posts/public?page=10&limit=2')
+                .get('/posts/public?page=10&limit=15')
                 .expect(response => {
                     const data = response.body;
                     expect(data).toHaveProperty('posts');
@@ -173,7 +182,7 @@ describe('PostController (e2e)', () => {
 
         it('없는 페이지일 경우 빈 게시물 목록과 총 게시글 수를 반환한다.', async () => {
             const response = await request(app.getHttpServer())
-                .get('/posts?page=10&limit=2')
+                .get('/posts?page=10&limit=15')
                 .set('Authorization', `Bearer ${accessTokenAdmin}`)
                 .expect(200);
 
@@ -203,7 +212,7 @@ describe('PostController (e2e)', () => {
         });
 
         it('비공개 게시물일 경우 빈 오브젝트를 반환한다.', async () => {
-            const response = await request(app.getHttpServer()).get('/posts/public/6').expect(200);
+            const response = await request(app.getHttpServer()).get('/posts/public/30').expect(200);
             const data = response.body;
             expect(data).toEqual({});
         });
