@@ -19,6 +19,7 @@ import { PostStatusValidationPipe } from './pipes/post-status-validation.pipe';
 import { Post as PostEntity } from './entities/post.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/users/entities/user.entity';
+import { FindPostsResponseDto } from './dto/find-posts-response.dto';
 import { FindPostsDto } from './dto/find-posts.dto';
 import { AdminGuard } from '../utils/guards/admin.guard';
 import { NullableType } from 'src/utils/types/nullable.type';
@@ -37,15 +38,15 @@ export class PostController {
 
     @Get('/public')
     @HttpCode(HttpStatus.OK)
-    getPublicPosts(@Query('page') page: number = 1, @Query('limit') limit: number = 15): Promise<FindPostsDto> {
-        return this.postService.findPostsPaginated(page, limit);
+    getPublicPosts(@Query() findPostsDto: FindPostsDto): Promise<FindPostsResponseDto> {
+        return this.postService.findPostsPaginated(findPostsDto);
     }
 
     @Get('/')
     @UseGuards(AuthGuard('jwt'), AdminGuard)
     @HttpCode(HttpStatus.OK)
-    getPosts(@Query('page') page: number = 1, @Query('limit') limit: number = 15): Promise<FindPostsDto> {
-        return this.postService.findPostsPaginated(page, limit, true);
+    getPosts(@Query() findPostsDto: FindPostsDto): Promise<FindPostsResponseDto> {
+        return this.postService.findPostsPaginated(findPostsDto, true);
     }
 
     @Get('/public/:id')

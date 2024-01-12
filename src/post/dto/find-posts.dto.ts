@@ -1,6 +1,13 @@
-import { Post } from '../entities/post.entity';
+import { IsOptional, IsInt, Min } from 'class-validator';
 
 export class FindPostsDto {
-    posts: Post[];
-    total: number;
+    @IsOptional()
+    @IsInt()
+    @Min(1)
+    page?: number;
+
+    @IsOptional()
+    @IsInt()
+    @Min(1)
+    limit?: number;
 }

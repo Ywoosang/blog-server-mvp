@@ -11,6 +11,7 @@ import { UsersService } from 'src/users/users.service';
 import { CategoryService } from 'src/category/category.service';
 import { TagService } from 'src/tag/tag.service';
 import { Tag } from 'src/tag/entities/tag.entity';
+import { FindPostsResponseDto } from './dto/find-posts-response.dto';
 
 @Injectable()
 export class PostService {
@@ -26,7 +27,10 @@ export class PostService {
         return this.postRepository.findOne(findOptions);
     }
 
-    async findPostsPaginated(page: number = 1, limit: number = 15, isAdmin: boolean = false): Promise<FindPostsDto> {
+    async findPostsPaginated(findPostsDto: FindPostsDto, isAdmin: boolean = false): Promise<FindPostsResponseDto> {
+        let { page, limit } = findPostsDto;
+        page = page ? page : 1;
+        limit = limit ? limit : 15;
         const skip = (page - 1) * limit;
         const whereCondition: any = {};
         if (!isAdmin) {
