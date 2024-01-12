@@ -11,13 +11,13 @@ import {
     CreateDateColumn,
     UpdateDateColumn
 } from 'typeorm';
-
-import { PostStatus } from '../post-status.enum';
 import { User } from 'src/users/entities/user.entity';
 import { Comment } from 'src/comment/entities/comment.entity';
 import { Like } from 'src/like/entities/like.entity';
 import { Category } from 'src/category/entities/category.entity';
 import { Tag } from 'src/tag/entities/tag.entity';
+import { File } from 'src/files/entities/file.entity';
+import { PostStatus } from '../post-status.enum';
 
 @Entity()
 export class Post extends BaseEntity {
@@ -56,4 +56,7 @@ export class Post extends BaseEntity {
 
     @OneToMany(() => Like, like => like.post)
     likes: Like[];
+
+    @OneToMany(() => File, file => file.post)
+    files: File[];
 }
