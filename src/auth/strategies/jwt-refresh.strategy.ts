@@ -17,21 +17,20 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
         private configService: ConfigService<AllConfigType>
     ) {
         super({
-            // 토큰이 유효한지 체크
             secretOrKey: configService.get('auth.refreshSecret', { infer: true }),
-            // refreshToken
-            jwtFromRequest: ExtractJwt.fromExtractors([
-                request => {
-                    return request.cookies.Refresh;
-                }
-            ]),
-            // req 객체 사용
+            jwtFromRequest: ExtractJwt.fromBodyField('refreshToken'),
             passReqToCallback: true
         });
     }
 
     async validate(request: Request, payload: any) {
-        const { userLoginId } = payload;
+        // payload : JWT 토큰의 디코딩 결과로 나온 객체
+        // 페이로드에 토큰에 포함된 클레임 들이포함되어 있음
+        const userLoginId = payload.userLoginId;
+        if (!userLoginId) {
+            throw new UnauthorizedException();
+        }
+
         const user: User = await this.userRepository.findOne({
             where: {
                 userLoginId
@@ -41,10 +40,13 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
             throw new UnauthorizedException();
         }
 
-        const refreshToken = request.cookies.Refresh;
-        const isMatch = await bcrypt.compare(refreshToken, user.refreshToken);
+        const refreshTokenFromBody = request.body.refreshToken;
+        const isMatch = await bcrypt.compare(refreshTokenFromBody, user.refreshToken);
+
         if (isMatch) {
             return user;
+        } else {
+            throw new UnauthorizedException();
         }
     }
 }
