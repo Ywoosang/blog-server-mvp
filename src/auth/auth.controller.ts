@@ -67,7 +67,7 @@ export class AuthController {
      * @param user - 현재 사용자 정보
      * @returns 새로 생성된 액세스 토큰
      */
-    @Get('/refresh')
+    @Post('/refresh')
     @UseGuards(AuthGuard('jwt-refresh'))
     @HttpCode(HttpStatus.OK)
     async refresh(@GetUser() user: User) {
