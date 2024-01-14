@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UsersRole } from 'src/users/users-role.enum';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
+import { UsersStatus } from 'src/users/users-status.enum';
 
 @Injectable()
 export class UsersSeedService {
@@ -23,7 +24,8 @@ export class UsersSeedService {
                     nickname: process.env.ADMIN_NICKNAME,
                     description: process.env.ADMIN_DESCRIPTION,
                     password: process.env.ADMIN_PASSWORD,
-                    role: UsersRole.ADMIN
+                    role: UsersRole.ADMIN,
+                    status: UsersStatus.ACTIVE
                 })
             );
         }
