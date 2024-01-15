@@ -6,6 +6,7 @@ import { User } from 'src/users/entities/user.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { UsersModule } from 'src/users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AllConfigType } from 'src/configs/types/config.type';
@@ -29,7 +30,7 @@ import { MailModule } from 'src/mail/mail.moudle';
         MailModule
     ],
     controllers: [AuthController],
-    providers: [AuthService, JwtStrategy],
-    exports: [JwtStrategy]
+    providers: [AuthService, JwtStrategy, JwtRefreshStrategy],
+    exports: [JwtStrategy, JwtRefreshStrategy]
 })
 export class AuthModule {}
