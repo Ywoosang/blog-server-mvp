@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { File } from './entities/file.entity';
 import { FilesController } from './files.controller';
@@ -14,7 +14,7 @@ import path from 'path';
 @Module({
     imports: [
         TypeOrmModule.forFeature([File]),
-        PostModule,
+        forwardRef(() => PostModule),
         MulterModule.registerAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
@@ -39,6 +39,7 @@ import path from 'path';
         })
     ],
     controllers: [FilesController],
-    providers: [FilesService]
+    providers: [FilesService],
+    exports: [FilesService]
 })
 export class FilesModule {}
