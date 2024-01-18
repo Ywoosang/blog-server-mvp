@@ -27,7 +27,7 @@ export class Post extends BaseEntity {
     @Column()
     title: string;
 
-    @Column()
+    @Column({ type: 'text' })
     content: string;
 
     @Column()
@@ -58,5 +58,5 @@ export class Post extends BaseEntity {
     likes: Like[];
 
     @OneToMany(() => File, file => file.post)
-    files: File[];
+    images: File[];
 }

@@ -9,7 +9,7 @@ export class File extends BaseEntity {
     @Column()
     filename: string;
 
-    @ManyToOne(() => Post, post => post.files)
+    @ManyToOne(() => Post, post => post.images)
     @JoinColumn({ name: 'postId' })
     post: Post;
 }

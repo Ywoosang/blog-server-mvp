@@ -5,6 +5,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { FindOneOptions, Repository } from 'typeorm';
 import { Post } from './entities/post.entity';
 import { User } from 'src/users/entities/user.entity';
+import { File as FileEntity } from 'src/files/entities/file.entity';
 import { FindPostsDto } from './dto/find-posts.dto';
 import { NullableType } from 'src/utils/types/nullable.type';
 import { UsersService } from 'src/users/users.service';
@@ -12,6 +13,7 @@ import { CategoryService } from 'src/category/category.service';
 import { TagService } from 'src/tag/tag.service';
 import { Tag } from 'src/tag/entities/tag.entity';
 import { FindPostsResponseDto } from './dto/find-posts-response.dto';
+import { FilesService } from 'src/files/files.service';
 
 @Injectable()
 export class PostService {
@@ -20,7 +22,8 @@ export class PostService {
         private postRepository: Repository<Post>,
         private usersService: UsersService,
         private categoryService: CategoryService,
-        private tagService: TagService
+        private tagService: TagService,
+        private filesService: FilesService
     ) {}
 
     async findOne(findOptions: FindOneOptions<Post>): Promise<NullableType<Post>> {
@@ -61,7 +64,7 @@ export class PostService {
     }
 
     async create(createPostDto: CreatePostDto, user: User): Promise<Post> {
-        const { title, content, status, categoryId, tagNames } = createPostDto;
+        const { title, content, status, categoryId, tagNames, imageIds } = createPostDto;
 
         let category;
         if (categoryId) {
@@ -70,11 +73,20 @@ export class PostService {
                 throw new NotFoundException('존재하지 않는 카테고리입니다.');
             }
         }
+
         const tags: Tag[] = [];
         if (tagNames) {
             for (const tagName of tagNames) {
                 const tag = await this.tagService.createIfNotExistByName({ name: tagName });
                 tags.push(tag);
+            }
+        }
+
+        const images: FileEntity[] = [];
+        if (imageIds) {
+            for (const imageId of imageIds) {
+                const imageFile = await this.filesService.findById(imageId);
+                images.push(imageFile);
             }
         }
 
@@ -85,7 +97,8 @@ export class PostService {
                 status,
                 user,
                 category,
-                tags
+                tags,
+                images
             })
         );
     }
