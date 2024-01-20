@@ -27,7 +27,7 @@ export class Post extends BaseEntity {
     @Column()
     title: string;
 
-    @Column()
+    @Column({ default: '' })
     description: string;
 
     @Column({ type: 'text' })
