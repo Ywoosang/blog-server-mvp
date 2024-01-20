@@ -11,6 +11,7 @@ class PostSeeder {
         const post: CreatePostDto = {
             title: faker.lorem.sentence(),
             content: faker.lorem.paragraph(),
+            description: '',
             status,
             categoryId,
             tagNames
