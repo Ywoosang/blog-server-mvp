@@ -42,7 +42,8 @@ export class PostService {
         const [posts, total] = await this.postRepository.findAndCount({
             take: limit,
             skip,
-            where: whereCondition
+            where: whereCondition,
+            relations: ['tags']
         });
 
         return {
