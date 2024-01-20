@@ -65,7 +65,7 @@ export class PostService {
     }
 
     async create(createPostDto: CreatePostDto, user: User): Promise<Post> {
-        const { title, content, status, categoryId, tagNames, imageIds } = createPostDto;
+        const { title, content, description, status, categoryId, tagNames, imageIds } = createPostDto;
 
         let category;
         if (categoryId) {
@@ -94,6 +94,7 @@ export class PostService {
         return this.postRepository.save(
             this.postRepository.create({
                 title,
+                description,
                 content,
                 status,
                 user,

@@ -9,6 +9,9 @@ export class CreatePostDto {
     @IsNotEmpty()
     content: string;
 
+    @IsString()
+    description: string;
+
     @IsEnum(PostStatus)
     status: PostStatus;
 
