@@ -51,7 +51,7 @@ export class PostController {
 
     @Get('/public/:id')
     @HttpCode(HttpStatus.OK)
-    async getPostById(@Param('id') postId: number): Promise<NullableType<PostEntity>> {
+    async getPublicPostById(@Param('id') postId: number): Promise<NullableType<PostEntity>> {
         return this.postService.findOne({
             where: {
                 id: postId,
@@ -64,7 +64,7 @@ export class PostController {
     @Get('/:id')
     @UseGuards(AuthGuard('jwt'), AdminGuard)
     @HttpCode(HttpStatus.OK)
-    async getPrivatePostById(@Param('id') postId: number): Promise<PostEntity> {
+    async getPostById(@Param('id') postId: number): Promise<PostEntity> {
         return this.postService.findOne({
             where: {
                 id: postId
