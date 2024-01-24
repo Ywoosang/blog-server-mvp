@@ -20,6 +20,8 @@ describe('PostController (e2e)', () => {
     let postSeeder: PostSeeder;
     let testAdminUser: User;
     let testUser: User;
+    let publicPostCount: number;
+    let privatePostCount: number;
 
     beforeAll(async () => {
         jest.setTimeout(1000000);
@@ -35,16 +37,20 @@ describe('PostController (e2e)', () => {
         testAdminUser = await userSeeder.createTestUser(UsersRole.ADMIN);
         // 사용자 생성
         testUser = await userSeeder.createTestUser(UsersRole.USER);
+        
         // 공개 게시물 생성
         const publicPostPromises = Array.from({ length: 20 }).map(() => {
             return postSeeder.createTestPost(testAdminUser);
         });
-        // 비공개 게시물 생성
         await Promise.all(publicPostPromises);
+        publicPostCount = 20;
+
+        // 비공개 게시물 생성
         const privatePostPromises = Array.from({ length: 10 }).map(() => {
             return postSeeder.createTestPost(testAdminUser, PostStatus.PRIVATE);
         });
         await Promise.all(privatePostPromises);
+        privatePostCount = 10;
 
         app = moduleFixture.createNestApplication();
         app.useGlobalPipes(new ValidationPipe(validationOptions));
@@ -89,6 +95,7 @@ describe('PostController (e2e)', () => {
                     status: PostStatus.PUBLIC
                 })
                 .expect(201);
+            publicPostCount++;
         });
 
         it('로그인하지 않은 사용자가 게시물을 생성할 때 401 Unauthrized 에러를 반환한다.', async () => {
@@ -152,6 +159,27 @@ describe('PostController (e2e)', () => {
                     status: PostStatus.PUBLIC
                 })
                 .expect(400);
+        });
+    });
+
+    describe('/posts/public/count  (GET)', () => {
+        it('공개 게시물 개수를 반환한다.', async () => {
+            const response = await request(app.getHttpServer()).get('/posts/public/count').expect(200);
+            const data = response.body;
+            expect(data.postCount).toBeDefined();
+            expect(data.postCount).toBe(publicPostCount);
+        });
+    });
+
+    describe('/posts/count  (GET)', () => {
+        it('모든 게시물 개수를 반환한다.', async () => {
+            const response = await request(app.getHttpServer())
+                .get('/posts/count')
+                .set('Authorization', `Bearer ${accessTokenAdmin}`)
+                .expect(200);
+            const data = response.body;
+            expect(data.postCount).toBeDefined();
+            expect(data.postCount).toBe(publicPostCount + privatePostCount);
         });
     });
 
