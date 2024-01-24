@@ -26,6 +26,21 @@ export class PostService {
         private filesService: FilesService
     ) {}
 
+    async getPostCount(status?: PostStatus): Promise<{ postCount: number }> {
+        let postCount;
+        if (status == PostStatus.PUBLIC) {
+            postCount = await this.postRepository.count({
+                where: {
+                    status: PostStatus.PUBLIC
+                }
+            });
+        } else {
+            postCount = await this.postRepository.count();
+        }
+
+        return { postCount };
+    }
+
     async findOne(findOptions: FindOneOptions<Post>): Promise<NullableType<Post>> {
         return this.postRepository.findOne(findOptions);
     }

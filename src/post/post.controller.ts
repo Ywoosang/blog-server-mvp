@@ -36,6 +36,19 @@ export class PostController {
         return this.postService.create(createPostDto, user);
     }
 
+    @Get('/count')
+    @UseGuards(AuthGuard('jwt'), AdminGuard)
+    @HttpCode(HttpStatus.OK)
+    getTotalPostCount(): Promise<{ postCount: number }> {
+        return this.postService.getPostCount();
+    }
+
+    @Get('/public/count')
+    @HttpCode(HttpStatus.OK)
+    getPublicPostCount(): Promise<{ postCount: number }> {
+        return this.postService.getPostCount(PostStatus.PUBLIC);
+    }
+
     @Get('/public')
     @HttpCode(HttpStatus.OK)
     getPublicPosts(@Query() findPostsDto: FindPostsDto): Promise<FindPostsResponseDto> {
