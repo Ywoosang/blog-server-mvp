@@ -58,6 +58,7 @@ describe('PostController (e2e)', () => {
     describe('/post (POST)', () => {
         const title = faker.lorem.sentence();
         const content = faker.lorem.paragraph();
+        const description = faker.lorem.sentence();
         it('게시물을 생성한다.', async () => {
             let response;
             response = await request(app.getHttpServer())
@@ -84,6 +85,7 @@ describe('PostController (e2e)', () => {
                 .send({
                     title,
                     content,
+                    description,
                     status: PostStatus.PUBLIC
                 })
                 .expect(201);
@@ -95,6 +97,7 @@ describe('PostController (e2e)', () => {
                 .send({
                     title,
                     content,
+                    description,
                     status: PostStatus.PUBLIC
                 })
                 .expect(401);
@@ -107,6 +110,7 @@ describe('PostController (e2e)', () => {
                 .send({
                     title,
                     content,
+                    description,
                     status: PostStatus.PUBLIC
                 })
                 .expect(403);
@@ -119,12 +123,26 @@ describe('PostController (e2e)', () => {
                 .send({
                     title: '',
                     content: '내용1',
+                    description,
                     status: PostStatus.PUBLIC
                 })
                 .expect(400);
         });
 
         it('내용이 없을 때 400 BadRequest 에러를 반환한다.', async () => {
+            await request(app.getHttpServer())
+                .post('/posts')
+                .set('Authorization', `Bearer ${accessTokenAdmin}`)
+                .send({
+                    title: '제목1',
+                    content: '',
+                    description,
+                    status: PostStatus.PUBLIC
+                })
+                .expect(400);
+        });
+
+        it('게시글 설명이 없을 때 400 BadRequest 에러를 반환한다.', async () => {
             await request(app.getHttpServer())
                 .post('/posts')
                 .set('Authorization', `Bearer ${accessTokenAdmin}`)
