@@ -142,7 +142,6 @@ describe('CategoryController (e2e)', () => {
                 .get('/categories')
                 .set('Authorization', `Bearer ${accessTokenAdmin}`)
                 .expect(200);
-            console.log(response);
             const data = response.body;
             expect(data.categories).toBeDefined();
             const categories = data.categories;
