@@ -19,8 +19,27 @@ export class CategoryService {
         return this.categoryRepository.save(this.categoryRepository.create(createCategoryDto));
     }
 
-    async findAll(): Promise<{ categories: NullableType<Category[]> }> {
+    async findAll(): Promise<{ categories: Category[] }> {
         const categories = await this.categoryRepository.find();
+
+        return { categories };
+    }
+
+    async findAllWithPostCount(
+        isAdmin: boolean = false
+    ): Promise<{ categories: { id: number; name: string; postCount: number }[] }> {
+        const query = this.categoryRepository.createQueryBuilder('category');
+        query
+            .leftJoin(
+                'post',
+                'post',
+                isAdmin ? 'category.id = post.categoryId' : 'category.id = post.categoryId AND post.status = :status',
+                { status: PostStatus.PUBLIC }
+            )
+            .select(['category.id AS id', 'category.name AS name', 'COALESCE(COUNT(post.id),0) AS postCount'])
+            .addGroupBy('category.id')
+            .addGroupBy('category.name');
+        const categories = await query.getRawMany();
 
         return { categories };
     }
