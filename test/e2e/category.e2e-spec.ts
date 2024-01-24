@@ -4,17 +4,23 @@ import request from 'supertest';
 import { AppModule } from 'src/app.module';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
-import UserSeeder from '../seeds/users.seed';
 import { UsersRole } from 'src/users/users-role.enum';
 import validationOptions from 'src/utils/validation-options';
+import { Category } from 'src/category/entities/category.entity';
+import { PostService } from 'src/post/post.service';
+import { PostStatus } from 'src/post/post-status.enum';
+import PostSeeder from '../seeds/post.seed';
+import UserSeeder from '../seeds/users.seed';
 
 describe('CategoryController (e2e)', () => {
     let app: INestApplication;
     let accessTokenUser: string;
     let accessTokenAdmin: string;
     let userSeeder: UserSeeder;
+    let postSeeder: PostSeeder;
     let testAdminUser: User;
     let testUser: User;
+    let category: Category;
 
     beforeAll(async () => {
         const moduleFixture = await Test.createTestingModule({
@@ -23,6 +29,9 @@ describe('CategoryController (e2e)', () => {
 
         const usersService = moduleFixture.get<UsersService>(UsersService);
         userSeeder = new UserSeeder(usersService);
+
+        const postService = moduleFixture.get<PostService>(PostService);
+        postSeeder = new PostSeeder(postService);
         // 관리자 생성
         testAdminUser = await userSeeder.createTestUser(UsersRole.ADMIN);
         testUser = await userSeeder.createTestUser(UsersRole.USER);
@@ -58,13 +67,14 @@ describe('CategoryController (e2e)', () => {
                 .expect(200);
             accessTokenUser = response.body.accessToken;
 
-            await request(app.getHttpServer())
+            response = await request(app.getHttpServer())
                 .post('/categories')
                 .set('Authorization', `Bearer ${accessTokenAdmin}`)
                 .send({
                     name
                 })
                 .expect(201);
+            category = response.body;
         });
 
         it('로그인하지 않은 사용자가 카테고리를 생성할 때 401 Unauthrized 에러를 반환한다.', async () => {
@@ -97,15 +107,64 @@ describe('CategoryController (e2e)', () => {
         });
     });
 
+    describe('/categories/public (GET)', () => {
+        it('모든 공개 카테고리 목록을 반환한다.', async () => {
+            // 카테고리에 공개 게시글 추가
+            await postSeeder.createTestPost(testAdminUser, PostStatus.PUBLIC, category.id);
+            // 카테고리에 비공개 게시글 추가
+            await postSeeder.createTestPost(testAdminUser, PostStatus.PRIVATE, category.id);
+            
+            const response = await request(app.getHttpServer()).get('/categories/public').expect(200);
+            const data = response.body;
+            expect(data.categories).toBeDefined();
+            const categories = data.categories;
+           
+            expect(Array.isArray(categories)).toBe(true);
+        });
+
+        it('각 카테고리는 id, name, postCount 를 포함해야 한다.', async() => {
+            const response = await request(app.getHttpServer()).get('/categories/public').expect(200);
+            const data = response.body;
+            const categories = data.categories;
+            categories.forEach(category => {
+                expect(category.name).toBeDefined();
+                expect(category.id).toBeDefined();
+                expect(category.postCount).toBeDefined();
+                expect(category.postCount).toBe(1);
+                expect(typeof category.postCount === 'number').toBe(true);
+            });
+        });
+    });
+
     describe('/categories (GET)', () => {
         it('모든 카테고리 목록을 반환한다.', async () => {
-            const response = await request(app.getHttpServer()).get('/categories').expect(200);
+            const response = await request(app.getHttpServer())
+                .get('/categories')
+                .set('Authorization', `Bearer ${accessTokenAdmin}`)
+                .expect(200);
+            console.log(response);
             const data = response.body;
             expect(data.categories).toBeDefined();
             const categories = data.categories;
             expect(Array.isArray(categories)).toBe(true);
             categories.forEach(category => {
                 expect(category.name).toBeDefined();
+            });
+        });
+
+        it('각 카테고리는 id, name, postCount 를 포함해야 한다.', async() => {
+            const response = await request(app.getHttpServer())
+                .get('/categories')
+                .set('Authorization', `Bearer ${accessTokenAdmin}`)
+                .expect(200);
+            const data = response.body;
+            const categories = data.categories;
+            categories.forEach(category => {
+                expect(category.name).toBeDefined();
+                expect(category.id).toBeDefined();
+                expect(category.postCount).toBeDefined();
+                expect(category.postCount).toBe(2);
+                expect(typeof category.postCount === 'number').toBe(true);
             });
         });
     });
