@@ -65,7 +65,7 @@ export class CategoryService {
             where: {
                 id
             },
-            relations: ['posts']
+            relations: ['posts', 'posts.tags']
         });
 
         if (!category) {
