@@ -112,7 +112,8 @@ describe('CommentController (e2e)', () => {
                 .post('/comments/1/replies')
                 .set('Authorization', `Bearer ${accessTokenUser}`)
                 .send({
-                    content
+                    content,
+                    replyToId: testUser.id
                 })
                 .expect(201);
         });
@@ -122,7 +123,8 @@ describe('CommentController (e2e)', () => {
                 .post('/comment/100/replies')
                 .set('Authorization', `Bearer ${accessTokenUser}`)
                 .send({
-                    content
+                    content,
+                    replyToId: testUser.id
                 })
                 .expect(404);
         });
@@ -132,7 +134,8 @@ describe('CommentController (e2e)', () => {
                 .post('/comments/1/replies')
                 .set('Authorization', `Bearer ${accessTokenUser}`)
                 .send({
-                    content: ''
+                    content: '',
+                    replyToId: testUser.id
                 })
                 .expect(400);
         });
@@ -140,6 +143,12 @@ describe('CommentController (e2e)', () => {
 
     describe('/comments/posts/:postId (GET)', () => {
         it('게시물에 달린 댓글들을 반환한다.', async () => {
+            // 공개 게시물 생성
+            const postId = 1;
+            let parent = await commentSeeder.createTestComment(testUser, postId);
+            for (let i = 0; i < 10; i++) {
+                parent = await commentSeeder.createTestReply(testUser, parent.id);
+            }
             const response = await request(app.getHttpServer()).get('/comments/posts/1');
             expect(response.statusCode).toBe(200);
             const comments = response.body;
@@ -147,9 +156,8 @@ describe('CommentController (e2e)', () => {
             comments.forEach(comment => {
                 expect(comment).toHaveProperty('id');
                 expect(comment).toHaveProperty('content');
-                expect(comment).toHaveProperty('parentCommentId');
                 expect(comment).toHaveProperty('replies');
-                expect(comment).toHaveProperty('post');
+                expect(comment).toHaveProperty('user');
             });
         });
     });
@@ -169,9 +177,9 @@ describe('CommentController (e2e)', () => {
         it('댓글 작성자가 아니라면 403 Forbidden 에러를 반환한다.', async () => {
             const user = await userSeeder.createTestUser(UsersRole.USER);
             await postSeeder.createTestPost(user, PostStatus.PUBLIC);
-            await commentSeeder.createTestComment(user);
+            const comment = await commentSeeder.createTestComment(user, 1);
             await request(app.getHttpServer())
-                .put('/comments/3')
+                .put(`/comments/${comment.id}`)
                 .set('Authorization', `Bearer ${accessTokenUser}`)
                 .send({
                     content: '수정된 내용'
@@ -199,8 +207,11 @@ describe('CommentController (e2e)', () => {
         });
 
         it('댓글 작성자가 아니라면 403 Forbidden 에러를 반환한다.', async () => {
+            const user = await userSeeder.createTestUser(UsersRole.USER);
+            const post = await postSeeder.createTestPost(user, PostStatus.PUBLIC);
+            const comment = await commentSeeder.createTestComment(user, post.id);
             await request(app.getHttpServer())
-                .delete('/comments/3')
+                .delete(`/comments/${comment.id}`)
                 .set('Authorization', `Bearer ${accessTokenUser}`)
                 .send({
                     content: '수정된 내용'
