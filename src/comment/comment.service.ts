@@ -15,6 +15,8 @@ export class CommentService {
     constructor(
         @InjectRepository(Comment)
         private commentRepository: Repository<Comment>,
+        @InjectRepository(User)
+        private userRepository: Repository<User>,
         private postService: PostService
     ) {}
 
@@ -36,6 +38,16 @@ export class CommentService {
     }
 
     async createReply(createReplyDto: CreateReplyDto, parentCommentId: number, user: User): Promise<Comment> {
+        const { replyToId } = createReplyDto;
+        const replyTo = await this.userRepository.findOne({
+            where: {
+                id: replyToId
+            }
+        });
+        if (!replyTo) {
+            throw new NotFoundException('존재하지 않는 사용자입니다.');
+        }
+
         const parentComment = await this.findOne({
             where: {
                 id: parentCommentId
@@ -49,6 +61,7 @@ export class CommentService {
             this.commentRepository.create({
                 ...createReplyDto,
                 user,
+                replyTo,
                 post,
                 parentComment
             })
@@ -60,15 +73,39 @@ export class CommentService {
     }
 
     async findMany(postId: number): Promise<NullableType<Comment[]>> {
-        const comments = this.commentRepository.find({
-            where: {
-                post: {
-                    id: postId
-                }
-            },
-            relations: ['replies', 'post']
-        });
+        const comments = [];
+        const rootComments = await this.commentRepository
+            .createQueryBuilder('comment')
+            .leftJoinAndSelect('comment.user', 'user')
+            .where('comment.parentCommentId IS NULL')
+            .andWhere('comment.postId = :postId', { postId }) // 추가된 부분
+            .orderBy('comment.createdAt', 'DESC')
+            .select(['comment.id', 'comment.content', 'comment.createdAt', 'user.id', 'user.nickname'])
+            .getMany();
 
+        for (let i = 0; i < rootComments.length; i++) {
+            const rootComment = rootComments[i];
+            let replies = await this.commentRepository
+                .createQueryBuilder('comment')
+                .leftJoinAndSelect('comment.user', 'user')
+                .leftJoinAndSelect('comment.replyTo', 'replyTo')
+                .where('comment.parentCommentId = :parentId', { parentId: rootComment.id })
+                .andWhere('comment.postId = :postId', { postId }) // 추가된 부분
+                .orderBy('comment.createdAt', 'ASC')
+                .select([
+                    'comment.parentCommentId',
+                    'comment.id',
+                    'comment.content',
+                    'comment.createdAt',
+                    'user.id',
+                    'user.nickname',
+                    'replyTo.id',
+                    'replyTo.nickname'
+                ])
+                .getMany();
+            rootComment.replies = replies;
+            comments.push(rootComment);
+        }
         return comments;
     }
 

@@ -1,4 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import {
+    Entity,
+    PrimaryGeneratedColumn,
+    Column,
+    ManyToOne,
+    OneToMany,
+    JoinColumn,
+    CreateDateColumn,
+    UpdateDateColumn
+} from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Post } from 'src/post/entities/post.entity';
 
@@ -12,6 +21,10 @@ export class Comment {
 
     @Column({ nullable: true })
     parentCommentId: number;
+
+    @ManyToOne(() => User, user => user.comments)
+    @JoinColumn({ name: 'replyToId' })
+    replyTo: User;
 
     @ManyToOne(() => User, user => user.comments)
     @JoinColumn({ name: 'userId' })
@@ -29,4 +42,10 @@ export class Comment {
 
     @OneToMany(() => Comment, comment => comment.parentComment)
     replies: Comment[];
+
+    @CreateDateColumn()
+    createdAt: Date;
+
+    @UpdateDateColumn()
+    updatedAt: Date;
 }
