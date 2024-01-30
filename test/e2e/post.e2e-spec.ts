@@ -8,9 +8,11 @@ import { PostStatus } from 'src/post/post-status.enum';
 import { User } from 'src/users/entities/user.entity';
 import UserSeeder from '../seeds/users.seed';
 import PostSeeder from '../seeds/post.seed';
+import CommentSeeder from '../seeds/comment.seed';
 import { UsersRole } from 'src/users/users-role.enum';
 import validationOptions from 'src/utils/validation-options';
 import * as faker from 'faker';
+import { CommentService } from 'src/comment/comment.service';
 
 describe('PostController (e2e)', () => {
     let app: INestApplication;
@@ -18,11 +20,12 @@ describe('PostController (e2e)', () => {
     let accessTokenAdmin: string;
     let userSeeder: UserSeeder;
     let postSeeder: PostSeeder;
+    let commentSeeder: CommentSeeder;
     let testAdminUser: User;
     let testUser: User;
     let publicPostCount: number;
     let privatePostCount: number;
-
+ 
     beforeAll(async () => {
         jest.setTimeout(1000000);
         const moduleFixture = await Test.createTestingModule({
@@ -31,8 +34,10 @@ describe('PostController (e2e)', () => {
 
         const usersService = moduleFixture.get<UsersService>(UsersService);
         const postService = moduleFixture.get<PostService>(PostService);
+		const commentService = moduleFixture.get<CommentService>(CommentService);
         userSeeder = new UserSeeder(usersService);
         postSeeder = new PostSeeder(postService);
+		commentSeeder = new CommentSeeder(commentService);
         // 관리자 생성
         testAdminUser = await userSeeder.createTestUser(UsersRole.ADMIN);
         // 사용자 생성
@@ -332,6 +337,17 @@ describe('PostController (e2e)', () => {
                 .set('Authorization', `Bearer ${accessTokenAdmin}`)
                 .expect(200);
         });
+        		
+		it('게시물 삭제시 댓글도 같이 삭제되어야 한다.', async() => {
+			// 댓글 생성
+			const comment = await commentSeeder.createTestComment(testUser, 1);
+            // 대댓글 생성
+			await commentSeeder.createTestReply(testAdminUser, comment.id);
+            await request(app.getHttpServer())
+                .delete('/posts/1')
+                .set('Authorization', `Bearer ${accessTokenAdmin}`)
+                .expect(200);
+		})
 
         it('관리자가 아니라면 403 Forbidden 에러를 반환한다.', async () => {
             await request(app.getHttpServer())
