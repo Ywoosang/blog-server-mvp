@@ -1,9 +1,6 @@
-import { forwardRef, Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { File } from './entities/file.entity';
+import { Module } from '@nestjs/common';
 import { FilesController } from './files.controller';
 import { FilesService } from './files.service';
-import { PostModule } from 'src/post/post.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AllConfigType } from 'src/configs/types/config.type';
@@ -13,18 +10,15 @@ import path from 'path';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([File]),
-        forwardRef(() => PostModule),
         MulterModule.registerAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
             useFactory: async (configService: ConfigService<AllConfigType>) => ({
                 storage: diskStorage({
                     destination: path.join(
-                        configService.get('app.workingDirectory', { infer: true }),
+                        configService.get('app.workingDirectory',{ infer:true }),
                         'public',
-                        'images',
-                        'posts'
+                        'temp'
                     ),
                     filename: (req, file, callback) => {
                         // uuid + 확장자 형식으로 파일 저장
