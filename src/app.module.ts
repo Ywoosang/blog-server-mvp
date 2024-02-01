@@ -17,6 +17,8 @@ import { MailerModule } from './mailer/mailer.module';
 import { HttpLoggerMiddleware } from './common/middlewares/http-logger.middleware';
 import { TagModule } from './tag/tag.module';
 import { FilesModule } from './files/files.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import path from 'path';
 
 @Module({
     imports: [
@@ -27,6 +29,10 @@ import { FilesModule } from './files/files.module';
                     ? [appConfig, authConfig]
                     : [appConfig, authConfig, databaseConfig, mailConfig],
             envFilePath: `.env.${process.env.NODE_ENV}`
+        }),
+        ServeStaticModule.forRoot({
+            rootPath: path.join(__dirname, '..', 'public'),
+            serveRoot: '/static'
         }),
         process.env.NODE_ENV === 'test' ? DatabaseTestModule : DatabaseModule,
         AuthModule,
