@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PostController } from './post.controller';
 import { PostService } from './post.service';
@@ -12,11 +12,11 @@ import { FilesModule } from 'src/files/files.module';
 @Module({
     imports: [
         TypeOrmModule.forFeature([Post]),
+        FilesModule,
         AuthModule,
         UsersModule,
         TagModule,
         CategoryModule,
-        forwardRef(() => FilesModule)
     ],
     providers: [PostService],
     exports: [PostService],

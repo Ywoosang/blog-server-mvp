@@ -25,7 +25,7 @@ export class CreatePostDto {
     tagNames?: string[];
 
     @IsOptional()
-    @IsInt({ each: true })
+    @IsString({ each: true })
     @IsNotEmpty({ each: true })
-    imageIds?: number[];
+    fileNames?: string[];
 }

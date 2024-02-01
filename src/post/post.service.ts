@@ -5,7 +5,6 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { FindOneOptions, Repository } from 'typeorm';
 import { Post } from './entities/post.entity';
 import { User } from 'src/users/entities/user.entity';
-import { File as FileEntity } from 'src/files/entities/file.entity';
 import { FindPostsDto } from './dto/find-posts.dto';
 import { NullableType } from 'src/utils/types/nullable.type';
 import { UsersService } from 'src/users/users.service';
@@ -80,7 +79,7 @@ export class PostService {
     }
 
     async create(createPostDto: CreatePostDto, user: User): Promise<Post> {
-        const { title, content, description, status, categoryId, tagNames, imageIds } = createPostDto;
+        const { title, content, description, status, categoryId, tagNames, fileNames } = createPostDto;
 
         let category;
         if (categoryId) {
@@ -98,15 +97,7 @@ export class PostService {
             }
         }
 
-        const images: FileEntity[] = [];
-        if (imageIds) {
-            for (const imageId of imageIds) {
-                const imageFile = await this.filesService.findById(imageId);
-                images.push(imageFile);
-            }
-        }
-
-        return this.postRepository.save(
+        const post = await this.postRepository.save(
             this.postRepository.create({
                 title,
                 description,
@@ -115,9 +106,17 @@ export class PostService {
                 user,
                 category,
                 tags,
-                images
             })
         );
+
+        const postId: string = post.id.toString();
+        if(fileNames) {
+            for(const fileName of fileNames) {
+                await this.filesService.uploadPostImage(fileName, postId);
+            }
+        }
+
+        return post;
     }
 
     async updateStatus(id: number, status: PostStatus): Promise<Post> {
