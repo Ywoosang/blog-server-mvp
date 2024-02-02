@@ -16,7 +16,7 @@ import path from 'path';
             useFactory: async (configService: ConfigService<AllConfigType>) => ({
                 storage: diskStorage({
                     destination: path.join(
-                        configService.get('app.workingDirectory',{ infer:true }),
+                        configService.get('app.workingDirectory', { infer: true }),
                         'public',
                         'temp'
                     ),
