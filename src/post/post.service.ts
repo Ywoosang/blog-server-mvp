@@ -84,9 +84,7 @@ export class PostService {
         let category;
         if (categoryId) {
             category = await this.categoryService.findOneById(categoryId);
-            if (!category) {
-                throw new NotFoundException('존재하지 않는 카테고리입니다.');
-            }
+            if (!category) throw new NotFoundException('존재하지 않는 카테고리입니다.');
         }
 
         const tags: Tag[] = [];
@@ -105,16 +103,19 @@ export class PostService {
                 status,
                 user,
                 category,
-                tags,
+                tags
             })
         );
-
-        const postId: string = post.id.toString();
-        if(fileNames) {
-            for(const fileName of fileNames) {
-                await this.filesService.uploadPostImage(fileName, postId);
+        
+        const postId = post.id;
+        if (fileNames) {
+            for (const fileName of fileNames) {
+                await this.filesService.uploadPostImage(fileName, `${postId}`);
             }
         }
+
+        post.content = this.filesService.uploadImageUrlInHtml(post.content, postId);
+        await this.postRepository.save(post);
 
         return post;
     }
@@ -143,6 +144,10 @@ export class PostService {
                 }
             ]
         });
+        if (!post) throw new NotFoundException('존재하지 않는 게시물입니다.');
+        const postId: string = post.id.toString();
+        this.filesService.deletePostImages(postId);
+
         await this.postRepository.remove(post);
     }
 }
