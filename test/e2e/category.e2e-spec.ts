@@ -113,16 +113,16 @@ describe('CategoryController (e2e)', () => {
             await postSeeder.createTestPost(testAdminUser, PostStatus.PUBLIC, category.id);
             // 카테고리에 비공개 게시글 추가
             await postSeeder.createTestPost(testAdminUser, PostStatus.PRIVATE, category.id);
-            
+
             const response = await request(app.getHttpServer()).get('/categories/public').expect(200);
             const data = response.body;
             expect(data.categories).toBeDefined();
             const categories = data.categories;
-           
+
             expect(Array.isArray(categories)).toBe(true);
         });
 
-        it('각 카테고리는 id, name, postCount 를 포함해야 한다.', async() => {
+        it('각 카테고리는 id, name, postCount 를 포함해야 한다.', async () => {
             const response = await request(app.getHttpServer()).get('/categories/public').expect(200);
             const data = response.body;
             const categories = data.categories;
@@ -151,7 +151,7 @@ describe('CategoryController (e2e)', () => {
             });
         });
 
-        it('각 카테고리는 id, name, postCount 를 포함해야 한다.', async() => {
+        it('각 카테고리는 id, name, postCount 를 포함해야 한다.', async () => {
             const response = await request(app.getHttpServer())
                 .get('/categories')
                 .set('Authorization', `Bearer ${accessTokenAdmin}`)

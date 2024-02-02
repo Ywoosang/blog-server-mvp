@@ -25,7 +25,7 @@ describe('PostController (e2e)', () => {
     let testUser: User;
     let publicPostCount: number;
     let privatePostCount: number;
- 
+
     beforeAll(async () => {
         jest.setTimeout(1000000);
         const moduleFixture = await Test.createTestingModule({
@@ -34,15 +34,15 @@ describe('PostController (e2e)', () => {
 
         const usersService = moduleFixture.get<UsersService>(UsersService);
         const postService = moduleFixture.get<PostService>(PostService);
-		const commentService = moduleFixture.get<CommentService>(CommentService);
+        const commentService = moduleFixture.get<CommentService>(CommentService);
         userSeeder = new UserSeeder(usersService);
         postSeeder = new PostSeeder(postService);
-		commentSeeder = new CommentSeeder(commentService);
+        commentSeeder = new CommentSeeder(commentService);
         // 관리자 생성
         testAdminUser = await userSeeder.createTestUser(UsersRole.ADMIN);
         // 사용자 생성
         testUser = await userSeeder.createTestUser(UsersRole.USER);
-        
+
         // 공개 게시물 생성
         const publicPostPromises = Array.from({ length: 20 }).map(() => {
             return postSeeder.createTestPost(testAdminUser);
@@ -337,17 +337,17 @@ describe('PostController (e2e)', () => {
                 .set('Authorization', `Bearer ${accessTokenAdmin}`)
                 .expect(200);
         });
-        		
-		it('게시물 삭제시 댓글도 같이 삭제되어야 한다.', async() => {
-			// 댓글 생성
-			const comment = await commentSeeder.createTestComment(testUser, 1);
+
+        it('게시물 삭제시 댓글도 같이 삭제되어야 한다.', async () => {
+            // 댓글 생성
+            const comment = await commentSeeder.createTestComment(testUser, 1);
             // 대댓글 생성
-			await commentSeeder.createTestReply(testAdminUser, comment.id);
+            await commentSeeder.createTestReply(testAdminUser, comment.id);
             await request(app.getHttpServer())
                 .delete('/posts/1')
                 .set('Authorization', `Bearer ${accessTokenAdmin}`)
                 .expect(200);
-		})
+        });
 
         it('관리자가 아니라면 403 Forbidden 에러를 반환한다.', async () => {
             await request(app.getHttpServer())

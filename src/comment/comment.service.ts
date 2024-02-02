@@ -85,7 +85,7 @@ export class CommentService {
 
         for (let i = 0; i < rootComments.length; i++) {
             const rootComment = rootComments[i];
-            let replies = await this.commentRepository
+            const replies = await this.commentRepository
                 .createQueryBuilder('comment')
                 .leftJoinAndSelect('comment.user', 'user')
                 .leftJoinAndSelect('comment.replyTo', 'replyTo')
@@ -106,6 +106,7 @@ export class CommentService {
             rootComment.replies = replies;
             comments.push(rootComment);
         }
+
         return comments;
     }
 
