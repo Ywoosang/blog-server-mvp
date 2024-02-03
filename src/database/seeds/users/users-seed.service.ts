@@ -4,12 +4,14 @@ import { UsersRole } from 'src/users/users-role.enum';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { UsersStatus } from 'src/users/users-status.enum';
+import { GravatarService } from 'src/gravatar/gravatar.service';
 
 @Injectable()
 export class UsersSeedService {
     constructor(
         @InjectRepository(User)
-        private usersRepository: Repository<User>
+        private usersRepository: Repository<User>,
+        private gravatarService: GravatarService
     ) {}
 
     async run() {
@@ -25,7 +27,8 @@ export class UsersSeedService {
                     description: process.env.ADMIN_DESCRIPTION,
                     password: process.env.ADMIN_PASSWORD,
                     role: UsersRole.ADMIN,
-                    status: UsersStatus.ACTIVE
+                    status: UsersStatus.ACTIVE,
+                    profileImage: this.gravatarService.getGravatarUrl(process.env.ADMIN_EMAIL)
                 })
             );
         }
