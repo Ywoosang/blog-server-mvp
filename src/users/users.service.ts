@@ -7,16 +7,25 @@ import { User } from './entities/user.entity';
 import { NullableType } from 'src/utils/types/nullable.type';
 import { FindOneOptions } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { GravatarService } from 'src/gravatar/gravatar.service';
 
 @Injectable()
 export class UsersService {
     constructor(
         @InjectRepository(User)
-        private usersRepository: Repository<User>
+        private usersRepository: Repository<User>,
+        private gravatarService: GravatarService
     ) {}
 
     async create(createUserDto: CreateUserDto): Promise<User> {
-        return this.usersRepository.save(this.usersRepository.create(createUserDto));
+        const { email } = createUserDto;
+        const profileImage = this.gravatarService.getGravatarUrl(email);
+        return this.usersRepository.save(
+            this.usersRepository.create({
+                ...createUserDto,
+                profileImage
+            })
+        );
     }
 
     async findOne(findOptions: FindOneOptions<User>): Promise<NullableType<User>> {
