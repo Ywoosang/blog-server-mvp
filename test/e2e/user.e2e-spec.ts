@@ -62,6 +62,27 @@ describe('UserController (e2e)', () => {
         });
     });
 
+    describe('/users/public/profile/:userLoginId (GET)', () => {
+        it('userLoginId 에 해당하는 사용자 공개 프로필 정보를 반환한다.', async () => {
+            let response = await request(app.getHttpServer())
+                .get(`/users/public/profile/${testUser.userLoginId}`)
+                .expect(200);
+            expect(response.statusCode).toBe(200);
+            const user = response.body;
+            expect(user).toHaveProperty('id');
+            expect(user).toHaveProperty('description');
+            expect(user).toHaveProperty('profileImage');
+            expect(user).toHaveProperty('nickname');
+            expect(user).toHaveProperty('userLoginId');
+        });
+        
+        it('존재하지 않는 사용자라면 404 NotFound 를 반환한다.', async () => {
+            await request(app.getHttpServer())
+                .get(`/users/public/profile/${encodeURIComponent('가나다')}`)
+                .expect(404);
+        });
+    });
+
     describe('/users/profile (PATCH)', () => {
         it('사용자 프로필 정보를 변경한다.', async () => {
             const nickname = 'ywoosang';
