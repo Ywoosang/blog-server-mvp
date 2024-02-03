@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Body, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Patch, Body, UseGuards, HttpCode, HttpStatus, Param } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -22,6 +22,12 @@ export class UsersController {
         delete user.password;
 
         return user;
+    }
+
+    @Get('/public/profile/:userLoginId')
+    @HttpCode(HttpStatus.OK)
+    async getUserPublicProfile(@Param('userLoginId') userLoginId: string) {
+        return this.userService.findUserPublicProfileByLoginId(userLoginId);
     }
 
     /**

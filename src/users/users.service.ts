@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -20,6 +20,7 @@ export class UsersService {
     async create(createUserDto: CreateUserDto): Promise<User> {
         const { email } = createUserDto;
         const profileImage = this.gravatarService.getGravatarUrl(email);
+
         return this.usersRepository.save(
             this.usersRepository.create({
                 ...createUserDto,
@@ -34,6 +35,17 @@ export class UsersService {
 
     async findAll() {
         return this.usersRepository.find();
+    }
+
+    async findUserPublicProfileByLoginId(userLoginId: string) {
+        const user = await this.usersRepository
+            .createQueryBuilder('user')
+            .select(['user.id','user.userLoginId','user.nickname', 'user.profileImage', 'user.description'])
+            .where('user.userLoginId = :userLoginId', { userLoginId })
+            .getOne();
+        if (!user) throw new NotFoundException('사용자를 찾을 수 없습니다.');
+
+        return user;
     }
 
     async update(id: number, updateUserDto: UpdateUserDto) {
