@@ -20,10 +20,10 @@ export class User extends BaseEntity {
     @Column({ type: String, unique: true })
     nickname: string;
 
-    @Column({ nullable: true })
+    @Column()
     description: string;
 
-    @Column({ nullable: true })
+    @Column()
     profileImage: string;
 
     @Column({ type: 'text' })

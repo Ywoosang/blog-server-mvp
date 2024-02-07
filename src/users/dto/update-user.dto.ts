@@ -9,5 +9,10 @@ export class UpdateUserDto {
 
     @IsOptional()
     @IsString()
+    @MaxLength(200)
     description?: string;
+
+    @IsOptional()
+    @IsString()
+    profileImage?: string;
 }
