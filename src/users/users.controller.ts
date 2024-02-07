@@ -1,13 +1,15 @@
 import { Controller, Get, Patch, Body, UseGuards, HttpCode, HttpStatus, Param } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserProfileDto } from './dto/user-profile.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/users/entities/user.entity';
 import { GetUser } from 'src/utils/decorators/get-user.decorator';
+import { plainToClass } from 'class-transformer';
 
 @Controller('users')
 export class UsersController {
-    constructor(private userService: UsersService) {}
+    constructor(private userService: UsersService) { }
 
     /**
      * Get the user's profile.
@@ -38,8 +40,9 @@ export class UsersController {
      */
     @Patch('/profile')
     @UseGuards(AuthGuard('jwt'))
-    @HttpCode(HttpStatus.NO_CONTENT)
-    async updateUserProfile(@GetUser() user: User, @Body() updateUserDto: UpdateUserDto) {
-        return this.userService.update(user.id, updateUserDto);
+    @HttpCode(HttpStatus.OK)
+    async updateUserProfile(@GetUser() user: User, @Body() updateUserDto: UpdateUserDto): Promise<UserProfileDto> {
+        const updatedUser = this.userService.update(user.id, updateUserDto);
+        return plainToClass(UserProfileDto, updatedUser);
     }
 }
