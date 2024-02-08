@@ -75,7 +75,7 @@ describe('UserController (e2e)', () => {
             expect(user).toHaveProperty('nickname');
             expect(user).toHaveProperty('userLoginId');
         });
-        
+
         it('존재하지 않는 사용자라면 404 NotFound 를 반환한다.', async () => {
             await request(app.getHttpServer())
                 .get(`/users/public/profile/${encodeURIComponent('가나다')}`)
@@ -94,7 +94,7 @@ describe('UserController (e2e)', () => {
                     nickname,
                     description
                 })
-                .expect(204);
+                .expect(200);
             const response = await request(app.getHttpServer())
                 .get('/users/profile')
                 .set('Authorization', `Bearer ${accessToken}`);
@@ -111,7 +111,7 @@ describe('UserController (e2e)', () => {
                 .send({
                     password: password
                 })
-                .expect(204);
+                .expect(200);
             const response = await request(app.getHttpServer())
                 .get('/users/profile')
                 .set('Authorization', `Bearer ${accessToken}`);
