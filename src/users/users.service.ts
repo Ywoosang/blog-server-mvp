@@ -27,6 +27,7 @@ export class UsersService {
         return this.usersRepository.save(
             this.usersRepository.create({
                 ...createUserDto,
+                description: '',
                 profileImage
             })
         );
