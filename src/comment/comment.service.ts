@@ -18,7 +18,7 @@ export class CommentService {
         @InjectRepository(User)
         private userRepository: Repository<User>,
         private postService: PostService
-    ) {}
+    ) { }
 
     async create(createCommentDto: CreateCommentDto, user: User): Promise<Comment> {
         const { postId } = createCommentDto;
@@ -80,7 +80,7 @@ export class CommentService {
             .where('comment.parentCommentId IS NULL')
             .andWhere('comment.postId = :postId', { postId }) // 추가된 부분
             .orderBy('comment.createdAt', 'DESC')
-            .select(['comment.id', 'comment.content', 'comment.createdAt', 'user.id', 'user.nickname'])
+            .select(['comment.id', 'comment.content', 'comment.createdAt', 'user.id', 'user.nickname', 'user.userLoginId', 'user.profileImage'])
             .getMany();
 
         for (let i = 0; i < rootComments.length; i++) {
@@ -99,8 +99,11 @@ export class CommentService {
                     'comment.createdAt',
                     'user.id',
                     'user.nickname',
+                    'user.profileImage',
+                    'user.userLoginId',
                     'replyTo.id',
-                    'replyTo.nickname'
+                    'replyTo.nickname',
+                    'replyTo.userLoginId'
                 ])
                 .getMany();
             rootComment.replies = replies;
