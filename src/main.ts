@@ -4,6 +4,7 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AllConfigType } from 'src/configs/types/config.type';
 import validationOptions from './utils/validation-options';
+import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
@@ -15,6 +16,7 @@ async function bootstrap() {
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
         allowedHeaders: 'Content-Type, Accept, Authorization'
     });
+    app.useGlobalInterceptors(new ResponseInterceptor());
     app.useGlobalPipes(new ValidationPipe(validationOptions));
 
     await app.listen(port);
