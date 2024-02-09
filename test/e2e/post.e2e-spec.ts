@@ -259,11 +259,11 @@ describe('PostController (e2e)', () => {
         });
 
         it('존재하지 않는 게시물일 경우 404 NotFound 에러를 반환한다.', async () => {
-            const response = await request(app.getHttpServer()).get('/posts/public/200').expect(404);
+            await request(app.getHttpServer()).get('/posts/public/200').expect(404);
         });
 
         it('비공개 게시물일 경우 403 Forbidden 에러를 반환한다.', async () => {
-            const response = await request(app.getHttpServer()).get('/posts/public/30').expect(403);
+            await request(app.getHttpServer()).get('/posts/public/30').expect(403);
         });
     });
 
@@ -280,7 +280,7 @@ describe('PostController (e2e)', () => {
         });
 
         it('존재하지 않는 게시물일 경우 404NotFound 에러를 반환한다.', async () => {
-            const response = await request(app.getHttpServer())
+            await request(app.getHttpServer())
                 .get('/posts/200')
                 .set('Authorization', `Bearer ${accessTokenAdmin}`)
                 .expect(404);

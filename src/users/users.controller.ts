@@ -9,7 +9,7 @@ import { plainToClass } from 'class-transformer';
 
 @Controller('users')
 export class UsersController {
-    constructor(private userService: UsersService) { }
+    constructor(private userService: UsersService) {}
 
     /**
      * Get the user's profile.
@@ -41,6 +41,7 @@ export class UsersController {
     @HttpCode(HttpStatus.OK)
     async updateUserProfile(@GetUser() user: User, @Body() updateUserDto: UpdateUserDto): Promise<UserProfileDto> {
         const updatedUser = this.userService.update(user.id, updateUserDto);
+
         return plainToClass(UserProfileDto, updatedUser);
     }
 }

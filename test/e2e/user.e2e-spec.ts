@@ -65,12 +65,12 @@ describe('UserController (e2e)', () => {
 
         it('사용자 프로필 정보에 refreshToken 은 포함되지 않는다.', async () => {
             expect(testUser).not.toHaveProperty('refreshToken');
-        })
+        });
     });
 
     describe('/users/public/profile/:userLoginId (GET)', () => {
         it('userLoginId 에 해당하는 사용자 공개 프로필 정보를 반환한다.', async () => {
-            let response = await request(app.getHttpServer())
+            const response = await request(app.getHttpServer())
                 .get(`/users/public/profile/${testUser.userLoginId}`)
                 .expect(200);
             expect(response.statusCode).toBe(200);

@@ -20,7 +20,7 @@ export class AuthService {
         private usersService: UsersService,
         private mailService: MailService,
         private configService: ConfigService<AllConfigType>
-    ) { }
+    ) {}
 
     async generateAccessToken(payload: any) {
         return this.jwtService.signAsync(payload);

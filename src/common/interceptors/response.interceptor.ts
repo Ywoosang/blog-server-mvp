@@ -13,8 +13,9 @@ export class ResponseInterceptor implements NestInterceptor {
                         if (el.user) {
                             el.user = this.excludeFields(el.user);
                         }
+
                         return el;
-                    })
+                    });
                 } else if (typeof data == 'object') {
                     if (data.user) {
                         data.user = this.excludeFields(data.user);
@@ -22,13 +23,16 @@ export class ResponseInterceptor implements NestInterceptor {
                         data = this.excludeFields(data);
                     }
                 }
+
                 return data;
             })
         );
     }
 
     private excludeFields(user: User): Partial<User> {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { password, refreshToken, ...rest } = user;
+
         return rest;
     }
 }

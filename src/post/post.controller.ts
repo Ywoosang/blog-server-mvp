@@ -29,7 +29,7 @@ import { GetUser } from 'src/utils/decorators/get-user.decorator';
 
 @Controller('posts')
 export class PostController {
-    constructor(private postService: PostService) { }
+    constructor(private postService: PostService) {}
 
     @Post()
     @UseGuards(AuthGuard('jwt'), AdminGuard)

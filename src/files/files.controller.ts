@@ -9,12 +9,13 @@ export class FilesController {
     constructor(
         private readonly configService: ConfigService<AllConfigType>,
         private readonly filesService: FilesService
-    ) { }
+    ) {}
 
     @Post('/image')
     @UseInterceptors(FileInterceptor('image'))
     async uploadFile(@UploadedFile() image: Express.Multer.File): Promise<{ filename: string }> {
         if (!image) throw new BadRequestException('파일이 존재하지 않습니다.');
+
         return {
             filename: image.filename
         };

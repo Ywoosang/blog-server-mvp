@@ -1,6 +1,6 @@
-import { Exclude, Expose } from "class-transformer";
-import { UsersRole } from "../users-role.enum";
-import { UsersStatus } from "../users-status.enum";
+import { Exclude, Expose } from 'class-transformer';
+import { UsersRole } from '../users-role.enum';
+import { UsersStatus } from '../users-status.enum';
 
 @Expose()
 export class UserProfileDto {

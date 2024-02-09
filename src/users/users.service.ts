@@ -18,7 +18,7 @@ export class UsersService {
         private usersRepository: Repository<User>,
         private gravatarService: GravatarService,
         private filesService: FilesService
-    ) { }
+    ) {}
 
     async create(createUserDto: CreateUserDto): Promise<User> {
         const { email } = createUserDto;
@@ -53,7 +53,6 @@ export class UsersService {
     }
 
     async update(id: number, updateUserDto: UpdateUserDto) {
-
         const user = await this.findOne({
             where: {
                 id
@@ -68,7 +67,7 @@ export class UsersService {
 
         return this.usersRepository.save({
             ...user,
-            ...updateUserDto,
+            ...updateUserDto
         });
     }
 

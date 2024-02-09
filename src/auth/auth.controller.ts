@@ -1,4 +1,4 @@
-import { Body, Controller, Post, ValidationPipe, HttpCode, HttpStatus, UseGuards, Get, Query } from '@nestjs/common';
+import { Body, Controller, Post, HttpCode, HttpStatus, UseGuards, Get, Query } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthLoginDto } from './dto/auth-login.dto';
 import { AuthRegisterDto } from './dto/auth-register.dto';
@@ -11,7 +11,7 @@ import { ConfirmEmailDto } from './dto/auth-confirm-email.dto';
 
 @Controller('auth')
 export class AuthController {
-    constructor(private authService: AuthService) { }
+    constructor(private authService: AuthService) {}
 
     /**
      * 새로운 사용자를 등록한다

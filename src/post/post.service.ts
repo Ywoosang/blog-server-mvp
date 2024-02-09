@@ -106,7 +106,7 @@ export class PostService {
                 tags
             })
         );
-        
+
         const postId = post.id;
         if (fileNames) {
             for (const fileName of fileNames) {

@@ -37,7 +37,7 @@ describe('LikeController (e2e)', () => {
         await postSeeder.createTestPost(testUser, PostStatus.PRIVATE);
 
         app = moduleFixture.createNestApplication();
-        app.useGlobalInterceptors(new ResponseInterceptor())
+        app.useGlobalInterceptors(new ResponseInterceptor());
         app.useGlobalPipes(new ValidationPipe(validationOptions));
         await app.init();
     });

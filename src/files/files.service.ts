@@ -15,10 +15,7 @@ export class FilesService {
         this.baseDir = this.configService.get('app.workingDirectory', { infer: true });
         this.tempPath = path.join(this.baseDir, 'public', 'temp');
         this.backendDomain = this.configService.get('app.backendDomain', { infer: true });
-        this.staticPath = path.join(
-            'static',
-            'images',
-        );
+        this.staticPath = path.join('static', 'images');
     }
 
     async uploadPostImage(filename: string, postId: string): Promise<string> {
@@ -34,17 +31,13 @@ export class FilesService {
         // 파일을 지정된 경로로 이동
         await fs.promises.rename(tempFilePath, filePath);
 
-        const extention = path.join(
-            this.staticPath,
-            'posts',
-            postId,
-            filename
-        );
+        const extention = path.join(this.staticPath, 'posts', postId, filename);
+
         return `${this.backendDomain}/${extention}`;
     }
 
     async uploadUserProfileImage(filename: string) {
-        console.log(console.log(this.configService.get('app.backendDomain', { infer: true })))
+        console.log(console.log(this.configService.get('app.backendDomain', { infer: true })));
         console.log(filename);
         const destination = path.join(this.baseDir, 'public', 'images', 'users');
         if (!fs.existsSync(destination)) {
@@ -53,11 +46,8 @@ export class FilesService {
         const tempFilePath = path.join(this.tempPath, filename);
         const filePath = path.join(destination, filename);
         await fs.promises.rename(tempFilePath, filePath);
-        const extention = path.join(
-            this.staticPath,
-            'users',
-            filename
-        );
+        const extention = path.join(this.staticPath, 'users', filename);
+
         return `${this.backendDomain}/${extention}`;
     }
 
