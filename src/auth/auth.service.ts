@@ -1,10 +1,4 @@
-import {
-    Injectable,
-    ConflictException,
-    UnauthorizedException,
-    UnprocessableEntityException,
-    NotFoundException
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException, UnprocessableEntityException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from 'src/users/users.service';
@@ -17,6 +11,7 @@ import { AllConfigType } from 'src/configs/types/config.type';
 import { UsersStatus } from 'src/users/users-status.enum';
 import { MailService } from 'src/mail/mail.service';
 import { User } from 'src/users/entities/user.entity';
+import AuthConflictException from 'src/common/exceptions/auth-conflict.exception';
 
 @Injectable()
 export class AuthService {
@@ -25,7 +20,7 @@ export class AuthService {
         private usersService: UsersService,
         private mailService: MailService,
         private configService: ConfigService<AllConfigType>
-    ) {}
+    ) { }
 
     async generateAccessToken(payload: any) {
         return this.jwtService.signAsync(payload);
@@ -40,10 +35,35 @@ export class AuthService {
 
     async signUp(registerDto: AuthRegisterDto): Promise<User> {
         const { email, userLoginId, nickname } = registerDto;
-        const existUser = await this.usersService.findOne({
-            where: [{ email }, { userLoginId }, { nickname }]
-        });
-        if (existUser) throw new ConflictException('이미 존재하는 사용자입니다.');
+        const existingEmail = await this.usersService.findOne({ where: { email } });
+        const existingUserLoginId = await this.usersService.findOne({ where: { userLoginId } });
+        const existingNickname = await this.usersService.findOne({ where: { nickname } });
+        const existingFields = [];
+
+        if (existingEmail) {
+            existingFields.push({
+                field: 'email',
+                message: '이미 존재하는 이메일 입니다.'
+            });
+        }
+
+        if (existingUserLoginId) {
+            existingFields.push({
+                field: 'userLoginId',
+                message: '이미 존재하는 아이디 입니다.'
+            });
+        }
+
+        if (existingNickname) {
+            existingFields.push({
+                field: 'nickname',
+                message: '이미 존재하는 이메일 입니다.'
+            });
+        }
+
+        if (existingFields.length > 0) {
+            throw new AuthConflictException(existingFields);
+        }
 
         const user = await this.usersService.create({
             ...registerDto,
