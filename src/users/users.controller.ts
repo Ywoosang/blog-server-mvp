@@ -21,8 +21,6 @@ export class UsersController {
     @UseGuards(AuthGuard('jwt'))
     @HttpCode(HttpStatus.OK)
     getUserProfile(@GetUser() user: User) {
-        delete user.password;
-
         return user;
     }
 
