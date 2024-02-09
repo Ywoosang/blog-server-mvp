@@ -10,7 +10,9 @@ import {
     Query,
     UseGuards,
     HttpCode,
-    HttpStatus
+    HttpStatus,
+    NotFoundException,
+    ForbiddenException
 } from '@nestjs/common';
 import { PostStatus } from './post-status.enum';
 import { PostService } from './post.service';
@@ -27,7 +29,7 @@ import { GetUser } from 'src/utils/decorators/get-user.decorator';
 
 @Controller('posts')
 export class PostController {
-    constructor(private postService: PostService) {}
+    constructor(private postService: PostService) { }
 
     @Post()
     @UseGuards(AuthGuard('jwt'), AdminGuard)
@@ -65,25 +67,31 @@ export class PostController {
     @Get('/public/:id')
     @HttpCode(HttpStatus.OK)
     async getPublicPostById(@Param('id') postId: number): Promise<NullableType<PostEntity>> {
-        return this.postService.findOne({
+        const post = await this.postService.findOne({
             where: {
-                id: postId,
-                status: PostStatus.PUBLIC
+                id: postId
             },
-            relations: ['user']
+            relations: ['user', 'tags']
         });
+        if (!post) throw new NotFoundException('존재하지 않는 게시물입니다.');
+        if (post.status === PostStatus.PRIVATE) throw new ForbiddenException('게시물에 접근할 권한이 없습니다.');
+
+        return post;
     }
 
     @Get('/:id')
     @UseGuards(AuthGuard('jwt'), AdminGuard)
     @HttpCode(HttpStatus.OK)
     async getPostById(@Param('id') postId: number): Promise<PostEntity> {
-        return this.postService.findOne({
+        const post = await this.postService.findOne({
             where: {
                 id: postId
             },
-            relations: ['user']
+            relations: ['user', 'tags']
         });
+        if (!post) throw new NotFoundException('존재하지 않는 게시물입니다.');
+
+        return post;
     }
 
     @Patch('/:id/status')
