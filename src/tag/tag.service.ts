@@ -69,7 +69,7 @@ export class TagService {
             where: {
                 id
             },
-            relations: ['posts']
+            relations: ['posts', 'posts.tags']
         });
 
         if (!tag) {
