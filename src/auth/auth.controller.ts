@@ -8,9 +8,10 @@ import { AuthLoginResponseDto } from './dto/auth-login-response.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/utils/decorators/get-user.decorator';
 import { ConfirmEmailDto } from './dto/auth-confirm-email.dto';
+
 @Controller('auth')
 export class AuthController {
-    constructor(private authService: AuthService) {}
+    constructor(private authService: AuthService) { }
 
     /**
      * 새로운 사용자를 등록한다
@@ -20,7 +21,7 @@ export class AuthController {
      */
     @Post('/signup')
     @HttpCode(HttpStatus.CREATED)
-    signUp(@Body(ValidationPipe) registerDto: AuthRegisterDto): Promise<NullableType<User>> {
+    signUp(@Body() registerDto: AuthRegisterDto): Promise<NullableType<User>> {
         return this.authService.signUp(registerDto);
     }
 
@@ -32,7 +33,7 @@ export class AuthController {
      */
     @Post('/signin')
     @HttpCode(HttpStatus.OK)
-    signIn(@Body(ValidationPipe) loginDto: AuthLoginDto): Promise<AuthLoginResponseDto> {
+    signIn(@Body() loginDto: AuthLoginDto): Promise<AuthLoginResponseDto> {
         return this.authService.signIn(loginDto);
     }
 
