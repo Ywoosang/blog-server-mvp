@@ -10,6 +10,7 @@ import UserSeeder from '../seeds/users.seed';
 import PostSeeder from '../seeds/post.seed';
 import { UsersRole } from 'src/users/users-role.enum';
 import validationOptions from 'src/utils/validation-options';
+import { ResponseInterceptor } from 'src/common/interceptors/response.interceptor';
 
 describe('LikeController (e2e)', () => {
     let app: INestApplication;
@@ -36,6 +37,7 @@ describe('LikeController (e2e)', () => {
         await postSeeder.createTestPost(testUser, PostStatus.PRIVATE);
 
         app = moduleFixture.createNestApplication();
+        app.useGlobalInterceptors(new ResponseInterceptor())
         app.useGlobalPipes(new ValidationPipe(validationOptions));
         await app.init();
     });

@@ -7,6 +7,7 @@ import UserSeeder from '../seeds/users.seed';
 import { User } from 'src/users/entities/user.entity';
 import { UsersRole } from 'src/users/users-role.enum';
 import validationOptions from 'src/utils/validation-options';
+import { ResponseInterceptor } from 'src/common/interceptors/response.interceptor';
 
 describe('UserController (e2e)', () => {
     let app: INestApplication;
@@ -26,6 +27,7 @@ describe('UserController (e2e)', () => {
 
         app = moduleFixture.createNestApplication();
         app.useGlobalPipes(new ValidationPipe(validationOptions));
+        app.useGlobalInterceptors(new ResponseInterceptor());
         await app.init();
     });
 
@@ -60,6 +62,10 @@ describe('UserController (e2e)', () => {
         it('사용자 프로필 정보에 비밀번호는 포함되지 않는다.', async () => {
             expect(testUser).not.toHaveProperty('password');
         });
+
+        it('사용자 프로필 정보에 refreshToken 은 포함되지 않는다.', async () => {
+            expect(testUser).not.toHaveProperty('refreshToken');
+        })
     });
 
     describe('/users/public/profile/:userLoginId (GET)', () => {

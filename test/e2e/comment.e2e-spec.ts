@@ -13,6 +13,7 @@ import CommentSeeder from '../seeds/comment.seed';
 import { UsersRole } from 'src/users/users-role.enum';
 import validationOptions from 'src/utils/validation-options';
 import * as faker from 'faker';
+import { ResponseInterceptor } from 'src/common/interceptors/response.interceptor';
 
 describe('CommentController (e2e)', () => {
     let app: INestApplication;
@@ -45,6 +46,7 @@ describe('CommentController (e2e)', () => {
 
         app = moduleFixture.createNestApplication();
         app.useGlobalPipes(new ValidationPipe(validationOptions));
+        app.useGlobalInterceptors(new ResponseInterceptor());
         await app.init();
     });
 

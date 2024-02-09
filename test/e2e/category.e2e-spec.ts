@@ -11,6 +11,7 @@ import { PostService } from 'src/post/post.service';
 import { PostStatus } from 'src/post/post-status.enum';
 import PostSeeder from '../seeds/post.seed';
 import UserSeeder from '../seeds/users.seed';
+import { ResponseInterceptor } from 'src/common/interceptors/response.interceptor';
 
 describe('CategoryController (e2e)', () => {
     let app: INestApplication;
@@ -38,6 +39,7 @@ describe('CategoryController (e2e)', () => {
 
         app = moduleFixture.createNestApplication();
         app.useGlobalPipes(new ValidationPipe(validationOptions));
+        app.useGlobalInterceptors(new ResponseInterceptor());
         await app.init();
     });
 

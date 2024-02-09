@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from 'src/app.module';
 import validationOptions from 'src/utils/validation-options';
+import { ResponseInterceptor } from 'src/common/interceptors/response.interceptor';
 
 describe('AuthController (e2e)', () => {
     let app: INestApplication;
@@ -14,6 +15,7 @@ describe('AuthController (e2e)', () => {
         }).compile();
         app = moduleFixture.createNestApplication();
         app.useGlobalPipes(new ValidationPipe(validationOptions));
+        app.useGlobalInterceptors(new ResponseInterceptor());
         await app.init();
     });
 
@@ -28,7 +30,7 @@ describe('AuthController (e2e)', () => {
                 .send({
                     email: 'test@gmail.com',
                     userLoginId: 'ywoosang',
-                    nickname: '테스트 사용자',
+                    nickname: '테스트사용자',
                     password: 'test@1234'
                 })
                 .expect(201);
@@ -40,7 +42,7 @@ describe('AuthController (e2e)', () => {
                 .send({
                     email: 'test@gmail.com',
                     userLoginId: 'ywoosang',
-                    nickname: '테스트 사용자',
+                    nickname: '테스트사용자',
                     password: 'test@1234'
                 })
                 .expect(409);
@@ -52,7 +54,7 @@ describe('AuthController (e2e)', () => {
                 .send({
                     email: 'test@gmail.com',
                     userLoginId: 'ywoosang',
-                    nickname: '테스트 사용자',
+                    nickname: '사용자',
                     password: 'test@1234'
                 })
                 .expect(409);
@@ -64,7 +66,7 @@ describe('AuthController (e2e)', () => {
                 .send({
                     email: 'test',
                     userLoginId: 'ywoosang',
-                    nickname: '테스트 사용자',
+                    nickname: '사용자',
                     password: 'test@1234'
                 })
                 .expect(400);
@@ -76,7 +78,7 @@ describe('AuthController (e2e)', () => {
                 .send({
                     email: 'test@gmail.com',
                     userLoginId: '-',
-                    nickname: '테스트 사용자',
+                    nickname: '사용자',
                     password: 'test@1234'
                 })
                 .expect(400);
@@ -88,7 +90,7 @@ describe('AuthController (e2e)', () => {
                 .send({
                     email: 'test@gmail.com',
                     userLoginId: 'ywoosang',
-                    nickname: '테스트 사용자',
+                    nickname: '사용자',
                     password: '-'
                 })
                 .expect(400);

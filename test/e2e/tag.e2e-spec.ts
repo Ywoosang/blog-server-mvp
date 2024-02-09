@@ -12,6 +12,7 @@ import { PostService } from 'src/post/post.service';
 import * as faker from 'faker';
 import 'faker/locale/ko';
 import { PostStatus } from 'src/post/post-status.enum';
+import { ResponseInterceptor } from 'src/common/interceptors/response.interceptor';
 
 describe('TagController (e2e)', () => {
     let app: INestApplication;
@@ -49,6 +50,7 @@ describe('TagController (e2e)', () => {
 
         app = moduleFixture.createNestApplication();
         app.useGlobalPipes(new ValidationPipe(validationOptions));
+        app.useGlobalInterceptors(new ResponseInterceptor());
         await app.init();
     });
 

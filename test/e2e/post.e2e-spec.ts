@@ -13,6 +13,7 @@ import { UsersRole } from 'src/users/users-role.enum';
 import validationOptions from 'src/utils/validation-options';
 import * as faker from 'faker';
 import { CommentService } from 'src/comment/comment.service';
+import { ResponseInterceptor } from 'src/common/interceptors/response.interceptor';
 
 describe('PostController (e2e)', () => {
     let app: INestApplication;
@@ -59,6 +60,7 @@ describe('PostController (e2e)', () => {
 
         app = moduleFixture.createNestApplication();
         app.useGlobalPipes(new ValidationPipe(validationOptions));
+        app.useGlobalInterceptors(new ResponseInterceptor());
         await app.init();
     });
 
@@ -256,16 +258,12 @@ describe('PostController (e2e)', () => {
             await request(app.getHttpServer()).get('/posts/public/1').expect(200);
         });
 
-        it('존재하지 않는 게시물일 경우 빈 오브젝트를 반환한다.', async () => {
-            const response = await request(app.getHttpServer()).get('/posts/public/200').expect(200);
-            const data = response.body;
-            expect(data).toEqual({});
+        it('존재하지 않는 게시물일 경우 404 NotFound 에러를 반환한다.', async () => {
+            const response = await request(app.getHttpServer()).get('/posts/public/200').expect(404);
         });
 
-        it('비공개 게시물일 경우 빈 오브젝트를 반환한다.', async () => {
-            const response = await request(app.getHttpServer()).get('/posts/public/30').expect(200);
-            const data = response.body;
-            expect(data).toEqual({});
+        it('비공개 게시물일 경우 403 Forbidden 에러를 반환한다.', async () => {
+            const response = await request(app.getHttpServer()).get('/posts/public/30').expect(403);
         });
     });
 
@@ -281,13 +279,11 @@ describe('PostController (e2e)', () => {
             await request(app.getHttpServer()).get('/posts/1').expect(401);
         });
 
-        it('존재하지 않는 게시물일 경우 빈 오브젝트를 반환한다.', async () => {
+        it('존재하지 않는 게시물일 경우 404NotFound 에러를 반환한다.', async () => {
             const response = await request(app.getHttpServer())
                 .get('/posts/200')
                 .set('Authorization', `Bearer ${accessTokenAdmin}`)
-                .expect(200);
-            const data = response.body;
-            expect(data).toEqual({});
+                .expect(404);
         });
 
         it('비공개 게시물일 경우 관리자가 아니라면 403 Forbidden 에러를 반환한다.', async () => {
