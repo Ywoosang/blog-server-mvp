@@ -41,7 +41,7 @@ export class Post extends BaseEntity {
     @UpdateDateColumn()
     updatedAt: Date;
 
-    @ManyToOne(() => User, user => user.posts, { eager: true })
+    @ManyToOne(() => User, user => user.posts, { eager: true, onDelete: 'CASCADE' })
     @JoinColumn({ name: 'userId' })
     user: User;
 
