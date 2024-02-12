@@ -8,10 +8,11 @@ import { AuthLoginResponseDto } from './dto/auth-login-response.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/utils/decorators/get-user.decorator';
 import { ConfirmEmailDto } from './dto/auth-confirm-email.dto';
+import { AuthEmailDto } from './dto/auth-email.dto';
 
 @Controller('auth')
 export class AuthController {
-    constructor(private authService: AuthService) {}
+    constructor(private authService: AuthService) { }
 
     /**
      * 새로운 사용자를 등록한다
@@ -19,10 +20,10 @@ export class AuthController {
      * @param registerDto - 사용자 등록을 위한 데이터
      * @returns 생성된 사용자 계정
      */
-    @Post('/signup')
+    @Post('/register')
     @HttpCode(HttpStatus.CREATED)
-    signUp(@Body() registerDto: AuthRegisterDto): Promise<NullableType<User>> {
-        return this.authService.signUp(registerDto);
+    register(@Body() registerDto: AuthRegisterDto): Promise<NullableType<User>> {
+        return this.authService.register(registerDto);
     }
 
     /**
@@ -31,10 +32,10 @@ export class AuthController {
      * @param loginDto - 로그인을 위한 데이터
      * @returns 로그인 후의 응답 데이터
      */
-    @Post('/signin')
+    @Post('/login')
     @HttpCode(HttpStatus.OK)
-    signIn(@Body() loginDto: AuthLoginDto): Promise<AuthLoginResponseDto> {
-        return this.authService.signIn(loginDto);
+    login(@Body() loginDto: AuthLoginDto): Promise<AuthLoginResponseDto> {
+        return this.authService.login(loginDto);
     }
 
     /**
@@ -44,22 +45,16 @@ export class AuthController {
      * @returns 전송된 사용자 정보
      */
     @Post('/send-email')
-    @UseGuards(AuthGuard('jwt'))
-    @HttpCode(HttpStatus.NO_CONTENT)
-    async sendEmail(@GetUser() user: User): Promise<User> {
-        return this.authService.sendEmail(user);
+    @HttpCode(HttpStatus.OK)
+    async sendAuthEmail(@Body() authEmailDto: AuthEmailDto): Promise<{ message: string }> {
+        return this.authService.sendAuthEmail(authEmailDto);
     }
 
-    /**
-     * 이메일 확인을 처리한다
-     *
-     * @param confirmEmailDto - 이메일 확인을 위한 데이터
-     * @returns 없음
-     */
-    @Get('/confirm-email')
-    @HttpCode(HttpStatus.NO_CONTENT)
-    async confirmEmail(@Query() confirmEmailDto: ConfirmEmailDto): Promise<void> {
-        return this.authService.confirmEmail(confirmEmailDto.hash);
+
+    @Get('/email')
+    @HttpCode(HttpStatus.OK)
+    async findEmail(@Query('hash') hash: string): Promise<{ email: string }> {
+        return this.authService.decodeEmail(hash);
     }
 
     /**
@@ -72,7 +67,7 @@ export class AuthController {
     @UseGuards(AuthGuard('jwt-refresh'))
     @HttpCode(HttpStatus.OK)
     async refresh(@GetUser() user: User) {
-        const payload = { userLoginId: user.userLoginId };
+        const payload = { userId: user.userId };
         const accessToken = await this.authService.generateAccessToken(payload);
 
         return {

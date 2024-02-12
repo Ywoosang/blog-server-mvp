@@ -1,17 +1,16 @@
-import { Injectable, UnauthorizedException, UnprocessableEntityException, NotFoundException } from '@nestjs/common';
+import { Injectable, UnprocessableEntityException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
 import { UsersService } from 'src/users/users.service';
 import { AuthRegisterDto } from './dto/auth-register.dto';
-import { AuthLoginDto } from './dto/auth-login.dto';
 import { AuthLoginResponseDto } from './dto/auth-login-response.dto';
 import { UsersRole } from 'src/users/users-role.enum';
 import { ConfigService } from '@nestjs/config';
 import { AllConfigType } from 'src/configs/types/config.type';
-import { UsersStatus } from 'src/users/users-status.enum';
 import { MailService } from 'src/mail/mail.service';
 import { User } from 'src/users/entities/user.entity';
 import AuthConflictException from 'src/common/exceptions/auth-conflict.exception';
+import { AuthLoginDto } from './dto/auth-login.dto';
+import { AuthEmailDto } from './dto/auth-email.dto';
 
 @Injectable()
 export class AuthService {
@@ -20,7 +19,7 @@ export class AuthService {
         private usersService: UsersService,
         private mailService: MailService,
         private configService: ConfigService<AllConfigType>
-    ) {}
+    ) { }
 
     async generateAccessToken(payload: any) {
         return this.jwtService.signAsync(payload);
@@ -33,13 +32,12 @@ export class AuthService {
         });
     }
 
-    async signUp(registerDto: AuthRegisterDto): Promise<User> {
-        const { email, userLoginId, nickname } = registerDto;
+    async register(registerDto: AuthRegisterDto): Promise<User> {
+        const { email, userId, nickname } = registerDto;
         const existingEmail = await this.usersService.findOne({ where: { email } });
-        const existingUserLoginId = await this.usersService.findOne({ where: { userLoginId } });
+        const existingUserId = await this.usersService.findOne({ where: { userId } });
         const existingNickname = await this.usersService.findOne({ where: { nickname } });
         const existingFields = [];
-
         if (existingEmail) {
             existingFields.push({
                 field: 'email',
@@ -47,9 +45,9 @@ export class AuthService {
             });
         }
 
-        if (existingUserLoginId) {
+        if (existingUserId) {
             existingFields.push({
-                field: 'userLoginId',
+                field: 'userId',
                 message: '이미 존재하는 아이디 입니다.'
             });
         }
@@ -57,10 +55,10 @@ export class AuthService {
         if (existingNickname) {
             existingFields.push({
                 field: 'nickname',
-                message: '이미 존재하는 이메일 입니다.'
+                message: '이미 존재하는 닉네임 입니다.'
             });
         }
-
+        console.log(existingFields);
         if (existingFields.length > 0) {
             throw new AuthConflictException(existingFields);
         }
@@ -68,29 +66,41 @@ export class AuthService {
         const user = await this.usersService.create({
             ...registerDto,
             role: UsersRole.USER,
-            status: UsersStatus.PENDING_VERIFICATION
         });
 
         return user;
     }
 
-    async signIn(loginDto: AuthLoginDto): Promise<AuthLoginResponseDto> {
-        const { userLoginId, password } = loginDto;
+    async decodeEmail(hash: string): Promise<{ email: string }> {
+        let email: string;
+        try {
+            const jwtData = await this.jwtService.verifyAsync<{
+                email: User['email'];
+            }>(hash, {
+                secret: this.configService.getOrThrow('auth.confirmEmailSecret', {
+                    infer: true
+                })
+            });
+            email = jwtData.email;
+        } catch {
+            throw new UnprocessableEntityException('invalid hash');
+        }
+        return { email };
+    }
+
+    async login(authLoginDto: AuthLoginDto): Promise<AuthLoginResponseDto> {
+        const { hash } = authLoginDto;
+        const { email } = await this.decodeEmail(hash);
         const user = await this.usersService.findOne({
             where: {
-                userLoginId
+                email
             }
         });
+
         if (!user) {
-            throw new UnauthorizedException('해당 아이디를 가진 사용자가 존재하지 않습니다.');
+            throw new NotFoundException('사용자를 찾을 수 없습니다.');
         }
-
-        const isValidPassword = await bcrypt.compare(password, user.password);
-        if (!isValidPassword) {
-            throw new UnauthorizedException('비밀번호가 틀렸습니다.');
-        }
-
-        const payload = { userLoginId };
+        const payload = { userId: user.userId };
         const accessToken = await this.generateAccessToken(payload);
         const refreshToken = await this.generateRefreshToken(payload);
         await this.usersService.updateRefreshToken(user.id, refreshToken);
@@ -101,10 +111,23 @@ export class AuthService {
         };
     }
 
-    async sendEmail(user: User): Promise<User> {
+
+
+
+    // 프론트엔드에서 로그인 이메일인지 회원가입 이메일인지 알아야함
+    async sendAuthEmail(authEmailDto: AuthEmailDto): Promise<{ message: string }> {
+        const { email } = authEmailDto;
+        console.log(email);
+        const user = await this.usersService.findOne({
+            where: {
+                email
+            }
+        })
+        console.log(user);
         const payload = {
-            confirmEmailUserId: user.id
+            email
         };
+
         const hash = await this.jwtService.signAsync(payload, {
             secret: this.configService.get('auth.confirmEmailSecret', {
                 infer: true
@@ -113,44 +136,27 @@ export class AuthService {
                 infer: true
             })
         });
-
-        await this.mailService.sendVerificationEmail({
-            to: user.email,
-            data: {
-                hash
-            }
-        });
-
-        return user;
-    }
-
-    async confirmEmail(hash: string): Promise<void> {
-        let userId: User['id'];
-        console.log(hash);
-        try {
-            const jwtData = await this.jwtService.verifyAsync<{
-                confirmEmailUserId: User['id'];
-            }>(hash, {
-                secret: this.configService.getOrThrow('auth.confirmEmailSecret', {
-                    infer: true
-                })
+        let message;
+        if (!user) {
+            await this.mailService.sendRegisterEmail({
+                to: email,
+                data: {
+                    hash
+                }
             });
-
-            userId = jwtData.confirmEmailUserId;
-        } catch {
-            throw new UnprocessableEntityException('invalid hash');
+            message = '회원가입 링크가 이메일로 전송되었습니다.'
+        } else {
+            await this.mailService.sendLoginEmail({
+                to: email,
+                data: {
+                    hash
+                }
+            })
+            message = '로그인 링크가 이메일로 전송되었습니다.'
         }
 
-        const user = await this.usersService.findOne({
-            where: {
-                id: userId
-            }
-        });
-
-        if (!user || user?.status !== UsersStatus.PENDING_VERIFICATION) {
-            throw new NotFoundException('사용자를 찾을 수 없습니다.');
+        return {
+            message
         }
-        user.status = UsersStatus.ACTIVE;
-        await user.save();
     }
 }
