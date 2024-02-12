@@ -31,7 +31,7 @@ export class ResponseInterceptor implements NestInterceptor {
 
     private excludeFields(user: User): Partial<User> {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { password, refreshToken, ...rest } = user;
+        const { refreshToken, ...rest } = user;
 
         return rest;
     }

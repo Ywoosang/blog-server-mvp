@@ -18,7 +18,7 @@ export class CommentService {
         @InjectRepository(User)
         private userRepository: Repository<User>,
         private postService: PostService
-    ) {}
+    ) { }
 
     async create(createCommentDto: CreateCommentDto, user: User): Promise<Comment> {
         const { postId } = createCommentDto;
@@ -86,7 +86,7 @@ export class CommentService {
                 'comment.createdAt',
                 'user.id',
                 'user.nickname',
-                'user.userLoginId',
+                'user.userId',
                 'user.profileImage'
             ])
             .getMany();
@@ -108,10 +108,10 @@ export class CommentService {
                     'user.id',
                     'user.nickname',
                     'user.profileImage',
-                    'user.userLoginId',
+                    'user.userId',
                     'replyTo.id',
                     'replyTo.nickname',
-                    'replyTo.userLoginId'
+                    'replyTo.userId'
                 ])
                 .getMany();
             rootComment.replies = replies;

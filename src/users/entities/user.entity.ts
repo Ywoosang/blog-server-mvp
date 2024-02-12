@@ -1,10 +1,8 @@
-import { BaseEntity, Column, PrimaryGeneratedColumn, Entity, BeforeInsert, OneToMany } from 'typeorm';
-import * as bcrypt from 'bcrypt';
+import { BaseEntity, Column, PrimaryGeneratedColumn, Entity, OneToMany } from 'typeorm';
 import { Post } from 'src/post/entities/post.entity';
 import { Comment } from 'src/comment/entities/comment.entity';
 import { Like } from 'src/like/entities/like.entity';
 import { UsersRole } from '../users-role.enum';
-import { UsersStatus } from '../users-status.enum';
 
 @Entity()
 export class User extends BaseEntity {
@@ -15,7 +13,7 @@ export class User extends BaseEntity {
     email: string;
 
     @Column({ type: String, unique: true })
-    userLoginId: string;
+    userId: string;
 
     @Column({ type: String, unique: true })
     nickname: string;
@@ -26,14 +24,8 @@ export class User extends BaseEntity {
     @Column()
     profileImage: string;
 
-    @Column({ type: 'text' })
-    password: string;
-
     @Column()
     role: UsersRole;
-
-    @Column()
-    status: UsersStatus;
 
     @Column({ nullable: true })
     refreshToken: string;
@@ -46,10 +38,4 @@ export class User extends BaseEntity {
 
     @OneToMany(() => Like, like => like.post)
     likes: Like[];
-
-    @BeforeInsert()
-    async setPassword(): Promise<void> {
-        const salt = await bcrypt.genSalt();
-        this.password = await bcrypt.hash(this.password, salt);
-    }
 }
