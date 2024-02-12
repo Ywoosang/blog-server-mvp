@@ -26,14 +26,14 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
     async validate(request: Request, payload: any) {
         // payload : JWT 토큰의 디코딩 결과로 나온 객체
         // 페이로드에 토큰에 포함된 클레임 들이포함되어 있음
-        const userLoginId = payload.userLoginId;
-        if (!userLoginId) {
+        const userId = payload.userId;
+        if (!userId) {
             throw new UnauthorizedException();
         }
 
         const user: User = await this.userRepository.findOne({
             where: {
-                userLoginId
+                userId
             }
         });
         if (!user) {

@@ -18,7 +18,7 @@ export class UsersService {
         private usersRepository: Repository<User>,
         private gravatarService: GravatarService,
         private filesService: FilesService
-    ) {}
+    ) { }
 
     async create(createUserDto: CreateUserDto): Promise<User> {
         const { email } = createUserDto;
@@ -41,11 +41,11 @@ export class UsersService {
         return this.usersRepository.find();
     }
 
-    async findUserPublicProfileByLoginId(userLoginId: string) {
+    async findUserPublicProfileByLoginId(userId: string) {
         const user = await this.usersRepository
             .createQueryBuilder('user')
-            .select(['user.id', 'user.userLoginId', 'user.nickname', 'user.profileImage', 'user.description'])
-            .where('user.userLoginId = :userLoginId', { userLoginId })
+            .select(['user.id', 'user.userId', 'user.nickname', 'user.profileImage', 'user.description'])
+            .where('user.userId = :userId', { userId })
             .getOne();
         if (!user) throw new NotFoundException('사용자를 찾을 수 없습니다.');
 
