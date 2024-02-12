@@ -1,7 +1,7 @@
-import { IsNotEmpty, IsString, Matches } from 'class-validator';
+import { IsEmail, IsNotEmpty } from 'class-validator';
 
 export class AuthEmailDto {
     @IsNotEmpty()
-    @Matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)
+    @IsEmail()
     email: string;
 }
