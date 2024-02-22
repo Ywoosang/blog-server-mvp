@@ -10,12 +10,17 @@ import * as bcrypt from 'bcrypt';
 import { GravatarService } from 'src/gravatar/gravatar.service';
 import { FilesService } from 'src/files/files.service';
 import path from 'path';
+import { FindUserActivitiesDto } from './dto/find-user-activities.dto';
+import { Comment } from 'src/comment/entities/comment.entity';
+import ActivityResponse from './dto/activity-response.dto';
 
 @Injectable()
 export class UsersService {
     constructor(
         @InjectRepository(User)
         private usersRepository: Repository<User>,
+        @InjectRepository(Comment)
+        private commentRepository: Repository<Comment>,
         private gravatarService: GravatarService,
         private filesService: FilesService
     ) { }
@@ -50,6 +55,34 @@ export class UsersService {
         if (!user) throw new NotFoundException('사용자를 찾을 수 없습니다.');
 
         return user;
+    }
+
+    async findUserActivities(findUserActivitiesDto: FindUserActivitiesDto, userId: string): Promise<ActivityResponse> {
+        // 활동내역 
+        // 댓글 작성 일자
+        let { page, limit } = findUserActivitiesDto;
+        page = page ? page : 1;
+        limit = limit ? limit : 8;
+        const skip = (page - 1) * limit;
+        console.log(userId);
+        const [comments, total] = await this.commentRepository.createQueryBuilder('comment')
+            .innerJoin('comment.user', 'user')
+            .innerJoinAndSelect('comment.post', 'post')
+            .select([
+                'comment.id',
+                'comment.createdAt',
+                'post.title',
+                'post.id'
+            ])
+            .where('user.userId = :userId', { userId })
+            // .orderBy('comment.createdAt', 'DESC')
+            .offset(skip)
+            .limit(limit)
+            .getManyAndCount();
+        return {
+            comments,
+            total
+        }
     }
 
     async update(id: number, updateUserDto: UpdateUserDto) {

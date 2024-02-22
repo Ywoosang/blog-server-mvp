@@ -4,12 +4,13 @@ import { UsersController } from './users.controller';
 import { GravatarModule } from 'src/gravatar/gravatar.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
+import { Comment } from 'src/comment/entities/comment.entity';
 import { FilesModule } from 'src/files/files.module';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([User]), GravatarModule, FilesModule],
+    imports: [TypeOrmModule.forFeature([User, Comment]), GravatarModule, FilesModule],
     controllers: [UsersController],
     providers: [UsersService],
     exports: [UsersService]
 })
-export class UsersModule {}
+export class UsersModule { }

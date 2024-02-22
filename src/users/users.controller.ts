@@ -1,14 +1,16 @@
-import { Controller, Get, Patch, Body, UseGuards, HttpCode, HttpStatus, Param } from '@nestjs/common';
+import { Controller, Get, Patch, Body, UseGuards, HttpCode, HttpStatus, Param, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/users/entities/user.entity';
 import { GetUser } from 'src/utils/decorators/get-user.decorator';
 import { plainToClass } from 'class-transformer';
+import { FindUserActivitiesDto } from './dto/find-user-activities.dto';
+import ActivityResponse from './dto/activity-response.dto';
 
 @Controller('users')
 export class UsersController {
-    constructor(private userService: UsersService) { }
+    constructor(private usersService: UsersService) { }
 
     /**
      * Get the user's profile.
@@ -26,7 +28,7 @@ export class UsersController {
     @Get('/public/profile/:userId')
     @HttpCode(HttpStatus.OK)
     async getUserPublicProfile(@Param('userId') userId: string) {
-        return this.userService.findUserPublicProfileByLoginId(userId);
+        return this.usersService.findUserPublicProfileByLoginId(userId);
     }
 
     /**
@@ -39,6 +41,15 @@ export class UsersController {
     @UseGuards(AuthGuard('jwt'))
     @HttpCode(HttpStatus.OK)
     async updateUserProfile(@GetUser() user: User, @Body() updateUserDto: UpdateUserDto): Promise<User> {
-        return this.userService.update(user.id, updateUserDto);
+        return this.usersService.update(user.id, updateUserDto);
+    }
+
+    @Get('/activities/:userId')
+    @HttpCode(HttpStatus.OK)
+    async getUserActivities(
+        @Param('userId') userId: string,
+        @Query() findUserActivitiesDto: FindUserActivitiesDto
+    ): Promise<ActivityResponse> {
+        return this.usersService.findUserActivities(findUserActivitiesDto, userId);
     }
 }
