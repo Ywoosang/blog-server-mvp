@@ -13,6 +13,7 @@ import { TagService } from 'src/tag/tag.service';
 import { Tag } from 'src/tag/entities/tag.entity';
 import { FindPostsResponseDto } from './dto/find-posts-response.dto';
 import { FilesService } from 'src/files/files.service';
+import { UpdatePostDto } from './dto/update-post.dto';
 
 @Injectable()
 export class PostService {
@@ -23,7 +24,7 @@ export class PostService {
         private categoryService: CategoryService,
         private tagService: TagService,
         private filesService: FilesService
-    ) {}
+    ) { }
 
     async getPostCount(status?: PostStatus): Promise<{ postCount: number }> {
         let postCount;
@@ -118,6 +119,45 @@ export class PostService {
         await this.postRepository.save(post);
 
         return post;
+    }
+
+    async update(id: number, updatePostDto: UpdatePostDto) {
+        const { title, content, description, status, categoryId, tagNames, fileNames } = updatePostDto;
+        const post = await this.findOne({
+            where: {
+                id
+            }
+        });
+        if (!post) throw new NotFoundException('존재하지 않는 게시물입니다.');
+
+        if (fileNames) {
+            for (const fileName of fileNames) {
+                await this.filesService.uploadPostImage(fileName, `${id}`);
+            }
+        }
+
+        let tags: null | Tag[] = null;
+        if (tagNames) {
+            tags = [];
+            for (const tagName of tagNames) {
+                const tag = await this.tagService.createIfNotExistByName({ name: tagName });
+                tags.push(tag);
+            }
+        }
+
+        let category = null;
+        if (categoryId) {
+            category = await this.categoryService.findOneById(categoryId);
+        }
+
+        post.title = title;
+        post.content = content;
+        post.description = description;
+        post.status = status;
+        post.tags = tags;
+        post.category = category;
+
+        await this.postRepository.save(post);
     }
 
     async updateStatus(id: number, status: PostStatus): Promise<Post> {

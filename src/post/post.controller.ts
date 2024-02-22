@@ -12,7 +12,8 @@ import {
     HttpCode,
     HttpStatus,
     NotFoundException,
-    ForbiddenException
+    ForbiddenException,
+    Put
 } from '@nestjs/common';
 import { PostStatus } from './post-status.enum';
 import { PostService } from './post.service';
@@ -26,10 +27,11 @@ import { FindPostsDto } from './dto/find-posts.dto';
 import { AdminGuard } from '../utils/guards/admin.guard';
 import { NullableType } from 'src/utils/types/nullable.type';
 import { GetUser } from 'src/utils/decorators/get-user.decorator';
+import { UpdatePostDto } from './dto/update-post.dto';
 
 @Controller('posts')
 export class PostController {
-    constructor(private postService: PostService) {}
+    constructor(private postService: PostService) { }
 
     @Post()
     @UseGuards(AuthGuard('jwt'), AdminGuard)
@@ -71,7 +73,7 @@ export class PostController {
             where: {
                 id: postId
             },
-            relations: ['user', 'tags']
+            relations: ['user', 'tags', 'category']
         });
         if (!post) throw new NotFoundException('존재하지 않는 게시물입니다.');
         if (post.status === PostStatus.PRIVATE) throw new ForbiddenException('게시물에 접근할 권한이 없습니다.');
@@ -87,11 +89,21 @@ export class PostController {
             where: {
                 id: postId
             },
-            relations: ['user', 'tags']
+            relations: ['user', 'tags', 'category']
         });
         if (!post) throw new NotFoundException('존재하지 않는 게시물입니다.');
 
         return post;
+    }
+
+    @Put('/:id')
+    @UseGuards(AuthGuard('jwt'), AdminGuard)
+    @HttpCode(HttpStatus.OK)
+    async updatePost(
+        @Param('id', ParseIntPipe) postId: number,
+        @Body() updatePostDto: UpdatePostDto
+    ) {
+        return this.postService.update(postId, updatePostDto);
     }
 
     @Patch('/:id/status')
