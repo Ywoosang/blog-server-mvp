@@ -79,7 +79,7 @@ export class CommentService {
             .leftJoinAndSelect('comment.user', 'user')
             .where('comment.parentCommentId IS NULL')
             .andWhere('comment.postId = :postId', { postId }) // 추가된 부분
-            .orderBy('comment.createdAt', 'DESC')
+            .orderBy('comment.createdAt', 'ASC')
             .select([
                 'comment.id',
                 'comment.content',
