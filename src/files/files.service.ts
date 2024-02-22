@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AllConfigType } from 'src/configs/types/config.type';
 import * as fs from 'fs';
@@ -37,14 +37,15 @@ export class FilesService {
     }
 
     async uploadUserProfileImage(filename: string) {
-        console.log(console.log(this.configService.get('app.backendDomain', { infer: true })));
-        console.log(filename);
         const destination = path.join(this.baseDir, 'public', 'images', 'users');
         if (!fs.existsSync(destination)) {
             fs.mkdirSync(destination, { recursive: true });
         }
         const tempFilePath = path.join(this.tempPath, filename);
         const filePath = path.join(destination, filename);
+        if (!fs.existsSync(tempFilePath)) {
+            throw new NotFoundException('존재하지 않는 프로필 이미지입니다.');
+        }
         await fs.promises.rename(tempFilePath, filePath);
         const extention = path.join(this.staticPath, 'users', filename);
 
