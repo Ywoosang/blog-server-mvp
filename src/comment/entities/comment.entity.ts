@@ -16,7 +16,7 @@ export class Comment {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column({ type: 'text' })
     content: string;
 
     @Column({ nullable: true })
@@ -26,7 +26,7 @@ export class Comment {
     @JoinColumn({ name: 'replyToId' })
     replyTo: User;
 
-    @ManyToOne(() => User, user => user.comments)
+    @ManyToOne(() => User, user => user.comments, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'userId' })
     user: User;
 
