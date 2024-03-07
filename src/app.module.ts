@@ -19,6 +19,7 @@ import { TagModule } from './tag/tag.module';
 import { FilesModule } from './files/files.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import path from 'path';
+import googleConfig from './configs/google.config';
 
 @Module({
     imports: [
@@ -27,8 +28,8 @@ import path from 'path';
             load:
                 process.env.NODE_ENV === 'test'
                     ? [appConfig, authConfig]
-                    : [appConfig, authConfig, databaseConfig, mailConfig],
-            envFilePath: `.env.${process.env.NODE_ENV}`
+                    : [appConfig, authConfig, databaseConfig, mailConfig, googleConfig],
+            envFilePath: `.env`
         }),
         ServeStaticModule.forRoot({
             rootPath: path.join(__dirname, '..', 'public'),

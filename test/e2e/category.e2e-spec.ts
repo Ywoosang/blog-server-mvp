@@ -54,7 +54,7 @@ describe('CategoryController (e2e)', () => {
             response = await request(app.getHttpServer())
                 .post('/auth/signin')
                 .send({
-                    userLoginId: testAdminUser.userLoginId,
+                    userId: testAdminUser.userId,
                     password: 'test@1234'
                 })
                 .expect(200);
@@ -63,7 +63,7 @@ describe('CategoryController (e2e)', () => {
             response = await request(app.getHttpServer())
                 .post('/auth/signin')
                 .send({
-                    userLoginId: testUser.userLoginId,
+                    userId: testUser.userId,
                     password: 'test@1234'
                 })
                 .expect(200);

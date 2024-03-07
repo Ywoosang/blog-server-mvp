@@ -1,31 +1,39 @@
-import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
-import { Observable } from 'rxjs';
+import {
+    Injectable,
+    type NestInterceptor,
+    type ExecutionContext,
+    type CallHandler,
+} from '@nestjs/common';
+import { type Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { User } from 'src/users/entities/user.entity';
+import { type User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {
     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+        const httpContext = context.switchToHttp();
+        const request = httpContext.getRequest();
+        const isLoginRequest = request.path === '/auth/login'; // 로그인 요청인지 확인
         return next.handle().pipe(
-            map(data => {
+            map((data) => {
                 if (Array.isArray(data)) {
-                    data = data.map(el => {
+                    data = data.map((el) => {
                         if (el.user) {
-                            el.user = this.excludeFields(el.user);
+                            el.user = this.excludeFields(el.user as User);
                         }
 
                         return el;
                     });
-                } else if (typeof data == 'object') {
+                } else if (typeof data === 'object') {
                     if (data.user) {
-                        data.user = this.excludeFields(data.user);
-                    } else {
-                        data = this.excludeFields(data);
+                        data.user = this.excludeFields(data.user as User);
+                    } else if (!isLoginRequest) {
+                        data = this.excludeFields(data as User);
                     }
                 }
 
                 return data;
-            })
+            }),
         );
     }
 

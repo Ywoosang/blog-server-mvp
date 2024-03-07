@@ -39,7 +39,7 @@ export class UsersService {
     }
 
     async findOne(findOptions: FindOneOptions<User>): Promise<NullableType<User>> {
-        return await this.usersRepository.findOne(findOptions);
+        return this.usersRepository.findOne(findOptions);
     }
 
     async findAll() {
@@ -92,6 +92,9 @@ export class UsersService {
             }
         });
         // 프로필 이미지가 변경되었을 경우
+        if(!user) {
+            throw new NotFoundException('사용자가 존재하지 않습니다.')
+        }
         const { profileImage } = updateUserDto;
         if (profileImage && user.profileImage != profileImage) {
             const filename = path.basename(profileImage);

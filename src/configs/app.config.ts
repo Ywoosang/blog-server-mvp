@@ -1,5 +1,5 @@
 import { registerAs } from '@nestjs/config';
-import { AppConfig } from './types/config.type';
+import { type AppConfig } from './types/config.type';
 import { IsInt, IsOptional, IsUrl, Max, Min } from 'class-validator';
 
 import validateConfig from 'src/utils/validate-config';
@@ -28,7 +28,9 @@ export default registerAs<AppConfig>('app', () => {
         nodeEnv: process.env.NODE_ENV || 'dev',
         port: process.env.APP_PORT ? parseInt(process.env.APP_PORT, 10) : 3000,
         workingDirectory: process.env.PWD || process.cwd(),
-        backendDomain: process.env.APP_BACKEND_DOMAIN || 'http://localhost:3000',
-        frontendDomain: process.env.APP_FRONTEND_DOMAIN || 'http://localhost:8080'
+        backendDomain:
+            process.env.APP_BACKEND_DOMAIN || 'http://localhost:3000',
+        frontendDomain:
+            process.env.APP_FRONTEND_DOMAIN || 'http://localhost:8080',
     };
 });

@@ -21,10 +21,11 @@ import { Tag } from 'src/tag/entities/tag.entity';
                 database: config.get('database.name', { infer: true }),
                 charset: 'utf8mb4',
                 synchronize: config.get('database.synchronize', { infer: true }),
+                // logging: true,
                 entities: [User, Post, Category, Comment, Like, Tag]
             }),
             inject: [ConfigService]
         })
     ]
 })
-export class DatabaseModule {}
+export class DatabaseModule { }

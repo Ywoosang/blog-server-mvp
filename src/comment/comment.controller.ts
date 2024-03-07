@@ -9,13 +9,13 @@ import {
     UseGuards,
     ParseIntPipe,
     HttpCode,
-    HttpStatus
+    HttpStatus,
 } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { AuthGuard } from '@nestjs/passport';
 import { CommentOwnerGuard } from './comment-owner.guard';
 import { User } from 'src/users/entities/user.entity';
-import { Comment } from './entities/comment.entity';
+import { type Comment } from './entities/comment.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { CreateReplyDto } from './dto/create-reply.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
@@ -23,7 +23,7 @@ import { GetUser } from 'src/utils/decorators/get-user.decorator';
 
 @Controller('comments')
 export class CommentController {
-    constructor(private commentService: CommentService) {}
+    constructor(private readonly commentService: CommentService) {}
 
     /**
      * Creates a new comment.
@@ -35,8 +35,11 @@ export class CommentController {
     @Post()
     @UseGuards(AuthGuard('jwt'))
     @HttpCode(HttpStatus.CREATED)
-    async createComment(@Body() createCommentDto: CreateCommentDto, @GetUser() user: User): Promise<Comment> {
-        return this.commentService.create(createCommentDto, user);
+    async createComment(
+        @Body() createCommentDto: CreateCommentDto,
+        @GetUser() user: User,
+    ): Promise<Comment> {
+        return await this.commentService.create(createCommentDto, user);
     }
 
     /**
@@ -53,9 +56,13 @@ export class CommentController {
     async createReply(
         @Param('parentCommentId', ParseIntPipe) parentCommentId: number,
         @Body() createReplyDto: CreateReplyDto,
-        @GetUser() user: User
+        @GetUser() user: User,
     ): Promise<Comment> {
-        return this.commentService.createReply(createReplyDto, parentCommentId, user);
+        return await this.commentService.createReply(
+            createReplyDto,
+            parentCommentId,
+            user,
+        );
     }
 
     /**
@@ -66,8 +73,10 @@ export class CommentController {
      */
     @Get('posts/:postId')
     @HttpCode(HttpStatus.OK)
-    async getCommentsByPostId(@Param('postId', ParseIntPipe) postId: number): Promise<Comment[]> {
-        return this.commentService.findMany(postId);
+    async getCommentsByPostId(
+        @Param('postId', ParseIntPipe) postId: number,
+    ): Promise<Comment[]> {
+        return await this.commentService.findMany(postId);
     }
 
     /**
@@ -82,9 +91,9 @@ export class CommentController {
     @UseGuards(AuthGuard('jwt'), CommentOwnerGuard)
     async updateComment(
         @Param('id', ParseIntPipe) id: number,
-        @Body() updateCommentDto: UpdateCommentDto
+        @Body() updateCommentDto: UpdateCommentDto,
     ): Promise<Comment> {
-        return this.commentService.update(id, updateCommentDto);
+        return await this.commentService.update(id, updateCommentDto);
     }
 
     /**
@@ -95,6 +104,6 @@ export class CommentController {
     @Delete(':id')
     @UseGuards(AuthGuard('jwt'), CommentOwnerGuard)
     async deleteComment(@Param('id', ParseIntPipe) id: number): Promise<void> {
-        return this.commentService.delete(id);
+        await this.commentService.delete(id);
     }
 }

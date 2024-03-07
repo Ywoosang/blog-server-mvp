@@ -6,6 +6,7 @@ import { AdminGuard } from 'src/utils/guards/admin.guard';
 import { FindCategoryPostsDto } from './dto/find-category-posts.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
+import { NullableType } from 'src/utils/types/nullable.type';
 
 @Controller('categories')
 export class CategoryController {
@@ -60,7 +61,7 @@ export class CategoryController {
     async findOneWithPostsByPublic(
         @Param('id', ParseIntPipe) id: number,
         @Query() findCategoryPostsDto: FindCategoryPostsDto
-    ): Promise<Category> {
+    ): Promise<NullableType<Category>> {
         return this.categoryService.findOneWithPosts(+id, findCategoryPostsDto);
     }
 
@@ -76,7 +77,7 @@ export class CategoryController {
     async findOneWithPosts(
         @Param('id', ParseIntPipe) id: number,
         @Query() findCategoryPostsDto: FindCategoryPostsDto
-    ): Promise<Category> {
+    ): Promise<NullableType<Category>> {
         return this.categoryService.findOneWithPosts(+id, findCategoryPostsDto, true);
     }
 

@@ -31,7 +31,7 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
             throw new UnauthorizedException();
         }
 
-        const user: User = await this.userRepository.findOne({
+        const user = await this.userRepository.findOne({
             where: {
                 userId
             }

@@ -11,4 +11,4 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         })
     ]
 })
-export class DatabaseTestModule {}
+export class DatabaseTestModule { }

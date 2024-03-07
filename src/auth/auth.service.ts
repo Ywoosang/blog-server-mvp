@@ -11,6 +11,9 @@ import { User } from 'src/users/entities/user.entity';
 import AuthConflictException from 'src/common/exceptions/auth-conflict.exception';
 import { AuthLoginDto } from './dto/auth-login.dto';
 import { AuthEmailDto } from './dto/auth-email.dto';
+import { NullableType } from 'src/utils/types/nullable.type';
+import { LoginResponseType } from './types/login-response.type';
+import { SocialInterface } from 'src/social/social.interface';
 
 @Injectable()
 export class AuthService {
@@ -22,7 +25,10 @@ export class AuthService {
     ) { }
 
     async generateAccessToken(payload: any) {
-        return this.jwtService.signAsync(payload);
+        const token = await this.jwtService.signAsync(payload);
+        // const expirationDate = this.getExpirationDateFromToken(token);
+        // console.log('Token expiration in Korean Timezone:', expirationDate.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }));
+        return token;
     }
 
     async generateRefreshToken(payload: any) {
@@ -32,12 +38,19 @@ export class AuthService {
         });
     }
 
+    private getExpirationDateFromToken(token: string): Date {
+        const decodedToken: any = this.jwtService.decode(token, { json: true });
+        if (decodedToken && decodedToken.exp) {
+            return new Date(decodedToken.exp * 1000);
+        }
+        throw new Error('Cannot extract expiration date from token');
+    }
     async register(registerDto: AuthRegisterDto): Promise<User> {
         const { email, userId, nickname } = registerDto;
         const existingEmail = await this.usersService.findOne({ where: { email } });
         const existingUserId = await this.usersService.findOne({ where: { userId } });
         const existingNickname = await this.usersService.findOne({ where: { nickname } });
-        const existingFields = [];
+        const existingFields: any = [];
         if (existingEmail) {
             existingFields.push({
                 field: 'email',
@@ -58,7 +71,6 @@ export class AuthService {
                 message: '이미 존재하는 닉네임 입니다.'
             });
         }
-        console.log(existingFields);
         if (existingFields.length > 0) {
             throw new AuthConflictException(existingFields);
         }
@@ -103,6 +115,9 @@ export class AuthService {
         const payload = { userId: user.userId };
         const accessToken = await this.generateAccessToken(payload);
         const refreshToken = await this.generateRefreshToken(payload);
+        console.log(accessToken);
+        console.log(refreshToken);
+
         await this.usersService.updateRefreshToken(user.id, refreshToken);
 
         return {
@@ -110,6 +125,97 @@ export class AuthService {
             refreshToken
         };
     }
+    // https://velog.io/@mainfn/Node.js-express%EB%A1%9C-%EA%B5%AC%EA%B8%80-OAuth-%ED%9A%8C%EC%9B%90%EA%B0%80%EC%9E%85%EB%A1%9C%EA%B7%B8%EC%9D%B8-%EA%B5%AC%ED%98%84
+    // https://yoyostudy.tistory.com/43 프론트엔드
+    async validateSocialLogin(
+        authProvider: string,
+        socialData: SocialInterface,
+    ): Promise<LoginResponseType> {
+        let user: NullableType<User> = null;
+        const socialEmail = socialData.email?.toLowerCase();
+        let userByEmail: NullableType<User> = null;
+
+        // 이미 존재하는 이메일이라면
+        if (socialEmail) {
+            userByEmail = await this.usersService.findOne({
+                where: {
+                    email: socialEmail
+                }
+            });
+        }
+
+        if (socialData.id) {
+            user = await this.usersService.findOne({
+                where: {
+                    userId: socialData.id,
+                }
+            });
+        }
+
+        if (user) {
+            if (socialEmail && !userByEmail) {
+                user.email = socialEmail;
+            }
+            await this.usersService.update(user.id, user);
+        } else if (userByEmail) {
+            user = userByEmail;
+        } else {
+            const role = {
+                id: UsersRole.USER,
+            };
+            // user = await this.usersService.create({
+            //     email: socialEmail ?? null,
+            //     firstName: socialData.firstName ?? null,
+            //     lastName: socialData.lastName ?? null,
+            //     socialId: socialData.id,
+            //     provider: authProvider,
+            //     role,
+            //     status,
+            // });
+
+            // user = await this.usersService.findOne({
+            //     id: user?.id,
+            // });
+        }
+
+        // if (!user) {
+        //     throw new HttpException(
+        //         {
+        //             status: HttpStatus.UNPROCESSABLE_ENTITY,
+        //             errors: {
+        //                 user: 'userNotFound',
+        //             },
+        //         },
+        //         HttpStatus.UNPROCESSABLE_ENTITY,
+        //     );
+        // }
+
+        // const session = await this.sessionService.create({
+        //     user,
+        // });
+
+        // const {
+        //     token: jwtToken,
+        //     refreshToken,
+        //     tokenExpires,
+        // } = await this.getTokensData({
+        //     id: user.id,
+        //     role: user.role,
+        //     sessionId: session.id,
+        // });
+
+        // return {
+        //     refreshToken,
+        //     token: jwtToken,
+        //     tokenExpires,
+        //     user,
+        // };
+        return {
+            accessToken: '',
+            refreshToken: ''
+        };
+    }
+
 
 
 

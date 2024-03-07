@@ -1,27 +1,23 @@
-import { Controller, Get, Patch, Body, UseGuards, HttpCode, HttpStatus, Param, Query } from '@nestjs/common';
+import { Controller, Get, Patch, Body, UseGuards, HttpCode, HttpStatus, Param, Query, UseInterceptors } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/users/entities/user.entity';
 import { GetUser } from 'src/utils/decorators/get-user.decorator';
-import { plainToClass } from 'class-transformer';
 import { FindUserActivitiesDto } from './dto/find-user-activities.dto';
 import ActivityResponse from './dto/activity-response.dto';
+import { AuthCheckInterceptor } from 'src/common/interceptors/auth-check.interceptor';
+import { NullableType } from 'src/utils/types/nullable.type';
 
 @Controller('users')
 export class UsersController {
     constructor(private usersService: UsersService) { }
 
-    /**
-     * Get the user's profile.
-     *
-     * @param user - The authenticated user.
-     * @returns The user's profile data with the password field removed.
-     */
     @Get('/profile')
-    @UseGuards(AuthGuard('jwt'))
+    @UseInterceptors(AuthCheckInterceptor)
     @HttpCode(HttpStatus.OK)
-    getUserProfile(@GetUser() user: User) {
+    getUserProfile(@GetUser() user: User): NullableType<User> {
+
         return user;
     }
 
@@ -31,12 +27,6 @@ export class UsersController {
         return this.usersService.findUserPublicProfileByLoginId(userId);
     }
 
-    /**
-     * Update the user's profile.
-     *
-     * @param user - The authenticated user.
-     * @param updateUserDto - Data for updating the user's profile.
-     */
     @Patch('/profile')
     @UseGuards(AuthGuard('jwt'))
     @HttpCode(HttpStatus.OK)

@@ -29,7 +29,7 @@ describe('AuthController (e2e)', () => {
                 .post('/auth/signup')
                 .send({
                     email: 'test@gmail.com',
-                    userLoginId: 'ywoosang',
+                    userId: 'ywoosang',
                     nickname: '테스트사용자',
                     password: 'test@1234'
                 })
@@ -41,7 +41,7 @@ describe('AuthController (e2e)', () => {
                 .post('/auth/signup')
                 .send({
                     email: 'test@gmail.com',
-                    userLoginId: 'ywoosang',
+                    userId: 'ywoosang',
                     nickname: '테스트사용자',
                     password: 'test@1234'
                 })
@@ -53,7 +53,7 @@ describe('AuthController (e2e)', () => {
                 .post('/auth/signup')
                 .send({
                     email: 'test@gmail.com',
-                    userLoginId: 'ywoosang',
+                    userId: 'ywoosang',
                     nickname: '사용자',
                     password: 'test@1234'
                 })
@@ -65,7 +65,7 @@ describe('AuthController (e2e)', () => {
                 .post('/auth/signup')
                 .send({
                     email: 'test',
-                    userLoginId: 'ywoosang',
+                    userId: 'ywoosang',
                     nickname: '사용자',
                     password: 'test@1234'
                 })
@@ -77,7 +77,7 @@ describe('AuthController (e2e)', () => {
                 .post('/auth/signup')
                 .send({
                     email: 'test@gmail.com',
-                    userLoginId: '-',
+                    userId: '-',
                     nickname: '사용자',
                     password: 'test@1234'
                 })
@@ -89,7 +89,7 @@ describe('AuthController (e2e)', () => {
                 .post('/auth/signup')
                 .send({
                     email: 'test@gmail.com',
-                    userLoginId: 'ywoosang',
+                    userId: 'ywoosang',
                     nickname: '사용자',
                     password: '-'
                 })
@@ -101,7 +101,7 @@ describe('AuthController (e2e)', () => {
                 .post('/auth/signup')
                 .send({
                     email: 'test@gmail.com',
-                    userLoginId: 'ywoosang',
+                    userId: 'ywoosang',
                     nickname: '-',
                     password: 'test@1234'
                 })
@@ -114,7 +114,7 @@ describe('AuthController (e2e)', () => {
             await request(app.getHttpServer())
                 .post('/auth/signin')
                 .send({
-                    userLoginId: 'ywoosang',
+                    userId: 'ywoosang',
                     password: 'test@1234'
                 })
                 .expect(200);
@@ -123,7 +123,7 @@ describe('AuthController (e2e)', () => {
         it('로그인이 성공할 경우 JWT 토큰을 담아 응답한다.', async () => {
             const jwtRegex = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/;
             const response = await request(app.getHttpServer()).post('/auth/signin').send({
-                userLoginId: 'ywoosang',
+                userId: 'ywoosang',
                 password: 'test@1234'
             });
             const accessToken = response.body.accessToken;
@@ -135,7 +135,7 @@ describe('AuthController (e2e)', () => {
             await request(app.getHttpServer())
                 .post('/auth/signin')
                 .send({
-                    userLoginId: 'test',
+                    userId: 'test',
                     password: 'test1234'
                 })
                 .expect(401);
@@ -145,7 +145,7 @@ describe('AuthController (e2e)', () => {
             await request(app.getHttpServer())
                 .post('/auth/signin')
                 .send({
-                    userLoginId: 'ywoosang',
+                    userId: 'ywoosang',
                     password: 'test1234'
                 })
                 .expect(401);

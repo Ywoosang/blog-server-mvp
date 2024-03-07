@@ -1,5 +1,5 @@
 import { registerAs } from '@nestjs/config';
-import { AuthConfig } from './types/config.type';
+import { type AuthConfig } from './types/config.type';
 import { IsString } from 'class-validator';
 import validateConfig from 'src/utils/validate-config';
 
@@ -32,6 +32,6 @@ export default registerAs<AuthConfig>('auth', () => {
         refreshSecret: process.env.AUTH_REFRESH_SECRET,
         refreshExpires: process.env.AUTH_REFRESH_TOKEN_EXPIRES_IN,
         confirmEmailSecret: process.env.AUTH_CONFIRM_EMAIL_SECRET,
-        emailExpires: process.env.AUTH_EMAIL_TOKEN_EXPIRES_IN
+        emailExpires: process.env.AUTH_EMAIL_TOKEN_EXPIRES_IN,
     };
 });

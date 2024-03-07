@@ -14,6 +14,7 @@ import { Tag } from 'src/tag/entities/tag.entity';
 import { FindPostsResponseDto } from './dto/find-posts-response.dto';
 import { FilesService } from 'src/files/files.service';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { Category } from 'src/category/entities/category.entity';
 
 @Injectable()
 export class PostService {
@@ -68,7 +69,7 @@ export class PostService {
     }
 
     async findPublicUserPosts(userId: number): Promise<NullableType<Post[]>> {
-        const user: User = await this.usersService.findOne({
+        const user = await this.usersService.findOne({
             where: {
                 id: userId
             },
@@ -85,7 +86,9 @@ export class PostService {
         let category;
         if (categoryId) {
             category = await this.categoryService.findOneById(categoryId);
-            if (!category) throw new NotFoundException('존재하지 않는 카테고리입니다.');
+            if (!category) {
+                throw new NotFoundException('존재하지 않는 카테고리입니다.');
+            }
         }
 
         const tags: Tag[] = [];
@@ -136,26 +139,27 @@ export class PostService {
             }
         }
 
-        let tags: null | Tag[] = null;
         if (tagNames) {
-            tags = [];
+            const tags: Tag[] = [];
             for (const tagName of tagNames) {
                 const tag = await this.tagService.createIfNotExistByName({ name: tagName });
                 tags.push(tag);
             }
+            post.tags = tags;
         }
 
-        let category = null;
         if (categoryId) {
-            category = await this.categoryService.findOneById(categoryId);
+            const category = await this.categoryService.findOneById(categoryId);
+            if(!category) {
+                throw new NotFoundException('존재하지 않는 카테고리입니다.');
+            }
+            post.category = category;
         }
 
         post.title = title;
         post.content = content;
         post.description = description;
         post.status = status;
-        post.tags = tags;
-        post.category = category;
 
         await this.postRepository.save(post);
     }

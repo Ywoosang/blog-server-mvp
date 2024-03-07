@@ -51,7 +51,7 @@ describe('LikeController (e2e)', () => {
             const response = await request(app.getHttpServer())
                 .post('/auth/signin')
                 .send({
-                    userLoginId: testUser.userLoginId,
+                    userId: testUser.userId,
                     password: 'test@1234'
                 })
                 .expect(200);

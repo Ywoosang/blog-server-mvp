@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AllConfigType } from 'src/configs/types/config.type';
+import { type AllConfigType } from 'src/configs/types/config.type';
 import * as fs from 'fs';
 import path from 'path';
 
@@ -12,14 +12,27 @@ export class FilesService {
     private readonly backendDomain: string;
 
     constructor(private readonly configService: ConfigService<AllConfigType>) {
-        this.baseDir = this.configService.get('app.workingDirectory', { infer: true });
+        this.baseDir = this.configService.getOrThrow('app.workingDirectory', {
+            infer: true,
+        });
         this.tempPath = path.join(this.baseDir, 'public', 'temp');
-        this.backendDomain = this.configService.get('app.backendDomain', { infer: true });
+        this.backendDomain = this.configService.getOrThrow(
+            'app.backendDomain',
+            {
+                infer: true,
+            },
+        );
         this.staticPath = path.join('static', 'images');
     }
 
     async uploadPostImage(filename: string, postId: string): Promise<string> {
-        const destination = path.join(this.baseDir, 'public', 'images', 'posts', postId);
+        const destination = path.join(
+            this.baseDir,
+            'public',
+            'images',
+            'posts',
+            postId,
+        );
 
         if (!fs.existsSync(destination)) {
             fs.mkdirSync(destination, { recursive: true });
@@ -36,8 +49,13 @@ export class FilesService {
         return `${this.backendDomain}/${extention}`;
     }
 
-    async uploadUserProfileImage(filename: string) {
-        const destination = path.join(this.baseDir, 'public', 'images', 'users');
+    async uploadUserProfileImage(filename: string): Promise<string> {
+        const destination = path.join(
+            this.baseDir,
+            'public',
+            'images',
+            'users',
+        );
         if (!fs.existsSync(destination)) {
             fs.mkdirSync(destination, { recursive: true });
         }
@@ -53,7 +71,13 @@ export class FilesService {
     }
 
     deletePostImages(postId: string): void {
-        const postImageFolder = path.join(this.baseDir, 'public', 'images', 'posts', postId);
+        const postImageFolder = path.join(
+            this.baseDir,
+            'public',
+            'images',
+            'posts',
+            postId,
+        );
 
         if (fs.existsSync(postImageFolder)) {
             fs.rmdirSync(postImageFolder, { recursive: true });
@@ -61,6 +85,9 @@ export class FilesService {
     }
 
     uploadImageUrlInHtml(html: string, postId: number): string {
-        return html.replace(/static\/temp\//g, `static/images/posts/${postId}/`);
+        return html.replace(
+            /static\/temp\//g,
+            `static/images/posts/${postId}/`,
+        );
     }
 }

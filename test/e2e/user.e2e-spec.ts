@@ -40,7 +40,7 @@ describe('UserController (e2e)', () => {
             let response = await request(app.getHttpServer())
                 .post('/auth/signin')
                 .send({
-                    userLoginId: testUser.userLoginId,
+                    userId: testUser.userId,
                     password: 'test@1234'
                 })
                 .expect(200);
@@ -53,7 +53,7 @@ describe('UserController (e2e)', () => {
             testUser = response.body;
             expect(testUser).toHaveProperty('id');
             expect(testUser).toHaveProperty('description');
-            expect(testUser).toHaveProperty('userLoginId');
+            expect(testUser).toHaveProperty('userId');
             expect(testUser).toHaveProperty('nickname');
             expect(testUser).toHaveProperty('email');
             expect(testUser).toHaveProperty('role');
@@ -68,10 +68,10 @@ describe('UserController (e2e)', () => {
         });
     });
 
-    describe('/users/public/profile/:userLoginId (GET)', () => {
-        it('userLoginId 에 해당하는 사용자 공개 프로필 정보를 반환한다.', async () => {
+    describe('/users/public/profile/:userId (GET)', () => {
+        it('userId 에 해당하는 사용자 공개 프로필 정보를 반환한다.', async () => {
             const response = await request(app.getHttpServer())
-                .get(`/users/public/profile/${testUser.userLoginId}`)
+                .get(`/users/public/profile/${testUser.userId}`)
                 .expect(200);
             expect(response.statusCode).toBe(200);
             const user = response.body;
@@ -79,7 +79,7 @@ describe('UserController (e2e)', () => {
             expect(user).toHaveProperty('description');
             expect(user).toHaveProperty('profileImage');
             expect(user).toHaveProperty('nickname');
-            expect(user).toHaveProperty('userLoginId');
+            expect(user).toHaveProperty('userId');
         });
 
         it('존재하지 않는 사용자라면 404 NotFound 를 반환한다.', async () => {

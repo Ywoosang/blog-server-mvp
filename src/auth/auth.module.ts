@@ -9,7 +9,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { UsersModule } from 'src/users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AllConfigType } from 'src/configs/types/config.type';
+import { type AllConfigType } from 'src/configs/types/config.type';
 import { MailModule } from 'src/mail/mail.moudle';
 
 @Module({
@@ -17,20 +17,24 @@ import { MailModule } from 'src/mail/mail.moudle';
         PassportModule.register({ defaultStrategy: 'jwt' }),
         JwtModule.registerAsync({
             imports: [ConfigModule],
-            useFactory: async (configService: ConfigService<AllConfigType>) => ({
+            useFactory: async (
+                configService: ConfigService<AllConfigType>,
+            ) => ({
                 secret: configService.get('auth.secret', { infer: true }),
                 signOptions: {
-                    expiresIn: configService.get('auth.expires', { infer: true })
-                }
+                    expiresIn: configService.get('auth.expires', {
+                        infer: true,
+                    }),
+                },
             }),
-            inject: [ConfigService]
+            inject: [ConfigService],
         }),
         TypeOrmModule.forFeature([User]),
         UsersModule,
-        MailModule
+        MailModule,
     ],
     controllers: [AuthController],
     providers: [AuthService, JwtStrategy, JwtRefreshStrategy],
-    exports: [JwtStrategy, JwtRefreshStrategy]
+    exports: [JwtStrategy, JwtRefreshStrategy],
 })
 export class AuthModule {}

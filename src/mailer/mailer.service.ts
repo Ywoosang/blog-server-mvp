@@ -28,12 +28,11 @@ export class MailerService {
         context: Record<string, unknown>;
     }): Promise<void> {
         let html: string;
-        if (templatePath) {
-            const template = await fs.readFile(templatePath, 'utf-8');
-            html = Handlebars.compile(template, {
-                strict: true
-            })(context);
-        }
+        const template = await fs.readFile(templatePath, 'utf-8');
+        html = Handlebars.compile(template, {
+            strict: true
+        })(context);
+        
         await this.transporter.sendMail({
             ...mailOptions,
             from: this.configService.get('mail.defaultEmail', { infer: true }),

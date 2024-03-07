@@ -7,6 +7,7 @@ import { FindTagsResponseDto } from './dto/find-tags-response.dto';
 import { TagService } from './tag.service';
 import { GetUser } from 'src/utils/decorators/get-user.decorator';
 import { User } from 'src/users/entities/user.entity';
+import { NullableType } from 'src/utils/types/nullable.type';
 
 @Controller('tags')
 export class TagController {
@@ -27,7 +28,7 @@ export class TagController {
 
     @Get('/public/:id')
     @HttpCode(HttpStatus.OK)
-    async findTagPosts(@Param('id', ParseIntPipe) id: string, @Query() findTagPostsDto: FindTagPostsDto): Promise<Tag> {
+    async findTagPosts(@Param('id', ParseIntPipe) id: string, @Query() findTagPostsDto: FindTagPostsDto): Promise<NullableType<Tag>> {
         return this.tagService.findOneWithPosts(+id, findTagPostsDto);
     }
 
@@ -37,7 +38,7 @@ export class TagController {
     async findPublicTagPosts(
         @Param('id', ParseIntPipe) id: string,
         @Query() findTagPostsDto: FindTagPostsDto
-    ): Promise<Tag> {
+    ): Promise<NullableType<Tag>> {
         return this.tagService.findOneWithPosts(+id, findTagPostsDto, true);
     }
 }
