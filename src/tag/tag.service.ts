@@ -9,13 +9,14 @@ import { FindTagsResponseDto } from './dto/find-tags-response.dto';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { User } from 'src/users/entities/user.entity';
 import { UsersRole } from 'src/users/users-role.enum';
+import { POST_PER_PAGE } from 'src/common/consts';
 
 @Injectable()
 export class TagService {
     constructor(
         @InjectRepository(Tag)
         private tagRepository: Repository<Tag>
-    ) {}
+    ) { }
 
     async createIfNotExistByName(createTagDto: CreateTagDto): Promise<Tag> {
         const { name } = createTagDto;
@@ -63,7 +64,7 @@ export class TagService {
     ): Promise<NullableType<Tag>> {
         let { page, limit } = findTagPostsDto;
         page = page ? page : 1;
-        limit = limit ? limit : 15;
+        limit = limit ? limit : POST_PER_PAGE;
         const skip = (page - 1) * limit;
         const tag = await this.tagRepository.findOne({
             where: {

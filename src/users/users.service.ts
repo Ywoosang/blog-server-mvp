@@ -13,6 +13,7 @@ import path from 'path';
 import { FindUserActivitiesDto } from './dto/find-user-activities.dto';
 import { Comment } from 'src/comment/entities/comment.entity';
 import ActivityResponse from './dto/activity-response.dto';
+import { POST_PER_PAGE } from 'src/common/consts';
 
 @Injectable()
 export class UsersService {
@@ -46,7 +47,7 @@ export class UsersService {
         return this.usersRepository.find();
     }
 
-    async findUserPublicProfileByLoginId(userId: string) {
+    async findUserPublicProfileByUserId(userId: string) {
         const user = await this.usersRepository
             .createQueryBuilder('user')
             .select(['user.id', 'user.userId', 'user.nickname', 'user.profileImage', 'user.description'])
@@ -62,7 +63,7 @@ export class UsersService {
         // 댓글 작성 일자
         let { page, limit } = findUserActivitiesDto;
         page = page ? page : 1;
-        limit = limit ? limit : 8;
+        limit = limit ? limit : POST_PER_PAGE;
         const skip = (page - 1) * limit;
         console.log(userId);
         const [comments, total] = await this.commentRepository.createQueryBuilder('comment')
@@ -92,7 +93,7 @@ export class UsersService {
             }
         });
         // 프로필 이미지가 변경되었을 경우
-        if(!user) {
+        if (!user) {
             throw new NotFoundException('사용자가 존재하지 않습니다.')
         }
         const { profileImage } = updateUserDto;

@@ -14,7 +14,7 @@ import { Tag } from 'src/tag/entities/tag.entity';
 import { FindPostsResponseDto } from './dto/find-posts-response.dto';
 import { FilesService } from 'src/files/files.service';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { Category } from 'src/category/entities/category.entity';
+import { POST_PER_PAGE } from 'src/common/consts';
 
 @Injectable()
 export class PostService {
@@ -49,7 +49,7 @@ export class PostService {
     async findPostsPaginated(findPostsDto: FindPostsDto, isAdmin: boolean = false): Promise<FindPostsResponseDto> {
         let { page, limit } = findPostsDto;
         page = page ? page : 1;
-        limit = limit ? limit : 15;
+        limit = limit ? limit : POST_PER_PAGE;
         const skip = (page - 1) * limit;
         const whereCondition: any = {};
         if (!isAdmin) {
@@ -59,7 +59,10 @@ export class PostService {
             take: limit,
             skip,
             where: whereCondition,
-            relations: ['tags']
+            relations: ['tags'],
+            order: {
+                createdAt: 'DESC'
+            }
         });
 
         return {
@@ -150,7 +153,7 @@ export class PostService {
 
         if (categoryId) {
             const category = await this.categoryService.findOneById(categoryId);
-            if(!category) {
+            if (!category) {
                 throw new NotFoundException('존재하지 않는 카테고리입니다.');
             }
             post.category = category;

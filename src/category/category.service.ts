@@ -7,13 +7,14 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Category } from './entities/category.entity';
 import { PostStatus } from 'src/post/post-status.enum';
 import { FindCategoryPostsDto } from './dto/find-category-posts.dto';
+import { POST_PER_PAGE } from 'src/common/consts';
 
 @Injectable()
 export class CategoryService {
     constructor(
         @InjectRepository(Category)
         private categoryRepository: Repository<Category>
-    ) {}
+    ) { }
 
     async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
         return this.categoryRepository.save(this.categoryRepository.create(createCategoryDto));
@@ -59,7 +60,7 @@ export class CategoryService {
     ): Promise<NullableType<Category>> {
         let { page, limit } = findCategoryPostsDto;
         page = page ? page : 1;
-        limit = limit ? limit : 15;
+        limit = limit ? limit : POST_PER_PAGE;
         const skip = (page - 1) * limit;
         const category = await this.categoryRepository.findOne({
             where: {

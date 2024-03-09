@@ -13,6 +13,7 @@ import { NullableType } from 'src/utils/types/nullable.type';
 export class UsersController {
     constructor(private usersService: UsersService) { }
 
+    // 로그인 여부로
     @Get('/profile')
     @UseInterceptors(AuthCheckInterceptor)
     @HttpCode(HttpStatus.OK)
@@ -21,10 +22,11 @@ export class UsersController {
         return user;
     }
 
+    // 사용자의 공개 프로필
     @Get('/public/profile/:userId')
     @HttpCode(HttpStatus.OK)
     async getUserPublicProfile(@Param('userId') userId: string) {
-        return this.usersService.findUserPublicProfileByLoginId(userId);
+        return this.usersService.findUserPublicProfileByUserId(userId);
     }
 
     @Patch('/profile')
