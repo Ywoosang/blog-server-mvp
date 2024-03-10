@@ -72,6 +72,17 @@ describe('CategoryController (e2e)', () => {
             category = response.body;
         });
 
+        it('카테고리가 이미 존재한다면 409 Conflict 에러를 반환한다.', async () => {
+            const response = await request(app.getHttpServer())
+                .post('/categories')
+                .set('Authorization', `Bearer ${accessTokenAdmin}`)
+                .send({
+                    name
+                })
+            expect(response.statusCode).toBe(409);
+            expect(response.body.message).toBe('이미 존재하는 카테고리입니다.')
+        });
+
         it('로그인하지 않은 사용자가 카테고리를 생성할 때 401 Unauthrized 에러를 반환한다.', async () => {
             await request(app.getHttpServer())
                 .post('/categories')
