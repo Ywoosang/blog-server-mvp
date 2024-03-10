@@ -45,6 +45,23 @@ export class AuthService {
         }
         throw new Error('Cannot extract expiration date from token');
     }
+
+    async generateHash(email: string): Promise<string> {
+        const payload = {
+            email
+        };
+        const hash = await this.jwtService.signAsync(payload, {
+            secret: this.configService.get('auth.confirmEmailSecret', {
+                infer: true
+            }),
+            expiresIn: this.configService.get('auth.emailExpires', {
+                infer: true
+            })
+        });
+
+        return hash;
+    }
+
     async register(registerDto: AuthRegisterDto): Promise<User> {
         const { email, userId, nickname } = registerDto;
         const existingEmail = await this.usersService.findOne({ where: { email } });
@@ -95,7 +112,7 @@ export class AuthService {
             });
             email = jwtData.email;
         } catch {
-            throw new UnprocessableEntityException('invalid hash');
+            throw new UnprocessableEntityException('처리할 수 없는 요청입니다.');
         }
         return { email };
     }
@@ -115,8 +132,6 @@ export class AuthService {
         const payload = { userId: user.userId };
         const accessToken = await this.generateAccessToken(payload);
         const refreshToken = await this.generateRefreshToken(payload);
-        console.log(accessToken);
-        console.log(refreshToken);
 
         await this.usersService.updateRefreshToken(user.id, refreshToken);
 
@@ -127,6 +142,7 @@ export class AuthService {
     }
     // https://velog.io/@mainfn/Node.js-express%EB%A1%9C-%EA%B5%AC%EA%B8%80-OAuth-%ED%9A%8C%EC%9B%90%EA%B0%80%EC%9E%85%EB%A1%9C%EA%B7%B8%EC%9D%B8-%EA%B5%AC%ED%98%84
     // https://yoyostudy.tistory.com/43 프론트엔드
+
     async validateSocialLogin(
         authProvider: string,
         socialData: SocialInterface,
@@ -216,32 +232,15 @@ export class AuthService {
         };
     }
 
-
-
-
-
     // 프론트엔드에서 로그인 이메일인지 회원가입 이메일인지 알아야함
     async sendAuthEmail(authEmailDto: AuthEmailDto): Promise<{ message: string }> {
         const { email } = authEmailDto;
-        console.log(email);
         const user = await this.usersService.findOne({
             where: {
                 email
             }
         })
-        console.log(user);
-        const payload = {
-            email
-        };
-
-        const hash = await this.jwtService.signAsync(payload, {
-            secret: this.configService.get('auth.confirmEmailSecret', {
-                infer: true
-            }),
-            expiresIn: this.configService.get('auth.emailExpires', {
-                infer: true
-            })
-        });
+        const hash = await this.generateHash(email);
         let message;
         if (!user) {
             await this.mailService.sendRegisterEmail({
