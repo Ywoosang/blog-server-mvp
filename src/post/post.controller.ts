@@ -13,7 +13,7 @@ import {
     HttpStatus,
     NotFoundException,
     ForbiddenException,
-    Put
+    Put,
 } from '@nestjs/common';
 import { PostStatus } from './post-status.enum';
 import { PostService } from './post.service';
@@ -31,12 +31,15 @@ import { UpdatePostDto } from './dto/update-post.dto';
 
 @Controller('posts')
 export class PostController {
-    constructor(private postService: PostService) { }
+    constructor(private postService: PostService) {}
 
     @Post()
     @UseGuards(AuthGuard('jwt'), AdminGuard)
     @HttpCode(HttpStatus.CREATED)
-    async createPost(@Body() createPostDto: CreatePostDto, @GetUser() user: User): Promise<PostEntity> {
+    async createPost(
+        @Body() createPostDto: CreatePostDto,
+        @GetUser() user: User,
+    ): Promise<PostEntity> {
         return this.postService.create(createPostDto, user);
     }
 
@@ -55,28 +58,35 @@ export class PostController {
 
     @Get('/public')
     @HttpCode(HttpStatus.OK)
-    getPublicPosts(@Query() findPostsDto: FindPostsDto): Promise<FindPostsResponseDto> {
+    getPublicPosts(
+        @Query() findPostsDto: FindPostsDto,
+    ): Promise<FindPostsResponseDto> {
         return this.postService.findPostsPaginated(findPostsDto);
     }
 
     @Get('/')
     @UseGuards(AuthGuard('jwt'), AdminGuard)
     @HttpCode(HttpStatus.OK)
-    getPosts(@Query() findPostsDto: FindPostsDto): Promise<FindPostsResponseDto> {
+    getPosts(
+        @Query() findPostsDto: FindPostsDto,
+    ): Promise<FindPostsResponseDto> {
         return this.postService.findPostsPaginated(findPostsDto, true);
     }
 
     @Get('/public/:id')
     @HttpCode(HttpStatus.OK)
-    async getPublicPostById(@Param('id') postId: number): Promise<NullableType<PostEntity>> {
+    async getPublicPostById(
+        @Param('id') postId: number,
+    ): Promise<NullableType<PostEntity>> {
         const post = await this.postService.findOne({
             where: {
-                id: postId
+                id: postId,
             },
-            relations: ['user', 'tags', 'category']
+            relations: ['user', 'tags', 'category'],
         });
         if (!post) throw new NotFoundException('존재하지 않는 게시물입니다.');
-        if (post.status === PostStatus.PRIVATE) throw new ForbiddenException('게시물에 접근할 권한이 없습니다.');
+        if (post.status === PostStatus.PRIVATE)
+            throw new ForbiddenException('게시물에 접근할 권한이 없습니다.');
 
         return post;
     }
@@ -87,9 +97,9 @@ export class PostController {
     async getPostById(@Param('id') postId: number): Promise<PostEntity> {
         const post = await this.postService.findOne({
             where: {
-                id: postId
+                id: postId,
             },
-            relations: ['user', 'tags', 'category']
+            relations: ['user', 'tags', 'category'],
         });
         if (!post) throw new NotFoundException('존재하지 않는 게시물입니다.');
 
@@ -101,7 +111,7 @@ export class PostController {
     @HttpCode(HttpStatus.OK)
     async updatePost(
         @Param('id', ParseIntPipe) postId: number,
-        @Body() updatePostDto: UpdatePostDto
+        @Body() updatePostDto: UpdatePostDto,
     ) {
         return this.postService.update(postId, updatePostDto);
     }
@@ -111,7 +121,7 @@ export class PostController {
     @HttpCode(HttpStatus.NO_CONTENT)
     async updatePostStatus(
         @Param('id', ParseIntPipe) postId: number,
-        @Body('status', PostStatusValidationPipe) status: PostStatus
+        @Body('status', PostStatusValidationPipe) status: PostStatus,
     ): Promise<PostEntity> {
         return this.postService.updateStatus(postId, status);
     }
@@ -119,7 +129,10 @@ export class PostController {
     @Delete('/:id')
     @UseGuards(AuthGuard('jwt'), AdminGuard)
     @HttpCode(HttpStatus.OK)
-    async deletePost(@Param('id', ParseIntPipe) postId: number, @GetUser() user: User): Promise<void> {
+    async deletePost(
+        @Param('id', ParseIntPipe) postId: number,
+        @GetUser() user: User,
+    ): Promise<void> {
         return this.postService.delete(postId, user);
     }
 }

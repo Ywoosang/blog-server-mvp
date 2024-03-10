@@ -12,13 +12,13 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     constructor(
         @InjectRepository(User)
         private userRepository: Repository<User>,
-        private configService: ConfigService<AllConfigType>
+        private configService: ConfigService<AllConfigType>,
     ) {
         super({
             // 토큰이 유효한지 체크
             secretOrKey: configService.get('auth.secret', { infer: true }),
             // bearer
-            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken()
+            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
         });
     }
 
@@ -26,14 +26,18 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
         const { userId, exp } = payload;
         const user = await this.userRepository.findOne({
             where: {
-                userId
-            }
+                userId,
+            },
         });
         if (!user) throw new UnauthorizedException();
         // 토큰의 만료 시간을 한국 시간대로 변환하여 콘솔에 출력
         const expirationDate = new Date(exp * 1000);
-        expirationDate.setTime(expirationDate.getTime() + (9 * 60 * 60 * 1000)); // 한국 시간대로 변환
-        console.log(`JWT 만료기간 : ${expirationDate.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })}`);
+        expirationDate.setTime(expirationDate.getTime() + 9 * 60 * 60 * 1000); // 한국 시간대로 변환
+        console.log(
+            `JWT 만료기간 : ${expirationDate.toLocaleString('ko-KR', {
+                timeZone: 'Asia/Seoul',
+            })}`,
+        );
 
         return user;
     }

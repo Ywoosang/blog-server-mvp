@@ -12,7 +12,7 @@ import { Tag } from 'src/tag/entities/tag.entity';
     imports: [
         ConfigModule, // AppModule 에서 설정한 ConfigModule 을 import
         TypeOrmModule.forRootAsync({
-            useFactory: config => ({
+            useFactory: (config) => ({
                 type: config.get('database.type', { infer: true }),
                 host: config.get('database.host', { infer: true }),
                 port: config.get('database.port', { infer: true }),
@@ -20,12 +20,14 @@ import { Tag } from 'src/tag/entities/tag.entity';
                 password: config.get('database.password', { infer: true }),
                 database: config.get('database.name', { infer: true }),
                 charset: 'utf8mb4',
-                synchronize: config.get('database.synchronize', { infer: true }),
+                synchronize: config.get('database.synchronize', {
+                    infer: true,
+                }),
                 // logging: true,
-                entities: [User, Post, Category, Comment, Like, Tag]
+                entities: [User, Post, Category, Comment, Like, Tag],
             }),
-            inject: [ConfigService]
-        })
-    ]
+            inject: [ConfigService],
+        }),
+    ],
 })
-export class DatabaseModule { }
+export class DatabaseModule {}

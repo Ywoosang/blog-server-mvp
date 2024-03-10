@@ -10,9 +10,16 @@ import { CategoryModule } from 'src/category/category.module';
 import { FilesModule } from 'src/files/files.module';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Post]), FilesModule, AuthModule, UsersModule, TagModule, CategoryModule],
+    imports: [
+        TypeOrmModule.forFeature([Post]),
+        FilesModule,
+        AuthModule,
+        UsersModule,
+        TagModule,
+        CategoryModule,
+    ],
     providers: [PostService],
     exports: [PostService],
-    controllers: [PostController]
+    controllers: [PostController],
 })
 export class PostModule {}

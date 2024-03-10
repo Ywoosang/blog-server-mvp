@@ -1,10 +1,10 @@
-import { BadRequestException, ArgumentMetadata, PipeTransform } from '@nestjs/common';
+import { BadRequestException, PipeTransform } from '@nestjs/common';
 import { PostStatus } from '../post-status.enum';
 
 export class PostStatusValidationPipe implements PipeTransform {
     readonly StatusOptions = [PostStatus.PRIVATE, PostStatus.PUBLIC];
 
-    transform(value: any, _metadata: ArgumentMetadata) {
+    transform(value: any) {
         value = value.toUpperCase();
         if (!this.isStatusValid(value)) {
             throw new BadRequestException(`${value} isn't in the status opt`);

@@ -10,12 +10,12 @@ export class UsersSeedService {
     constructor(
         @InjectRepository(User)
         private usersRepository: Repository<User>,
-        private gravatarService: GravatarService
-    ) { }
+        private gravatarService: GravatarService,
+    ) {}
 
     async run() {
         const countAdmin = await this.usersRepository.count({
-            where: { role: UsersRole.ADMIN }
+            where: { role: UsersRole.ADMIN },
         });
         if (!countAdmin) {
             await this.usersRepository.save(
@@ -25,8 +25,10 @@ export class UsersSeedService {
                     nickname: process.env.ADMIN_NICKNAME,
                     description: process.env.ADMIN_DESCRIPTION,
                     role: UsersRole.ADMIN,
-                    profileImage: this.gravatarService.getGravatarUrl(process.env.ADMIN_EMAIL!)
-                })
+                    profileImage: this.gravatarService.getGravatarUrl(
+                        process.env.ADMIN_EMAIL!,
+                    ),
+                }),
             );
         }
     }

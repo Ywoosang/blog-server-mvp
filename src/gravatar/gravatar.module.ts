@@ -3,6 +3,6 @@ import { GravatarService } from './gravatar.service';
 
 @Module({
     providers: [GravatarService],
-    exports: [GravatarService]
+    exports: [GravatarService],
 })
 export class GravatarModule {}

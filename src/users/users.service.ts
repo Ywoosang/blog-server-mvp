@@ -23,8 +23,8 @@ export class UsersService {
         @InjectRepository(Comment)
         private commentRepository: Repository<Comment>,
         private gravatarService: GravatarService,
-        private filesService: FilesService
-    ) { }
+        private filesService: FilesService,
+    ) {}
 
     async create(createUserDto: CreateUserDto): Promise<User> {
         const { email } = createUserDto;
@@ -34,12 +34,14 @@ export class UsersService {
             this.usersRepository.create({
                 ...createUserDto,
                 description: '',
-                profileImage
-            })
+                profileImage,
+            }),
         );
     }
 
-    async findOne(findOptions: FindOneOptions<User>): Promise<NullableType<User>> {
+    async findOne(
+        findOptions: FindOneOptions<User>,
+    ): Promise<NullableType<User>> {
         return this.usersRepository.findOne(findOptions);
     }
 
@@ -50,7 +52,13 @@ export class UsersService {
     async findUserPublicProfileByUserId(userId: string) {
         const user = await this.usersRepository
             .createQueryBuilder('user')
-            .select(['user.id', 'user.userId', 'user.nickname', 'user.profileImage', 'user.description'])
+            .select([
+                'user.id',
+                'user.userId',
+                'user.nickname',
+                'user.profileImage',
+                'user.description',
+            ])
             .where('user.userId = :userId', { userId })
             .getOne();
         if (!user) throw new NotFoundException('사용자를 찾을 수 없습니다.');
@@ -58,22 +66,26 @@ export class UsersService {
         return user;
     }
 
-    async findUserActivities(findUserActivitiesDto: FindUserActivitiesDto, userId: string): Promise<ActivityResponse> {
-        // 활동내역 
+    async findUserActivities(
+        findUserActivitiesDto: FindUserActivitiesDto,
+        userId: string,
+    ): Promise<ActivityResponse> {
+        // 활동내역
         // 댓글 작성 일자
         let { page, limit } = findUserActivitiesDto;
         page = page ? page : 1;
         limit = limit ? limit : POST_PER_PAGE;
         const skip = (page - 1) * limit;
         console.log(userId);
-        const [comments, total] = await this.commentRepository.createQueryBuilder('comment')
+        const [comments, total] = await this.commentRepository
+            .createQueryBuilder('comment')
             .innerJoin('comment.user', 'user')
             .innerJoinAndSelect('comment.post', 'post')
             .select([
                 'comment.id',
                 'comment.createdAt',
                 'post.title',
-                'post.id'
+                'post.id',
             ])
             .where('user.userId = :userId', { userId })
             // .orderBy('comment.createdAt', 'DESC')
@@ -82,36 +94,37 @@ export class UsersService {
             .getManyAndCount();
         return {
             comments,
-            total
-        }
+            total,
+        };
     }
 
     async update(id: number, updateUserDto: UpdateUserDto) {
         const user = await this.findOne({
             where: {
-                id
-            }
+                id,
+            },
         });
         // 프로필 이미지가 변경되었을 경우
         if (!user) {
-            throw new NotFoundException('사용자가 존재하지 않습니다.')
+            throw new NotFoundException('사용자가 존재하지 않습니다.');
         }
         const { profileImage } = updateUserDto;
         if (profileImage && user.profileImage != profileImage) {
             const filename = path.basename(profileImage);
-            updateUserDto.profileImage = await this.filesService.uploadUserProfileImage(filename);
+            updateUserDto.profileImage =
+                await this.filesService.uploadUserProfileImage(filename);
         }
 
         return this.usersRepository.save({
             ...user,
-            ...updateUserDto
+            ...updateUserDto,
         });
     }
 
     async updateRefreshToken(id: number, refreshToken: string): Promise<void> {
         const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
         await this.usersRepository.update(id, {
-            refreshToken: hashedRefreshToken
+            refreshToken: hashedRefreshToken,
         });
     }
 }

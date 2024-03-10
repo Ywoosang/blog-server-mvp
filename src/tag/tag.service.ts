@@ -15,15 +15,15 @@ import { POST_PER_PAGE } from 'src/common/consts';
 export class TagService {
     constructor(
         @InjectRepository(Tag)
-        private tagRepository: Repository<Tag>
-    ) { }
+        private tagRepository: Repository<Tag>,
+    ) {}
 
     async createIfNotExistByName(createTagDto: CreateTagDto): Promise<Tag> {
         const { name } = createTagDto;
         const tag = await this.tagRepository.findOne({
             where: {
-                name
-            }
+                name,
+            },
         });
         if (tag) {
             return tag;
@@ -32,7 +32,9 @@ export class TagService {
         return this.tagRepository.save(this.tagRepository.create(createTagDto));
     }
 
-    async findTagsWithOneOrMorePosts(user?: User): Promise<FindTagsResponseDto> {
+    async findTagsWithOneOrMorePosts(
+        user?: User,
+    ): Promise<FindTagsResponseDto> {
         let query = this.tagRepository
             .createQueryBuilder('tag')
             .innerJoin('tag.posts', 'post_tag')
@@ -42,16 +44,22 @@ export class TagService {
             query = query.addSelect(['COUNT(post_tag.id) as postCount']);
         } else {
             query = query
-                .addSelect(['COUNT(CASE WHEN post_tag.status = :status THEN 1 END) as postCount'])
+                .addSelect([
+                    'COUNT(CASE WHEN post_tag.status = :status THEN 1 END) as postCount',
+                ])
                 .setParameter('status', PostStatus.PUBLIC);
         }
 
-        const queryResult = await query.groupBy('tag.id, tag.name').having('postCount > 0').distinct(true).getRawMany();
+        const queryResult = await query
+            .groupBy('tag.id, tag.name')
+            .having('postCount > 0')
+            .distinct(true)
+            .getRawMany();
 
-        const tags = queryResult.map(tag => ({
+        const tags = queryResult.map((tag) => ({
             id: tag.tag_id as number,
             name: tag.tag_name as string,
-            postCount: parseInt(tag.postCount)
+            postCount: parseInt(tag.postCount),
         }));
 
         return { tags };
@@ -60,7 +68,7 @@ export class TagService {
     async findOneWithPosts(
         id: number,
         findTagPostsDto: FindTagPostsDto,
-        isAdmin: boolean = false
+        isAdmin: boolean = false,
     ): Promise<NullableType<Tag>> {
         let { page, limit } = findTagPostsDto;
         page = page ? page : 1;
@@ -68,9 +76,9 @@ export class TagService {
         const skip = (page - 1) * limit;
         const tag = await this.tagRepository.findOne({
             where: {
-                id
+                id,
             },
-            relations: ['posts', 'posts.tags']
+            relations: ['posts', 'posts.tags'],
         });
 
         if (!tag) {
@@ -78,7 +86,9 @@ export class TagService {
         }
 
         if (!isAdmin) {
-            tag.posts = tag.posts.filter(post => (post.status = PostStatus.PUBLIC));
+            tag.posts = tag.posts.filter(
+                (post) => (post.status = PostStatus.PUBLIC),
+            );
         }
         tag.posts = tag.posts.slice(skip, skip + limit);
 

@@ -2,10 +2,10 @@ const validationOptions = {
     // 자동 타입 변환
     transform: true,
     transformOptions: {
-        enableImplicitConversion: true
+        enableImplicitConversion: true,
     },
     // DTO 에 없는 속성 무시
-    whitelist: true
+    whitelist: true,
 };
 
 export default validationOptions;

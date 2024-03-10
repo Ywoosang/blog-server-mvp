@@ -13,15 +13,19 @@ export class MailService {
 
     constructor(
         private readonly configService: ConfigService<AllConfigType>,
-        private readonly mailerService: MailerService
+        private readonly mailerService: MailerService,
     ) {
         this.mailTemplateDir = path.join(
-            this.configService.getOrThrow('app.workingDirectory', { infer: true }),
+            this.configService.getOrThrow('app.workingDirectory', {
+                infer: true,
+            }),
             'src',
             'mail',
             'mail-templates',
-        )
-        this.baseUrl = this.configService.get('app.frontendDomain', { infer: true })
+        );
+        this.baseUrl = this.configService.get('app.frontendDomain', {
+            infer: true,
+        });
     }
 
     async sendLoginEmail(mailData: MailData<{ hash: string }>): Promise<void> {
@@ -31,39 +35,34 @@ export class MailService {
         await this.mailerService.sendMail({
             to: mailData.to,
             subject: LOGIN_SUBJECT,
-            templatePath: path.join(
-                this.mailTemplateDir,
-                'authentication.hbs'
-            ),
+            templatePath: path.join(this.mailTemplateDir, 'authentication.hbs'),
             context: {
                 homeUrl: this.baseUrl,
                 actionUrl: url.toString(),
                 actionText: '로그인',
                 greeting: '어서오세요.',
-                linkValidity: 24
-            }
+                linkValidity: 24,
+            },
         });
     }
 
-
-    async sendRegisterEmail(mailData: MailData<{ hash: string }>): Promise<void> {
+    async sendRegisterEmail(
+        mailData: MailData<{ hash: string }>,
+    ): Promise<void> {
         const url = new URL(`${this.baseUrl}/auth/register`);
         url.searchParams.set('hash', mailData.data.hash);
 
         await this.mailerService.sendMail({
             to: mailData.to,
             subject: REGISTER_SUBJECT,
-            templatePath: path.join(
-                this.mailTemplateDir,
-                'authentication.hbs'
-            ),
+            templatePath: path.join(this.mailTemplateDir, 'authentication.hbs'),
             context: {
                 homeUrl: this.baseUrl,
                 actionUrl: url.toString(),
                 actionText: '회원가입',
                 greeting: '환영합니다.',
-                linkValidity: 24
-            }
+                linkValidity: 24,
+            },
         });
     }
 }

@@ -1,4 +1,10 @@
-import { BaseEntity, Column, PrimaryGeneratedColumn, Entity, OneToMany } from 'typeorm';
+import {
+    BaseEntity,
+    Column,
+    PrimaryGeneratedColumn,
+    Entity,
+    OneToMany,
+} from 'typeorm';
 import { Post } from 'src/post/entities/post.entity';
 import { Comment } from 'src/comment/entities/comment.entity';
 import { Like } from 'src/like/entities/like.entity';
@@ -30,12 +36,12 @@ export class User extends BaseEntity {
     @Column({ nullable: true })
     refreshToken: string;
 
-    @OneToMany(() => Post, post => post.user)
+    @OneToMany(() => Post, (post) => post.user)
     posts: Post[];
 
-    @OneToMany(() => Comment, comment => comment.user)
+    @OneToMany(() => Comment, (comment) => comment.user)
     comments: Comment[];
 
-    @OneToMany(() => Like, like => like.post)
+    @OneToMany(() => Like, (like) => like.post)
     likes: Like[];
 }

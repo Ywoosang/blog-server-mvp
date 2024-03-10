@@ -14,7 +14,7 @@ async function bootstrap() {
         origin: configService.get('app.frontendDomain', { infer: true }),
         credentials: true,
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-        allowedHeaders: 'Content-Type, Accept, Authorization'
+        allowedHeaders: 'Content-Type, Accept, Authorization',
     });
     app.useGlobalInterceptors(new ResponseInterceptor());
     app.useGlobalPipes(new ValidationPipe(validationOptions));

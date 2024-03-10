@@ -7,8 +7,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
             type: 'sqlite',
             database: ':memory:',
             synchronize: true,
-            autoLoadEntities: true
-        })
-    ]
+            autoLoadEntities: true,
+        }),
+    ],
 })
-export class DatabaseTestModule { }
+export class DatabaseTestModule {}

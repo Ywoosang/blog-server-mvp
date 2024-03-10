@@ -6,7 +6,7 @@ import {
     OneToMany,
     JoinColumn,
     CreateDateColumn,
-    UpdateDateColumn
+    UpdateDateColumn,
 } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Post } from 'src/post/entities/post.entity';
@@ -22,23 +22,25 @@ export class Comment {
     @Column({ nullable: true })
     parentCommentId: number;
 
-    @ManyToOne(() => User, user => user.comments)
+    @ManyToOne(() => User, (user) => user.comments)
     @JoinColumn({ name: 'replyToId' })
     replyTo: User;
 
-    @ManyToOne(() => User, user => user.comments, { onDelete: 'CASCADE' })
+    @ManyToOne(() => User, (user) => user.comments, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'userId' })
     user: User;
 
-    @ManyToOne(() => Post, post => post.comments, { onDelete: 'CASCADE' })
+    @ManyToOne(() => Post, (post) => post.comments, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'postId' })
     post: Post;
 
-    @ManyToOne(() => Comment, comment => comment.replies, { onDelete: 'CASCADE' })
+    @ManyToOne(() => Comment, (comment) => comment.replies, {
+        onDelete: 'CASCADE',
+    })
     @JoinColumn({ name: 'parentCommentId' })
     parentComment: Comment;
 
-    @OneToMany(() => Comment, comment => comment.parentComment)
+    @OneToMany(() => Comment, (comment) => comment.parentComment)
     replies: Comment[];
 
     @CreateDateColumn()

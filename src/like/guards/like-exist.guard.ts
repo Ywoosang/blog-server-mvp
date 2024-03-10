@@ -11,14 +11,14 @@ export class LikeExistGuard implements CanActivate {
         const like = await this.likeService.findOne({
             where: {
                 post: {
-                    id: postId
+                    id: postId,
                 },
                 user: {
-                    id: userId
-                }
-            }
+                    id: userId,
+                },
+            },
         });
 
-        return !!!like;
+        return !like;
     }
 }

@@ -9,7 +9,7 @@ import {
     JoinColumn,
     JoinTable,
     CreateDateColumn,
-    UpdateDateColumn
+    UpdateDateColumn,
 } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Comment } from 'src/comment/entities/comment.entity';
@@ -41,21 +41,26 @@ export class Post extends BaseEntity {
     @UpdateDateColumn()
     updatedAt: Date;
 
-    @ManyToOne(() => User, user => user.posts, { eager: true, onDelete: 'CASCADE' })
+    @ManyToOne(() => User, (user) => user.posts, {
+        eager: true,
+        onDelete: 'CASCADE',
+    })
     @JoinColumn({ name: 'userId' })
     user: User;
 
-    @ManyToOne(() => Category, category => category.posts, { onDelete: 'SET NULL' })
+    @ManyToOne(() => Category, (category) => category.posts, {
+        onDelete: 'SET NULL',
+    })
     @JoinColumn({ name: 'categoryId' })
     category: Category;
 
-    @ManyToMany(() => Tag, tag => tag.posts)
+    @ManyToMany(() => Tag, (tag) => tag.posts)
     @JoinTable({ name: 'post_tag' })
     tags: Tag[];
 
-    @OneToMany(() => Comment, comment => comment.post)
+    @OneToMany(() => Comment, (comment) => comment.post)
     comments: Comment[];
 
-    @OneToMany(() => Like, like => like.post)
+    @OneToMany(() => Like, (like) => like.post)
     likes: Like[];
 }

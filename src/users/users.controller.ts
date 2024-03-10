@@ -1,4 +1,15 @@
-import { Controller, Get, Patch, Body, UseGuards, HttpCode, HttpStatus, Param, Query, UseInterceptors } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    Patch,
+    Body,
+    UseGuards,
+    HttpCode,
+    HttpStatus,
+    Param,
+    Query,
+    UseInterceptors,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -11,14 +22,13 @@ import { NullableType } from 'src/utils/types/nullable.type';
 
 @Controller('users')
 export class UsersController {
-    constructor(private usersService: UsersService) { }
+    constructor(private usersService: UsersService) {}
 
     // 로그인 여부로
     @Get('/profile')
     @UseInterceptors(AuthCheckInterceptor)
     @HttpCode(HttpStatus.OK)
     getUserProfile(@GetUser() user: User): NullableType<User> {
-
         return user;
     }
 
@@ -32,7 +42,10 @@ export class UsersController {
     @Patch('/profile')
     @UseGuards(AuthGuard('jwt'))
     @HttpCode(HttpStatus.OK)
-    async updateUserProfile(@GetUser() user: User, @Body() updateUserDto: UpdateUserDto): Promise<User> {
+    async updateUserProfile(
+        @GetUser() user: User,
+        @Body() updateUserDto: UpdateUserDto,
+    ): Promise<User> {
         return this.usersService.update(user.id, updateUserDto);
     }
 
@@ -40,8 +53,11 @@ export class UsersController {
     @HttpCode(HttpStatus.OK)
     async getUserActivities(
         @Param('userId') userId: string,
-        @Query() findUserActivitiesDto: FindUserActivitiesDto
+        @Query() findUserActivitiesDto: FindUserActivitiesDto,
     ): Promise<ActivityResponse> {
-        return this.usersService.findUserActivities(findUserActivitiesDto, userId);
+        return this.usersService.findUserActivities(
+            findUserActivitiesDto,
+            userId,
+        );
     }
 }

@@ -1,4 +1,12 @@
-import { IsAlphanumeric, IsEmail, IsEnum, IsNotEmpty, IsString, Matches, MaxLength, MinLength } from 'class-validator';
+import {
+    IsAlphanumeric,
+    IsEmail,
+    IsEnum,
+    IsNotEmpty,
+    IsString,
+    MaxLength,
+    MinLength,
+} from 'class-validator';
 import { UsersRole } from '../users-role.enum';
 
 export class CreateUserDto {

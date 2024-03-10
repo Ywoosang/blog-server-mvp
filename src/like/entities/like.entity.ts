@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
+import {
+    Entity,
+    PrimaryGeneratedColumn,
+    ManyToOne,
+    JoinColumn,
+    CreateDateColumn,
+} from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Post } from 'src/post/entities/post.entity';
 
@@ -10,11 +16,11 @@ export class Like {
     @CreateDateColumn()
     createdAt: Date;
 
-    @ManyToOne(() => User, user => user.likes)
+    @ManyToOne(() => User, (user) => user.likes)
     @JoinColumn({ name: 'userId' })
     user: User;
 
-    @ManyToOne(() => Post, post => post.likes)
+    @ManyToOne(() => Post, (post) => post.likes)
     @JoinColumn({ name: 'postId' })
     post: Post;
 }

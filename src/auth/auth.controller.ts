@@ -1,4 +1,13 @@
-import { Body, Controller, Post, HttpCode, HttpStatus, UseGuards, Get, Query } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Post,
+    HttpCode,
+    HttpStatus,
+    UseGuards,
+    Get,
+    Query,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthLoginDto } from './dto/auth-login.dto';
 import { AuthRegisterDto } from './dto/auth-register.dto';
@@ -7,12 +16,11 @@ import { NullableType } from 'src/utils/types/nullable.type';
 import { AuthLoginResponseDto } from './dto/auth-login-response.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/utils/decorators/get-user.decorator';
-import { ConfirmEmailDto } from './dto/auth-confirm-email.dto';
 import { AuthEmailDto } from './dto/auth-email.dto';
 
 @Controller('auth')
 export class AuthController {
-    constructor(private authService: AuthService) { }
+    constructor(private authService: AuthService) {}
 
     /**
      * 새로운 사용자를 등록한다
@@ -22,7 +30,9 @@ export class AuthController {
      */
     @Post('/register')
     @HttpCode(HttpStatus.CREATED)
-    register(@Body() registerDto: AuthRegisterDto): Promise<NullableType<User>> {
+    register(
+        @Body() registerDto: AuthRegisterDto,
+    ): Promise<NullableType<User>> {
         return this.authService.register(registerDto);
     }
 
@@ -46,10 +56,11 @@ export class AuthController {
      */
     @Post('/send-email')
     @HttpCode(HttpStatus.OK)
-    async sendAuthEmail(@Body() authEmailDto: AuthEmailDto): Promise<{ message: string }> {
+    async sendAuthEmail(
+        @Body() authEmailDto: AuthEmailDto,
+    ): Promise<{ message: string }> {
         return this.authService.sendAuthEmail(authEmailDto);
     }
-
 
     @Get('/email')
     @HttpCode(HttpStatus.OK)
@@ -71,7 +82,7 @@ export class AuthController {
         const accessToken = await this.authService.generateAccessToken(payload);
 
         return {
-            accessToken
+            accessToken,
         };
     }
 }

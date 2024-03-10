@@ -14,8 +14,8 @@ export class MailerService {
             service: configService.get('mail.service', { infer: true }),
             auth: {
                 user: configService.get('mail.user', { infer: true }),
-                pass: configService.get('mail.password', { infer: true })
-            }
+                pass: configService.get('mail.password', { infer: true }),
+            },
         });
     }
 
@@ -27,16 +27,15 @@ export class MailerService {
         templatePath: string;
         context: Record<string, unknown>;
     }): Promise<void> {
-        let html: string;
         const template = await fs.readFile(templatePath, 'utf-8');
-        html = Handlebars.compile(template, {
-            strict: true
+        const html = Handlebars.compile(template, {
+            strict: true,
         })(context);
-        
+
         await this.transporter.sendMail({
             ...mailOptions,
             from: this.configService.get('mail.defaultEmail', { infer: true }),
-            html
+            html,
         });
     }
 }

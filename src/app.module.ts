@@ -28,12 +28,18 @@ import googleConfig from './configs/google.config';
             load:
                 process.env.NODE_ENV === 'test'
                     ? [appConfig, authConfig]
-                    : [appConfig, authConfig, databaseConfig, mailConfig, googleConfig],
-            envFilePath: `.env`
+                    : [
+                          appConfig,
+                          authConfig,
+                          databaseConfig,
+                          mailConfig,
+                          googleConfig,
+                      ],
+            envFilePath: `.env`,
         }),
         ServeStaticModule.forRoot({
             rootPath: path.join(__dirname, '..', 'public'),
-            serveRoot: '/static'
+            serveRoot: '/static',
         }),
         process.env.NODE_ENV === 'test' ? DatabaseTestModule : DatabaseModule,
         AuthModule,
@@ -45,8 +51,8 @@ import googleConfig from './configs/google.config';
         TagModule,
         MailModule,
         MailerModule,
-        FilesModule
-    ]
+        FilesModule,
+    ],
 })
 export class AppModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {

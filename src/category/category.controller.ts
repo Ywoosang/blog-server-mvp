@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Param, Body, Put, Delete, UseGuards, Query, ParseIntPipe } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    Post,
+    Param,
+    Body,
+    Put,
+    Delete,
+    UseGuards,
+    Query,
+    ParseIntPipe,
+} from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { Category } from './entities/category.entity';
 import { AuthGuard } from '@nestjs/passport';
@@ -20,7 +31,9 @@ export class CategoryController {
      */
     @Post()
     @UseGuards(AuthGuard('jwt'), AdminGuard)
-    async create(@Body() createCategoryDto: CreateCategoryDto): Promise<Category> {
+    async create(
+        @Body() createCategoryDto: CreateCategoryDto,
+    ): Promise<Category> {
         return this.categoryService.create(createCategoryDto);
     }
 
@@ -31,7 +44,9 @@ export class CategoryController {
      */
     @Get()
     @UseGuards(AuthGuard('jwt'), AdminGuard)
-    async findAllWithPostCount(): Promise<{ categories: { id: number; name: string; postCount: number }[] }> {
+    async findAllWithPostCount(): Promise<{
+        categories: { id: number; name: string; postCount: number }[];
+    }> {
         return this.categoryService.findAllWithPostCount(true);
     }
 
@@ -41,7 +56,9 @@ export class CategoryController {
      * @returns 카테고리 정보와 해당 카테고리에 속한 PUBLIC 게시물의 개수
      */
     @Get('/public')
-    async findAllWithPublicPostCount(): Promise<{ categories: { id: number; name: string; postCount: number }[] }> {
+    async findAllWithPublicPostCount(): Promise<{
+        categories: { id: number; name: string; postCount: number }[];
+    }> {
         return this.categoryService.findAllWithPostCount();
     }
 
@@ -60,7 +77,7 @@ export class CategoryController {
     @Get('/public/:id')
     async findOneWithPostsByPublic(
         @Param('id', ParseIntPipe) id: number,
-        @Query() findCategoryPostsDto: FindCategoryPostsDto
+        @Query() findCategoryPostsDto: FindCategoryPostsDto,
     ): Promise<NullableType<Category>> {
         return this.categoryService.findOneWithPosts(+id, findCategoryPostsDto);
     }
@@ -76,9 +93,13 @@ export class CategoryController {
     @UseGuards(AuthGuard('jwt'), AdminGuard)
     async findOneWithPosts(
         @Param('id', ParseIntPipe) id: number,
-        @Query() findCategoryPostsDto: FindCategoryPostsDto
+        @Query() findCategoryPostsDto: FindCategoryPostsDto,
     ): Promise<NullableType<Category>> {
-        return this.categoryService.findOneWithPosts(+id, findCategoryPostsDto, true);
+        return this.categoryService.findOneWithPosts(
+            +id,
+            findCategoryPostsDto,
+            true,
+        );
     }
 
     /**
@@ -92,7 +113,7 @@ export class CategoryController {
     @UseGuards(AuthGuard('jwt'), AdminGuard)
     async update(
         @Param('id', ParseIntPipe) id: number,
-        @Body() updateCategoryDto: UpdateCategoryDto
+        @Body() updateCategoryDto: UpdateCategoryDto,
     ): Promise<Category> {
         return this.categoryService.update(+id, updateCategoryDto);
     }

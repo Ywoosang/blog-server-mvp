@@ -13,11 +13,13 @@ import { POST_PER_PAGE } from 'src/common/consts';
 export class CategoryService {
     constructor(
         @InjectRepository(Category)
-        private categoryRepository: Repository<Category>
-    ) { }
+        private categoryRepository: Repository<Category>,
+    ) {}
 
     async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
-        return this.categoryRepository.save(this.categoryRepository.create(createCategoryDto));
+        return this.categoryRepository.save(
+            this.categoryRepository.create(createCategoryDto),
+        );
     }
 
     async findAll(): Promise<{ categories: Category[] }> {
@@ -26,18 +28,24 @@ export class CategoryService {
         return { categories };
     }
 
-    async findAllWithPostCount(
-        isAdmin: boolean = false
-    ): Promise<{ categories: { id: number; name: string; postCount: number }[] }> {
+    async findAllWithPostCount(isAdmin: boolean = false): Promise<{
+        categories: { id: number; name: string; postCount: number }[];
+    }> {
         const query = this.categoryRepository.createQueryBuilder('category');
         query
             .leftJoin(
                 'post',
                 'post',
-                isAdmin ? 'category.id = post.categoryId' : 'category.id = post.categoryId AND post.status = :status',
-                { status: PostStatus.PUBLIC }
+                isAdmin
+                    ? 'category.id = post.categoryId'
+                    : 'category.id = post.categoryId AND post.status = :status',
+                { status: PostStatus.PUBLIC },
             )
-            .select(['category.id AS id', 'category.name AS name', 'COALESCE(COUNT(post.id),0) AS postCount'])
+            .select([
+                'category.id AS id',
+                'category.name AS name',
+                'COALESCE(COUNT(post.id),0) AS postCount',
+            ])
             .addGroupBy('category.id')
             .addGroupBy('category.name');
         const categories = await query.getRawMany();
@@ -48,15 +56,15 @@ export class CategoryService {
     async findOneById(id: number): Promise<NullableType<Category>> {
         return this.categoryRepository.findOne({
             where: {
-                id
-            }
+                id,
+            },
         });
     }
 
     async findOneWithPosts(
         id: number,
         findCategoryPostsDto: FindCategoryPostsDto,
-        isAdmin: boolean = false
+        isAdmin: boolean = false,
     ): Promise<NullableType<Category>> {
         let { page, limit } = findCategoryPostsDto;
         page = page ? page : 1;
@@ -64,9 +72,9 @@ export class CategoryService {
         const skip = (page - 1) * limit;
         const category = await this.categoryRepository.findOne({
             where: {
-                id
+                id,
             },
-            relations: ['posts', 'posts.tags']
+            relations: ['posts', 'posts.tags'],
         });
 
         if (!category) {
@@ -74,16 +82,23 @@ export class CategoryService {
         }
 
         if (!isAdmin) {
-            category.posts = category.posts.filter(post => (post.status = PostStatus.PUBLIC));
+            category.posts = category.posts.filter(
+                (post) => (post.status = PostStatus.PUBLIC),
+            );
         }
         category.posts = category.posts.slice(skip, skip + limit);
 
         return category;
     }
 
-    async update(id: number, updateCategoryDto: UpdateCategoryDto): Promise<Category> {
+    async update(
+        id: number,
+        updateCategoryDto: UpdateCategoryDto,
+    ): Promise<Category> {
         const { name } = updateCategoryDto;
-        const category = await this.categoryRepository.findOne({ where: { id } });
+        const category = await this.categoryRepository.findOne({
+            where: { id },
+        });
         if (!category) {
             throw new NotFoundException('존재하지 않는 카테고리 입니다.');
         }

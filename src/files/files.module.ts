@@ -26,7 +26,9 @@ import path from 'path';
                     ),
                     filename: (req, file, callback) => {
                         // uuid + 확장자 형식으로 파일 저장
-                        const filename = `${uuid()}${path.extname(file.originalname)}`;
+                        const filename = `${uuid()}${path.extname(
+                            file.originalname,
+                        )}`;
                         callback(null, filename);
                     },
                 }),

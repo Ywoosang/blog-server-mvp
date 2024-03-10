@@ -10,6 +10,6 @@ import { PostModule } from 'src/post/post.module';
     imports: [TypeOrmModule.forFeature([Like]), AuthModule, PostModule],
     providers: [LikeService],
     exports: [LikeService],
-    controllers: [LikeController]
+    controllers: [LikeController],
 })
 export class LikeModule {}

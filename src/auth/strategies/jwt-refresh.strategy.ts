@@ -10,16 +10,21 @@ import { Request } from 'express';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
-export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
+export class JwtRefreshStrategy extends PassportStrategy(
+    Strategy,
+    'jwt-refresh',
+) {
     constructor(
         @InjectRepository(User)
         private userRepository: Repository<User>,
-        private configService: ConfigService<AllConfigType>
+        private configService: ConfigService<AllConfigType>,
     ) {
         super({
-            secretOrKey: configService.get('auth.refreshSecret', { infer: true }),
+            secretOrKey: configService.get('auth.refreshSecret', {
+                infer: true,
+            }),
             jwtFromRequest: ExtractJwt.fromBodyField('refreshToken'),
-            passReqToCallback: true
+            passReqToCallback: true,
         });
     }
 
@@ -33,15 +38,18 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
 
         const user = await this.userRepository.findOne({
             where: {
-                userId
-            }
+                userId,
+            },
         });
         if (!user) {
             throw new UnauthorizedException();
         }
 
         const refreshTokenFromBody = request.body.refreshToken;
-        const isMatch = await bcrypt.compare(refreshTokenFromBody, user.refreshToken);
+        const isMatch = await bcrypt.compare(
+            refreshTokenFromBody,
+            user.refreshToken,
+        );
 
         if (isMatch) {
             return user;

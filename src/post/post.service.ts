@@ -24,16 +24,16 @@ export class PostService {
         private usersService: UsersService,
         private categoryService: CategoryService,
         private tagService: TagService,
-        private filesService: FilesService
-    ) { }
+        private filesService: FilesService,
+    ) {}
 
     async getPostCount(status?: PostStatus): Promise<{ postCount: number }> {
         let postCount;
         if (status == PostStatus.PUBLIC) {
             postCount = await this.postRepository.count({
                 where: {
-                    status: PostStatus.PUBLIC
-                }
+                    status: PostStatus.PUBLIC,
+                },
             });
         } else {
             postCount = await this.postRepository.count();
@@ -42,11 +42,16 @@ export class PostService {
         return { postCount };
     }
 
-    async findOne(findOptions: FindOneOptions<Post>): Promise<NullableType<Post>> {
+    async findOne(
+        findOptions: FindOneOptions<Post>,
+    ): Promise<NullableType<Post>> {
         return this.postRepository.findOne(findOptions);
     }
 
-    async findPostsPaginated(findPostsDto: FindPostsDto, isAdmin: boolean = false): Promise<FindPostsResponseDto> {
+    async findPostsPaginated(
+        findPostsDto: FindPostsDto,
+        isAdmin: boolean = false,
+    ): Promise<FindPostsResponseDto> {
         let { page, limit } = findPostsDto;
         page = page ? page : 1;
         limit = limit ? limit : POST_PER_PAGE;
@@ -61,30 +66,38 @@ export class PostService {
             where: whereCondition,
             relations: ['tags'],
             order: {
-                createdAt: 'DESC'
-            }
+                createdAt: 'DESC',
+            },
         });
 
         return {
             posts,
-            total
+            total,
         };
     }
 
     async findPublicUserPosts(userId: number): Promise<NullableType<Post[]>> {
         const user = await this.usersService.findOne({
             where: {
-                id: userId
+                id: userId,
             },
-            relations: ['posts']
+            relations: ['posts'],
         });
         if (!user) throw new NotFoundException('존재하지 않는 사용자입니다.');
 
-        return user.posts.filter(post => post.status === PostStatus.PUBLIC);
+        return user.posts.filter((post) => post.status === PostStatus.PUBLIC);
     }
 
     async create(createPostDto: CreatePostDto, user: User): Promise<Post> {
-        const { title, content, description, status, categoryId, tagNames, fileNames } = createPostDto;
+        const {
+            title,
+            content,
+            description,
+            status,
+            categoryId,
+            tagNames,
+            fileNames,
+        } = createPostDto;
 
         let category;
         if (categoryId) {
@@ -97,7 +110,9 @@ export class PostService {
         const tags: Tag[] = [];
         if (tagNames) {
             for (const tagName of tagNames) {
-                const tag = await this.tagService.createIfNotExistByName({ name: tagName });
+                const tag = await this.tagService.createIfNotExistByName({
+                    name: tagName,
+                });
                 tags.push(tag);
             }
         }
@@ -110,8 +125,8 @@ export class PostService {
                 status,
                 user,
                 category,
-                tags
-            })
+                tags,
+            }),
         );
 
         const postId = post.id;
@@ -121,18 +136,29 @@ export class PostService {
             }
         }
 
-        post.content = this.filesService.uploadImageUrlInHtml(post.content, postId);
+        post.content = this.filesService.uploadImageUrlInHtml(
+            post.content,
+            postId,
+        );
         await this.postRepository.save(post);
 
         return post;
     }
 
     async update(id: number, updatePostDto: UpdatePostDto) {
-        const { title, content, description, status, categoryId, tagNames, fileNames } = updatePostDto;
+        const {
+            title,
+            content,
+            description,
+            status,
+            categoryId,
+            tagNames,
+            fileNames,
+        } = updatePostDto;
         const post = await this.findOne({
             where: {
-                id
-            }
+                id,
+            },
         });
         if (!post) throw new NotFoundException('존재하지 않는 게시물입니다.');
 
@@ -145,7 +171,9 @@ export class PostService {
         if (tagNames) {
             const tags: Tag[] = [];
             for (const tagName of tagNames) {
-                const tag = await this.tagService.createIfNotExistByName({ name: tagName });
+                const tag = await this.tagService.createIfNotExistByName({
+                    name: tagName,
+                });
                 tags.push(tag);
             }
             post.tags = tags;
@@ -170,8 +198,8 @@ export class PostService {
     async updateStatus(id: number, status: PostStatus): Promise<Post> {
         const post = await this.findOne({
             where: {
-                id
-            }
+                id,
+            },
         });
         if (!post) throw new NotFoundException('존재하지 않는 게시물입니다.');
         post.status = status;
@@ -186,10 +214,10 @@ export class PostService {
                 { id },
                 {
                     user: {
-                        id: user.id
-                    }
-                }
-            ]
+                        id: user.id,
+                    },
+                },
+            ],
         });
         if (!post) throw new NotFoundException('존재하지 않는 게시물입니다.');
         const postId: string = post.id.toString();

@@ -7,6 +7,6 @@ import { UsersSeedService } from './users-seed.service';
 @Module({
     imports: [TypeOrmModule.forFeature([User]), GravatarModule],
     providers: [UsersSeedService],
-    exports: [UsersSeedService]
+    exports: [UsersSeedService],
 })
 export class UsersSeedModule {}
