@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NullableType } from 'src/utils/types/nullable.type';
 import { Repository } from 'typeorm';
@@ -14,9 +14,13 @@ export class CategoryService {
     constructor(
         @InjectRepository(Category)
         private categoryRepository: Repository<Category>,
-    ) {}
+    ) { }
 
     async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
+        const { name } = createCategoryDto;
+        const category = await this.findOneByName(name);
+        if (category) throw new ConflictException('이미 존재하는 카테고리입니다.')
+
         return this.categoryRepository.save(
             this.categoryRepository.create(createCategoryDto),
         );
@@ -59,6 +63,14 @@ export class CategoryService {
                 id,
             },
         });
+    }
+
+    async findOneByName(name: string): Promise<NullableType<Category>> {
+        return this.categoryRepository.findOne({
+            where: {
+                name,
+            }
+        })
     }
 
     async findOneWithPosts(
