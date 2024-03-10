@@ -5,12 +5,11 @@ import { UsersService } from 'src/users/users.service';
 class UserSeeder {
     constructor(private readonly usersService: UsersService) { }
 
-    async createTestUser(role: UsersRole) {
+    async createTestUser(email: string, role: UsersRole) {
         const user = {
-            email: faker.internet.email(),
+            email,
             userId: faker.random.alphaNumeric(faker.datatype.number({ min: 4, max: 20 })),
             nickname: faker.name.findName(),
-            password: 'test@1234',
             role,
         };
 

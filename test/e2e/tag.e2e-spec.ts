@@ -13,6 +13,8 @@ import * as faker from 'faker';
 import 'faker/locale/ko';
 import { PostStatus } from 'src/post/post-status.enum';
 import { ResponseInterceptor } from 'src/common/interceptors/response.interceptor';
+import { AuthService } from 'src/auth/auth.service';
+import { ADMIN_EMAIL, USER_EMAIL } from '../consts';
 
 describe('TagController (e2e)', () => {
     let app: INestApplication;
@@ -32,12 +34,21 @@ describe('TagController (e2e)', () => {
 
         const usersService = moduleFixture.get<UsersService>(UsersService);
         const postService = moduleFixture.get<PostService>(PostService);
+        const authService = moduleFixture.get<AuthService>(AuthService);
         userSeeder = new UserSeeder(usersService);
         postSeeder = new PostSeeder(postService);
-        // 관리자 생성
-        testAdminUser = await userSeeder.createTestUser(UsersRole.ADMIN);
-        // 사용자 생성
-        testUser = await userSeeder.createTestUser(UsersRole.USER);
+
+        testAdminUser = await userSeeder.createTestUser(ADMIN_EMAIL, UsersRole.ADMIN);
+        testUser = await userSeeder.createTestUser(USER_EMAIL, UsersRole.USER);
+
+        const adminHash = await authService.generateHash(ADMIN_EMAIL);
+        const userHash = await authService.generateHash(USER_EMAIL);
+
+        let response;
+        response = await authService.login({ hash: adminHash });
+        accessTokenAdmin = response.accessToken;
+        response = await authService.login({ hash: userHash });
+        accessTokenUser = response.accessToken;
 
         // 게시물 및 태그들 생성
         const tags = Array.from({ length: 5 }).map(() => {
@@ -60,26 +71,7 @@ describe('TagController (e2e)', () => {
 
     describe('/tags (GET)', () => {
         it('게시물이 하나 이상 있는 태그들을 반환한다.', async () => {
-            let response;
-            response = await request(app.getHttpServer())
-                .post('/auth/signin')
-                .send({
-                    userId: testAdminUser.userId,
-                    password: 'test@1234'
-                })
-                .expect(200);
-            accessTokenAdmin = response.body.accessToken;
-
-            response = await request(app.getHttpServer())
-                .post('/auth/signin')
-                .send({
-                    userId: testUser.userId,
-                    password: 'test@1234'
-                })
-                .expect(200);
-            accessTokenUser = response.body.accessToken;
-
-            response = await request(app.getHttpServer())
+            const response = await request(app.getHttpServer())
                 .get('/tags')
                 .set('Authorization', `Bearer ${accessTokenAdmin}`)
                 .expect(200);

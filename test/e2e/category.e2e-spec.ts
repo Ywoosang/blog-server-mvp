@@ -12,6 +12,8 @@ import { PostStatus } from 'src/post/post-status.enum';
 import PostSeeder from '../seeds/post.seed';
 import UserSeeder from '../seeds/users.seed';
 import { ResponseInterceptor } from 'src/common/interceptors/response.interceptor';
+import { ADMIN_EMAIL, USER_EMAIL } from '../consts';
+import { AuthService } from 'src/auth/auth.service';
 
 describe('CategoryController (e2e)', () => {
     let app: INestApplication;
@@ -29,13 +31,23 @@ describe('CategoryController (e2e)', () => {
         }).compile();
 
         const usersService = moduleFixture.get<UsersService>(UsersService);
-        userSeeder = new UserSeeder(usersService);
-
         const postService = moduleFixture.get<PostService>(PostService);
+        const authService = moduleFixture.get<AuthService>(AuthService);
+
+        userSeeder = new UserSeeder(usersService);
         postSeeder = new PostSeeder(postService);
-        // 관리자 생성
-        testAdminUser = await userSeeder.createTestUser(UsersRole.ADMIN);
-        testUser = await userSeeder.createTestUser(UsersRole.USER);
+
+        testAdminUser = await userSeeder.createTestUser(ADMIN_EMAIL, UsersRole.ADMIN);
+        testUser = await userSeeder.createTestUser(USER_EMAIL, UsersRole.USER);
+
+        const adminHash = await authService.generateHash(ADMIN_EMAIL);
+        const userHash = await authService.generateHash(USER_EMAIL);
+
+        let response;
+        response = await authService.login({ hash: adminHash });
+        accessTokenAdmin = response.accessToken;
+        response = await authService.login({ hash: userHash });
+        accessTokenUser = response.accessToken;
 
         app = moduleFixture.createNestApplication();
         app.useGlobalPipes(new ValidationPipe(validationOptions));
@@ -50,26 +62,7 @@ describe('CategoryController (e2e)', () => {
     describe('/categories (POST)', () => {
         const name = '일상';
         it('카테고리를 생성한다.', async () => {
-            let response;
-            response = await request(app.getHttpServer())
-                .post('/auth/signin')
-                .send({
-                    userId: testAdminUser.userId,
-                    password: 'test@1234'
-                })
-                .expect(200);
-            accessTokenAdmin = response.body.accessToken;
-
-            response = await request(app.getHttpServer())
-                .post('/auth/signin')
-                .send({
-                    userId: testUser.userId,
-                    password: 'test@1234'
-                })
-                .expect(200);
-            accessTokenUser = response.body.accessToken;
-
-            response = await request(app.getHttpServer())
+            const response = await request(app.getHttpServer())
                 .post('/categories')
                 .set('Authorization', `Bearer ${accessTokenAdmin}`)
                 .send({

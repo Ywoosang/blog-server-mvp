@@ -8,10 +8,12 @@ import { User } from 'src/users/entities/user.entity';
 import { UsersRole } from 'src/users/users-role.enum';
 import validationOptions from 'src/utils/validation-options';
 import { ResponseInterceptor } from 'src/common/interceptors/response.interceptor';
+import { USER_EMAIL, USER_EMAIL_SECOND } from '../consts';
+import { AuthService } from 'src/auth/auth.service';
 
 describe('UserController (e2e)', () => {
     let app: INestApplication;
-    let accessToken: string;
+    let accessTokenUser: string;
     let userSeeder: UserSeeder;
     let testUser: User;
 
@@ -20,10 +22,18 @@ describe('UserController (e2e)', () => {
             imports: [AppModule]
         }).compile();
 
+        const authService = moduleFixture.get<AuthService>(AuthService);
         const usersService = moduleFixture.get<UsersService>(UsersService);
+
         userSeeder = new UserSeeder(usersService);
-        // 사용자 생성
-        testUser = await userSeeder.createTestUser(UsersRole.USER);
+
+        testUser = await userSeeder.createTestUser(USER_EMAIL, UsersRole.USER);
+
+        const userHash = await authService.generateHash(USER_EMAIL);
+
+        let response;
+        response = await authService.login({ hash: userHash });
+        accessTokenUser = response.accessToken;
 
         app = moduleFixture.createNestApplication();
         app.useGlobalPipes(new ValidationPipe(validationOptions));
@@ -37,18 +47,9 @@ describe('UserController (e2e)', () => {
 
     describe('/users/profile (GET)', () => {
         it('사용자 프로필 정보를 반환한다.', async () => {
-            let response = await request(app.getHttpServer())
-                .post('/auth/signin')
-                .send({
-                    userId: testUser.userId,
-                    password: 'test@1234'
-                })
-                .expect(200);
-            accessToken = response.body.accessToken;
-
-            response = await request(app.getHttpServer())
+            const response = await request(app.getHttpServer())
                 .get('/users/profile')
-                .set('Authorization', `Bearer ${accessToken}`);
+                .set('Authorization', `Bearer ${accessTokenUser}`);
             expect(response.statusCode).toBe(200);
             testUser = response.body;
             expect(testUser).toHaveProperty('id');
@@ -59,11 +60,11 @@ describe('UserController (e2e)', () => {
             expect(testUser).toHaveProperty('role');
         });
 
-        it('사용자 프로필 정보에 비밀번호는 포함되지 않는다.', async () => {
+        it('사용자 프로필 정보에 비밀번호는 포함되지 않아야 한다.', async () => {
             expect(testUser).not.toHaveProperty('password');
         });
 
-        it('사용자 프로필 정보에 refreshToken 은 포함되지 않는다.', async () => {
+        it('사용자 프로필 정보에 refreshToken 은 포함되지 않아야 한다.', async () => {
             expect(testUser).not.toHaveProperty('refreshToken');
         });
     });
@@ -95,7 +96,7 @@ describe('UserController (e2e)', () => {
             const description = 'nestJS 블로그 개발 테스트';
             await request(app.getHttpServer())
                 .patch('/users/profile')
-                .set('Authorization', `Bearer ${accessToken}`)
+                .set('Authorization', `Bearer ${accessTokenUser}`)
                 .send({
                     nickname,
                     description
@@ -103,26 +104,26 @@ describe('UserController (e2e)', () => {
                 .expect(200);
             const response = await request(app.getHttpServer())
                 .get('/users/profile')
-                .set('Authorization', `Bearer ${accessToken}`);
+                .set('Authorization', `Bearer ${accessTokenUser}`);
             const user = response.body;
             expect(user.nickname).toBe(nickname);
             expect(user.description).toBe(description);
         });
 
-        it('비밀번호는 변경할 수 없어야 한다.', async () => {
-            const password = 'password1234';
+        it('이메일은 변경할 수 없어야 한다.', async () => {
             await request(app.getHttpServer())
                 .patch('/users/profile')
-                .set('Authorization', `Bearer ${accessToken}`)
+                .set('Authorization', `Bearer ${accessTokenUser}`)
                 .send({
-                    password: password
+                    email: USER_EMAIL_SECOND
                 })
                 .expect(200);
+
             const response = await request(app.getHttpServer())
                 .get('/users/profile')
-                .set('Authorization', `Bearer ${accessToken}`);
+                .set('Authorization', `Bearer ${accessTokenUser}`);
             const user = response.body;
-            expect(user.password).not.toBe(password);
+            expect(user.email).toBe(USER_EMAIL);
         });
     });
 });

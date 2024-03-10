@@ -14,6 +14,9 @@ import validationOptions from 'src/utils/validation-options';
 import * as faker from 'faker';
 import { CommentService } from 'src/comment/comment.service';
 import { ResponseInterceptor } from 'src/common/interceptors/response.interceptor';
+import { AuthService } from 'src/auth/auth.service';
+import { ADMIN_EMAIL, USER_EMAIL } from '../consts';
+import { POST_PER_PAGE } from 'src/common/consts';
 
 describe('PostController (e2e)', () => {
     let app: INestApplication;
@@ -36,13 +39,23 @@ describe('PostController (e2e)', () => {
         const usersService = moduleFixture.get<UsersService>(UsersService);
         const postService = moduleFixture.get<PostService>(PostService);
         const commentService = moduleFixture.get<CommentService>(CommentService);
+        const authService = moduleFixture.get<AuthService>(AuthService);
+
         userSeeder = new UserSeeder(usersService);
         postSeeder = new PostSeeder(postService);
         commentSeeder = new CommentSeeder(commentService);
-        // 관리자 생성
-        testAdminUser = await userSeeder.createTestUser(UsersRole.ADMIN);
-        // 사용자 생성
-        testUser = await userSeeder.createTestUser(UsersRole.USER);
+
+        testAdminUser = await userSeeder.createTestUser(ADMIN_EMAIL, UsersRole.ADMIN);
+        testUser = await userSeeder.createTestUser(USER_EMAIL, UsersRole.USER);
+
+        const adminHash = await authService.generateHash(ADMIN_EMAIL);
+        const userHash = await authService.generateHash(USER_EMAIL);
+
+        let response;
+        response = await authService.login({ hash: adminHash });
+        accessTokenAdmin = response.accessToken;
+        response = await authService.login({ hash: userHash });
+        accessTokenUser = response.accessToken;
 
         // 공개 게시물 생성
         const publicPostPromises = Array.from({ length: 20 }).map(() => {
@@ -73,25 +86,6 @@ describe('PostController (e2e)', () => {
         const content = faker.lorem.paragraph();
         const description = faker.lorem.sentence();
         it('게시물을 생성한다.', async () => {
-            let response;
-            response = await request(app.getHttpServer())
-                .post('/auth/signin')
-                .send({
-                    userId: testAdminUser.userId,
-                    password: 'test@1234'
-                })
-                .expect(200);
-            accessTokenAdmin = response.body.accessToken;
-
-            response = await request(app.getHttpServer())
-                .post('/auth/signin')
-                .send({
-                    userId: testUser.userId,
-                    password: 'test@1234'
-                })
-                .expect(200);
-            accessTokenUser = response.body.accessToken;
-
             await request(app.getHttpServer())
                 .post('/posts')
                 .set('Authorization', `Bearer ${accessTokenAdmin}`)
@@ -201,13 +195,13 @@ describe('PostController (e2e)', () => {
             });
         });
 
-        it('limit 또는 page 가 주어지지 않는다면 1페이지, 15 개 게시물을 반환한다.', async () => {
+        it(`limit 또는 page 가 주어지지 않는다면 1페이지, ${POST_PER_PAGE} 개 게시물을 반환한다.`, async () => {
             const response = await request(app.getHttpServer()).get('/posts/public').expect(200);
             const data = response.body;
             expect(data).toHaveProperty('posts');
             expect(data).toHaveProperty('total');
             expect(Array.isArray(data.posts)).toBeTruthy();
-            expect(data.posts.length).toBe(15);
+            expect(data.posts.length).toBe(POST_PER_PAGE);
         });
 
         it('없는 페이지일 경우 빈 게시물 목록과 총 게시글 수를 반환한다.', async () => {
@@ -335,12 +329,14 @@ describe('PostController (e2e)', () => {
         });
 
         it('게시물 삭제시 댓글도 같이 삭제되어야 한다.', async () => {
+            // 게시물 생성
+            const post = await postSeeder.createTestPost(testUser);
             // 댓글 생성
-            const comment = await commentSeeder.createTestComment(testUser, 1);
+            const comment = await commentSeeder.createTestComment(testUser, post.id);
             // 대댓글 생성
             await commentSeeder.createTestReply(testAdminUser, comment.id);
             await request(app.getHttpServer())
-                .delete('/posts/1')
+                .delete(`/posts/${post.id}`)
                 .set('Authorization', `Bearer ${accessTokenAdmin}`)
                 .expect(200);
         });

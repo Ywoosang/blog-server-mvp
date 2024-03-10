@@ -8,9 +8,11 @@ import { PostStatus } from 'src/post/post-status.enum';
 import { User } from 'src/users/entities/user.entity';
 import UserSeeder from '../seeds/users.seed';
 import PostSeeder from '../seeds/post.seed';
-import { UsersRole } from 'src/users/users-role.enum';
 import validationOptions from 'src/utils/validation-options';
 import { ResponseInterceptor } from 'src/common/interceptors/response.interceptor';
+import { AuthService } from 'src/auth/auth.service';
+import { USER_EMAIL } from '../consts';
+import { UsersRole } from 'src/users/users-role.enum';
 
 describe('LikeController (e2e)', () => {
     let app: INestApplication;
@@ -27,10 +29,19 @@ describe('LikeController (e2e)', () => {
 
         const usersService = moduleFixture.get<UsersService>(UsersService);
         const postService = moduleFixture.get<PostService>(PostService);
+        const authService = moduleFixture.get<AuthService>(AuthService);
+
         userSeeder = new UserSeeder(usersService);
         postSeeder = new PostSeeder(postService);
-        // 사용자 생성
-        testUser = await userSeeder.createTestUser(UsersRole.USER);
+
+        testUser = await userSeeder.createTestUser(USER_EMAIL, UsersRole.USER);
+
+        const userHash = await authService.generateHash(USER_EMAIL);
+
+        let response;
+        response = await authService.login({ hash: userHash });
+        accessTokenUser = response.accessToken;
+
         // 공개 게시물 생성
         await postSeeder.createTestPost(testUser);
         // 비공개 게시물 생성
@@ -48,15 +59,6 @@ describe('LikeController (e2e)', () => {
 
     describe('/likes/posts/:id (POST)', () => {
         it('좋아요를 생성한다.', async () => {
-            const response = await request(app.getHttpServer())
-                .post('/auth/signin')
-                .send({
-                    userId: testUser.userId,
-                    password: 'test@1234'
-                })
-                .expect(200);
-            accessTokenUser = response.body.accessToken;
-
             await request(app.getHttpServer())
                 .post('/likes/posts/1')
                 .set('Authorization', `Bearer ${accessTokenUser}`)

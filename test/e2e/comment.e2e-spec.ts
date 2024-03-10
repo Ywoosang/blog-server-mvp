@@ -14,6 +14,8 @@ import { UsersRole } from 'src/users/users-role.enum';
 import validationOptions from 'src/utils/validation-options';
 import * as faker from 'faker';
 import { ResponseInterceptor } from 'src/common/interceptors/response.interceptor';
+import { USER_EMAIL, USER_EMAIL_SECOND } from '../consts';
+import { AuthService } from 'src/auth/auth.service';
 
 describe('CommentController (e2e)', () => {
     let app: INestApplication;
@@ -22,6 +24,7 @@ describe('CommentController (e2e)', () => {
     let postSeeder: PostSeeder;
     let commentSeeder: CommentSeeder;
     let testUser: User;
+    let testUserSecond: User;
 
     beforeAll(async () => {
         jest.setTimeout(1000000);
@@ -32,13 +35,20 @@ describe('CommentController (e2e)', () => {
         const usersService = moduleFixture.get<UsersService>(UsersService);
         const postService = moduleFixture.get<PostService>(PostService);
         const commentService = moduleFixture.get<CommentService>(CommentService);
+        const authService = moduleFixture.get<AuthService>(AuthService);
+
         userSeeder = new UserSeeder(usersService);
         postSeeder = new PostSeeder(postService);
         commentSeeder = new CommentSeeder(commentService);
-        // 사용자 생성
-        testUser = await userSeeder.createTestUser(UsersRole.USER);
-        // 게시물 생성
-        // 공개 게시물 생성
+
+        testUser = await userSeeder.createTestUser(USER_EMAIL, UsersRole.USER);
+        testUserSecond = await userSeeder.createTestUser(USER_EMAIL_SECOND, UsersRole.USER);
+        const userHash = await authService.generateHash(USER_EMAIL);
+
+        let response;
+        response = await authService.login({ hash: userHash });
+        accessTokenUser = response.accessToken;
+
         const publicPostPromises = Array.from({ length: 5 }).map(() => {
             return postSeeder.createTestPost(testUser);
         });
@@ -57,14 +67,6 @@ describe('CommentController (e2e)', () => {
     describe('/comments (POST)', () => {
         const content = faker.lorem.paragraph();
         it('게시물에 대한 댓글을 생성한다.', async () => {
-            const response = await request(app.getHttpServer())
-                .post('/auth/signin')
-                .send({
-                    userId: testUser.userId,
-                    password: 'test@1234'
-                })
-                .expect(200);
-            accessTokenUser = response.body.accessToken;
             await request(app.getHttpServer())
                 .post('/comments')
                 .set('Authorization', `Bearer ${accessTokenUser}`)
@@ -177,9 +179,8 @@ describe('CommentController (e2e)', () => {
         });
 
         it('댓글 작성자가 아니라면 403 Forbidden 에러를 반환한다.', async () => {
-            const user = await userSeeder.createTestUser(UsersRole.USER);
-            await postSeeder.createTestPost(user, PostStatus.PUBLIC);
-            const comment = await commentSeeder.createTestComment(user, 1);
+            await postSeeder.createTestPost(testUserSecond, PostStatus.PUBLIC);
+            const comment = await commentSeeder.createTestComment(testUserSecond, 1);
             await request(app.getHttpServer())
                 .put(`/comments/${comment.id}`)
                 .set('Authorization', `Bearer ${accessTokenUser}`)
@@ -209,9 +210,8 @@ describe('CommentController (e2e)', () => {
         });
 
         it('댓글 작성자가 아니라면 403 Forbidden 에러를 반환한다.', async () => {
-            const user = await userSeeder.createTestUser(UsersRole.USER);
-            const post = await postSeeder.createTestPost(user, PostStatus.PUBLIC);
-            const comment = await commentSeeder.createTestComment(user, post.id);
+            const post = await postSeeder.createTestPost(testUserSecond, PostStatus.PUBLIC);
+            const comment = await commentSeeder.createTestComment(testUserSecond, post.id);
             await request(app.getHttpServer())
                 .delete(`/comments/${comment.id}`)
                 .set('Authorization', `Bearer ${accessTokenUser}`)
