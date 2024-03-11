@@ -1,0 +1,95 @@
+name: ci/cd
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 소스 코드 Checkout
+        uses: actions/checkout@v2
+
+      - name: Node.js 설치
+        uses: actions/setup-node@v2
+        with:
+          node-version: '17'
+
+      - name: 패키지 설치
+        run: npm ci
+
+      - name: e2e 테스트 실행
+        run: npm run test:e2e
+        env:
+          AUTH_JWT_SECRET: ${{ secrets.AUTH_JWT_SECRET }}
+          AUTH_JWT_TOKEN_EXPIRES_IN: ${{ secrets.AUTH_JWT_TOKEN_EXPIRES_IN }}
+          AUTH_REFRESH_SECRET: ${{ secrets.AUTH_REFRESH_SECRET }}
+          AUTH_REFRESH_TOKEN_EXPIRES_IN: ${{ secrets.AUTH_REFRESH_TOKEN_EXPIRES_IN }}
+          AUTH_CONFIRM_EMAIL_SECRET: ${{ secrets.AUTH_CONFIRM_EMAIL_SECRET }}
+          AUTH_EMAIL_TOKEN_EXPIRES_IN: ${{ secrets.AUTH_EMAIL_TOKEN_EXPIRES_IN }}
+
+  build-and-deploy:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 소스코드 Checkout
+        uses: actions/checkout@v2
+
+      - name: Node.js 설치
+        uses: actions/setup-node@v2
+        with: 
+          node-version: '17'
+
+      - name: 패키지 설치
+        run: npm ci
+
+      - name: .env 파일 생성
+        working-directory: ./
+        run: |
+          echo "ADMIN_DESCRIPTION=${{ secrets.ADMIN_DESCRIPTION }}" >> .env
+          echo "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" >> .env
+          echo "ADMIN_LOGIN_ID=${{ secrets.ADMIN_LOGIN_ID }}" >> .env
+          echo "ADMIN_NICKNAME=${{ secrets.ADMIN_NICKNAME }}" >> .env
+          echo "APP_PORT=${{ secrets.APP_PORT }}" >> .env
+          echo "AUTH_CONFIRM_EMAIL_SECRET=${{ secrets.AUTH_CONFIRM_EMAIL_SECRET }}" >> .env
+          echo "AUTH_EMAIL_TOKEN_EXPIRES_IN=${{ secrets.AUTH_EMAIL_TOKEN_EXPIRES_IN }}" >> .env
+          echo "AUTH_JWT_SECRET=${{ secrets.AUTH_JWT_SECRET }}" >> .env
+          echo "AUTH_JWT_TOKEN_EXPIRES_IN=${{ secrets.AUTH_JWT_TOKEN_EXPIRES_IN }}" >> .env
+          echo "AUTH_REFRESH_SECRET=${{ secrets.AUTH_REFRESH_SECRET }}" >> .env
+          echo "AUTH_REFRESH_TOKEN_EXPIRES_IN=${{ secrets.AUTH_REFRESH_TOKEN_EXPIRES_IN }}" >> .env
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> .env
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
+          echo "MAIL_DEFAULT_EMAIL=${{ secrets.MAIL_DEFAULT_EMAIL }}" >> .env
+          echo "MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}" >> .env
+          echo "MAIL_SERVICE=${{ secrets.MAIL_SERVICE }}" >> .env
+          echo "MAIL_USER=${{ secrets.MAIL_USER }}" >> .env
+
+      - name: 빌드
+       run: npm run build
+      
+      - name: 빌드한 코드 압축
+        run: zip -r blog.zip ./dist ./env ./appspec.yml ./ startup.sh ./package.json ./package-lock.json 
+
+      - name: AWS 접속
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+    
+      - name: S3 에 zip 파일 업로드
+        run: aws s3 cp --region ap-northeast-2 ./blog.zip s3://ywoosang-blog-deploy/zip/
+
+      - name: CodeDeploy 로 배포
+        run: |
+          aws deploy create-deployment \
+            --application-name ywoosang-blog-codedeploy \
+            --deployment-config-name CodeDeployDefault.OneAtATime \
+            --deployment-group-name ywoosang-blog-prod \
+            --s3-location bucket=ywoosang-blog-deploy,key=zip/blog.zip,bundleType=zip
+
+
