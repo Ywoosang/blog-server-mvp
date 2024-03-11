@@ -41,7 +41,7 @@ jobs:
 
       - name: Node.js 설치
         uses: actions/setup-node@v2
-        with: 
+        with:
           node-version: '17'
 
       - name: 패키지 설치
@@ -69,10 +69,10 @@ jobs:
           echo "MAIL_USER=${{ secrets.MAIL_USER }}" >> .env
 
       - name: 빌드
-       run: npm run build
-      
+        run: npm run build
+
       - name: 빌드한 코드 압축
-        run: zip -r blog.zip ./dist ./env ./appspec.yml ./ startup.sh ./package.json ./package-lock.json 
+        run: zip -r blog.zip ./dist ./env ./appspec.yml ./startup.sh ./package.json ./package-lock.json
 
       - name: AWS 접속
         uses: aws-actions/configure-aws-credentials@v1
@@ -80,7 +80,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-2
-    
+
       - name: S3 에 zip 파일 업로드
         run: aws s3 cp --region ap-northeast-2 ./blog.zip s3://ywoosang-blog-deploy/zip/
 
@@ -91,5 +91,3 @@ jobs:
             --deployment-config-name CodeDeployDefault.OneAtATime \
             --deployment-group-name ywoosang-blog-prod \
             --s3-location bucket=ywoosang-blog-deploy,key=zip/blog.zip,bundleType=zip
-
-
