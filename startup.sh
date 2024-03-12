@@ -3,6 +3,6 @@ REPOSITORY=/home/ec2-user/app
 
 cd $REPOSITORY
 
-npm install
+npm ci --production
 
-npm start:prod
+npm run start:prod
