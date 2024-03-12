@@ -72,7 +72,7 @@ jobs:
         run: npm run build
 
       - name: 빌드한 코드 압축
-        run: zip -r blog.zip ./dist ./env ./appspec.yml ./startup.sh ./package.json ./package-lock.json
+        run: zip -r blog.zip ./dist ./.env ./appspec.yml ./startup.sh ./package.json ./package-lock.json
 
       - name: AWS 접속
         uses: aws-actions/configure-aws-credentials@v1
