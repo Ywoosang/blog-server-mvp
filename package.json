@@ -1,5 +1,5 @@
 {
-    "name": "nest-study",
+    "name": "ywoosang-blog-server",
     "version": "0.0.1",
     "description": "",
     "author": "",
@@ -12,7 +12,7 @@
         "start": "nest start",
         "start:dev": "NODE_ENV=dev nest start --watch",
         "start:test": "NODE_ENV=test nest start --watch",
-        "start:prod": "NODE_ENV=prod node dist/main",
+        "start:prod": "NODE_ENV=prod pm2 start dist/main.js",
         "start:debug": "nest start --debug --watch",
         "lint": "prettier --check 'src/**/*.ts' && eslint 'src/**/*.ts'",
         "lint:fix": "prettier --cache --write 'src/**/*.ts' && eslint --cache --fix 'src/**/*.ts'",

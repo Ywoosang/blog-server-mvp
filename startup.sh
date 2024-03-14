@@ -5,4 +5,6 @@ cd $REPOSITORY
 
 npm ci --production
 
+pm2 delete all
+
 npm run start:prod
