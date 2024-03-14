@@ -50,7 +50,14 @@ jobs:
       - name: .env 파일 생성
         working-directory: ./
         run: |
-          echo "ADMIN_DESCRIPTION=${{ secrets.ADMIN_DESCRIPTION }}" >> .env
+          echo "DATABASE_TYPE=${{ secrets.DATABASE_TYPE }}" >> .env
+          echo "DATABASE_HOST=${{ secrets.DATABASE_HOST }}" >> .env
+          echo "DATABASE_PORT=${{ secrets.DATABASE_PORT }}" >> .env
+          echo "DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}" >> .env
+          echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env
+          echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env
+          echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}" >> .env
+          echo "DATABASE_SYNCHRONIZE=${{ secrets.DATABASE_SYNCHRONIZE }}" >> .env
           echo "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" >> .env
           echo "ADMIN_LOGIN_ID=${{ secrets.ADMIN_LOGIN_ID }}" >> .env
           echo "ADMIN_NICKNAME=${{ secrets.ADMIN_NICKNAME }}" >> .env
@@ -61,12 +68,12 @@ jobs:
           echo "AUTH_JWT_TOKEN_EXPIRES_IN=${{ secrets.AUTH_JWT_TOKEN_EXPIRES_IN }}" >> .env
           echo "AUTH_REFRESH_SECRET=${{ secrets.AUTH_REFRESH_SECRET }}" >> .env
           echo "AUTH_REFRESH_TOKEN_EXPIRES_IN=${{ secrets.AUTH_REFRESH_TOKEN_EXPIRES_IN }}" >> .env
-          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> .env
-          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
           echo "MAIL_DEFAULT_EMAIL=${{ secrets.MAIL_DEFAULT_EMAIL }}" >> .env
           echo "MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}" >> .env
           echo "MAIL_SERVICE=${{ secrets.MAIL_SERVICE }}" >> .env
           echo "MAIL_USER=${{ secrets.MAIL_USER }}" >> .env
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> .env
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
 
       - name: 빌드
         run: npm run build
