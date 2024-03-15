@@ -50,11 +50,12 @@ jobs:
       - name: .env 파일 생성
         working-directory: ./
         run: |
+          echo "APP_BACKEND_DOMAIN=${{ secrets.APP_BACKEND_DOMAIN }}" >> .env
+          echo "APP_FRONTEND_DOMAIN=${{ secrets.APP_FRONTEND_DOMAIN }}" >> .env
           echo "DATABASE_TYPE=${{ secrets.DATABASE_TYPE }}" >> .env
           echo "DATABASE_HOST=${{ secrets.DATABASE_HOST }}" >> .env
           echo "DATABASE_PORT=${{ secrets.DATABASE_PORT }}" >> .env
           echo "DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}" >> .env
-          echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env
           echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env
           echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}" >> .env
           echo "DATABASE_SYNCHRONIZE=${{ secrets.DATABASE_SYNCHRONIZE }}" >> .env
