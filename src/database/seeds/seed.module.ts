@@ -10,7 +10,7 @@ import { UsersSeedModule } from './users/users-seed.module';
         ConfigModule.forRoot({
             isGlobal: true,
             load: [databaseConfig, appConfig],
-            envFilePath: `.env.${process.env.NODE_ENV}`,
+            envFilePath: ['.env'],
         }),
         DatabaseModule,
         UsersSeedModule,
