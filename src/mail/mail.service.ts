@@ -4,7 +4,11 @@ import path from 'path';
 import { AllConfigType } from 'src/configs/types/config.type';
 import { MailerService } from 'src/mailer/mailer.service';
 import { MailData } from './interfaces/mail-data.interface';
-import { LOGIN_SUBJECT, REGISTER_SUBJECT } from 'src/mail/constants/constants';
+import {
+    LOGIN_SUBJECT,
+    REGISTER_SUBJECT,
+    SOURCE_DIR,
+} from 'src/mail/constants/constants';
 
 @Injectable()
 export class MailService {
@@ -19,7 +23,7 @@ export class MailService {
             this.configService.getOrThrow('app.workingDirectory', {
                 infer: true,
             }),
-            'src',
+            SOURCE_DIR,
             'mail',
             'mail-templates',
         );
