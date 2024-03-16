@@ -1,6 +1,6 @@
 {
     "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": true
+        "source.fixAll.eslint": "explicit"
     },
     // `prettier`를 기본 포맷터로 지정
     "editor.defaultFormatter": "esbenp.prettier-vscode",
