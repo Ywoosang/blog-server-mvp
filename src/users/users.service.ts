@@ -76,7 +76,6 @@ export class UsersService {
         page = page ? page : 1;
         limit = limit ? limit : POST_PER_PAGE;
         const skip = (page - 1) * limit;
-        console.log(userId);
         const [comments, total] = await this.commentRepository
             .createQueryBuilder('comment')
             .innerJoin('comment.user', 'user')

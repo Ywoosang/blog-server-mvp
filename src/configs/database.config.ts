@@ -2,12 +2,8 @@ import { registerAs } from '@nestjs/config';
 import { type DatabaseConfig } from './types/config.type';
 import {
     IsOptional,
-    IsInt,
-    Min,
-    Max,
     IsString,
     ValidateIf,
-    IsBoolean,
 } from 'class-validator';
 
 import validateConfig from 'src/utils/validate-config';
@@ -22,9 +18,9 @@ class EnvironmentVariablesValidator {
     DATABASE_HOST: string;
 
     @ValidateIf((envValues) => !envValues.DATABASE_URL)
-    @IsInt()
-    @Min(0)
-    @Max(65535)
+    // @IsInt()
+    // @Min(0)
+    // @Max(65535)
     @IsOptional()
     DATABASE_PORT: number;
 
@@ -41,7 +37,7 @@ class EnvironmentVariablesValidator {
     @IsString()
     DATABASE_USERNAME: string;
 
-    @IsBoolean()
+    // @IsBoolean()
     @IsOptional()
     DATABASE_SYNCHRONIZE: boolean;
 }
