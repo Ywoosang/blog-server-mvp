@@ -10,9 +10,9 @@ export class AuthRegisterDto {
     @Matches(/^[a-zA-Z0-9]{4,10}$/)
     userId: string;
 
-    // 2~10자 영문 또는 한글 또는 숫자
+    // 2~10자
     @IsString()
-    @Matches(/^[a-zA-Z가-힣0-9]{2,10}$/)
+    @Matches(/^.{2,10}$/)
     nickname: string;
 
     @IsString()

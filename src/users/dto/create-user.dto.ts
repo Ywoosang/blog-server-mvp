@@ -1,12 +1,4 @@
-import {
-    IsAlphanumeric,
-    IsEmail,
-    IsEnum,
-    IsNotEmpty,
-    IsString,
-    MaxLength,
-    MinLength,
-} from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsString, Matches } from 'class-validator';
 import { UsersRole } from '../users-role.enum';
 
 export class CreateUserDto {
@@ -14,14 +6,13 @@ export class CreateUserDto {
     @IsEmail()
     email: string;
 
-    @IsAlphanumeric()
-    @MinLength(4)
-    @MaxLength(20)
+    @IsString()
+    @Matches(/^[a-zA-Z0-9]{4,10}$/)
     userId: string;
 
+    // 2~10자
     @IsString()
-    @MinLength(2)
-    @MaxLength(10)
+    @Matches(/^.{2,10}$/)
     nickname: string;
 
     @IsEnum(UsersRole)

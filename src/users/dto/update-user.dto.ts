@@ -1,11 +1,10 @@
-import { IsString, IsOptional, MaxLength, MinLength } from 'class-validator';
+import { IsString, IsOptional, MaxLength, Matches } from 'class-validator';
 
 export class UpdateUserDto {
     @IsOptional()
     @IsString()
-    @MinLength(2)
-    @MaxLength(10)
-    nickname?: string;
+    @Matches(/^.{2,10}$/)
+    nickname: string;
 
     @IsOptional()
     @IsString()
