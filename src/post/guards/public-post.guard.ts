@@ -1,10 +1,4 @@
-import {
-    BadRequestException,
-    CanActivate,
-    ExecutionContext,
-    Injectable,
-    NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, CanActivate, ExecutionContext, Injectable, NotFoundException } from '@nestjs/common';
 import { PostService } from '../post.service';
 import { PostStatus } from '../post-status.enum';
 

@@ -1,9 +1,4 @@
-import {
-    Injectable,
-    CanActivate,
-    ExecutionContext,
-    NotFoundException,
-} from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, NotFoundException } from '@nestjs/common';
 import { CommentService } from './comment.service';
 
 @Injectable()

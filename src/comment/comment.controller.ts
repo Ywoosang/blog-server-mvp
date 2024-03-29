@@ -35,10 +35,7 @@ export class CommentController {
     @Post()
     @UseGuards(AuthGuard('jwt'))
     @HttpCode(HttpStatus.CREATED)
-    async createComment(
-        @Body() createCommentDto: CreateCommentDto,
-        @GetUser() user: User,
-    ): Promise<Comment> {
+    async createComment(@Body() createCommentDto: CreateCommentDto, @GetUser() user: User): Promise<Comment> {
         return await this.commentService.create(createCommentDto, user);
     }
 
@@ -58,11 +55,7 @@ export class CommentController {
         @Body() createReplyDto: CreateReplyDto,
         @GetUser() user: User,
     ): Promise<Comment> {
-        return await this.commentService.createReply(
-            createReplyDto,
-            parentCommentId,
-            user,
-        );
+        return await this.commentService.createReply(createReplyDto, parentCommentId, user);
     }
 
     /**
@@ -73,9 +66,7 @@ export class CommentController {
      */
     @Get('posts/:postId')
     @HttpCode(HttpStatus.OK)
-    async getCommentsByPostId(
-        @Param('postId', ParseIntPipe) postId: number,
-    ): Promise<Comment[]> {
+    async getCommentsByPostId(@Param('postId', ParseIntPipe) postId: number): Promise<Comment[]> {
         return await this.commentService.findMany(postId);
     }
 

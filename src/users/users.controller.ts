@@ -42,10 +42,7 @@ export class UsersController {
     @Patch('/profile')
     @UseGuards(AuthGuard('jwt'))
     @HttpCode(HttpStatus.OK)
-    async updateUserProfile(
-        @GetUser() user: User,
-        @Body() updateUserDto: UpdateUserDto,
-    ): Promise<User> {
+    async updateUserProfile(@GetUser() user: User, @Body() updateUserDto: UpdateUserDto): Promise<User> {
         return this.usersService.update(user.id, updateUserDto);
     }
 
@@ -55,9 +52,6 @@ export class UsersController {
         @Param('userId') userId: string,
         @Query() findUserActivitiesDto: FindUserActivitiesDto,
     ): Promise<ActivityResponse> {
-        return this.usersService.findUserActivities(
-            findUserActivitiesDto,
-            userId,
-        );
+        return this.usersService.findUserActivities(findUserActivitiesDto, userId);
     }
 }

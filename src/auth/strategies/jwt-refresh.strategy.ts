@@ -10,10 +10,7 @@ import { Request } from 'express';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
-export class JwtRefreshStrategy extends PassportStrategy(
-    Strategy,
-    'jwt-refresh',
-) {
+export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
     constructor(
         @InjectRepository(User)
         private userRepository: Repository<User>,
@@ -46,10 +43,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
         }
 
         const refreshTokenFromBody = request.body.refreshToken;
-        const isMatch = await bcrypt.compare(
-            refreshTokenFromBody,
-            user.refreshToken,
-        );
+        const isMatch = await bcrypt.compare(refreshTokenFromBody, user.refreshToken);
 
         if (isMatch) {
             return user;

@@ -1,10 +1,4 @@
-import {
-    Entity,
-    PrimaryGeneratedColumn,
-    Column,
-    ManyToMany,
-    BaseEntity,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, BaseEntity } from 'typeorm';
 import { Post } from 'src/post/entities/post.entity';
 
 @Entity()

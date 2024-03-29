@@ -25,9 +25,7 @@ export class UsersSeedService {
                     nickname: process.env.ADMIN_NICKNAME,
                     description: process.env.ADMIN_DESCRIPTION,
                     role: UsersRole.ADMIN,
-                    profileImage: this.gravatarService.getGravatarUrl(
-                        process.env.ADMIN_EMAIL!,
-                    ),
+                    profileImage: this.gravatarService.getGravatarUrl(process.env.ADMIN_EMAIL!),
                 }),
             );
         }

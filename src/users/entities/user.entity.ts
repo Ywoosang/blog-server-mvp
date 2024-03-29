@@ -1,10 +1,4 @@
-import {
-    BaseEntity,
-    Column,
-    PrimaryGeneratedColumn,
-    Entity,
-    OneToMany,
-} from 'typeorm';
+import { BaseEntity, Column, PrimaryGeneratedColumn, Entity, OneToMany } from 'typeorm';
 import { Post } from 'src/post/entities/post.entity';
 import { Comment } from 'src/comment/entities/comment.entity';
 import { Like } from 'src/like/entities/like.entity';

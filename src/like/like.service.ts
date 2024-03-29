@@ -1,11 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-    FindOptionsWhere,
-    FindManyOptions,
-    Repository,
-    FindOneOptions,
-} from 'typeorm';
+import { FindOptionsWhere, FindManyOptions, Repository, FindOneOptions } from 'typeorm';
 import { Like } from 'src/like/entities/like.entity';
 import { NullableType } from 'src/utils/types/nullable.type';
 import { PostService } from 'src/post/post.service';
@@ -31,9 +26,7 @@ export class LikeService {
         );
     }
 
-    async findOne(
-        findOptions: FindOneOptions<Like>,
-    ): Promise<NullableType<Like>> {
+    async findOne(findOptions: FindOneOptions<Like>): Promise<NullableType<Like>> {
         return this.likeRepository.findOne(findOptions);
     }
 

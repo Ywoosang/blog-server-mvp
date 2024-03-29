@@ -1,13 +1,4 @@
-import {
-    Controller,
-    Get,
-    HttpCode,
-    HttpStatus,
-    Param,
-    ParseIntPipe,
-    Query,
-    UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AdminGuard } from 'src/utils/guards/admin.guard';
 import { FindTagPostsDto } from './dto/find-tag-posts.dto';
@@ -25,9 +16,7 @@ export class TagController {
     @Get()
     @UseGuards(AuthGuard('jwt'), AdminGuard)
     @HttpCode(HttpStatus.OK)
-    async findTagsWithOneOrMorePosts(
-        @GetUser() user: User,
-    ): Promise<FindTagsResponseDto> {
+    async findTagsWithOneOrMorePosts(@GetUser() user: User): Promise<FindTagsResponseDto> {
         return this.tagService.findTagsWithOneOrMorePosts(user);
     }
 

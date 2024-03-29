@@ -32,9 +32,7 @@ export class TagService {
         return this.tagRepository.save(this.tagRepository.create(createTagDto));
     }
 
-    async findTagsWithOneOrMorePosts(
-        user?: User,
-    ): Promise<FindTagsResponseDto> {
+    async findTagsWithOneOrMorePosts(user?: User): Promise<FindTagsResponseDto> {
         let query = this.tagRepository
             .createQueryBuilder('tag')
             .innerJoin('tag.posts', 'post_tag')
@@ -44,17 +42,11 @@ export class TagService {
             query = query.addSelect(['COUNT(post_tag.id) as postCount']);
         } else {
             query = query
-                .addSelect([
-                    'COUNT(CASE WHEN post_tag.status = :status THEN 1 END) as postCount',
-                ])
+                .addSelect(['COUNT(CASE WHEN post_tag.status = :status THEN 1 END) as postCount'])
                 .setParameter('status', PostStatus.PUBLIC);
         }
 
-        const queryResult = await query
-            .groupBy('tag.id, tag.name')
-            .having('postCount > 0')
-            .distinct(true)
-            .getRawMany();
+        const queryResult = await query.groupBy('tag.id, tag.name').having('postCount > 0').distinct(true).getRawMany();
 
         const tags = queryResult.map((tag) => ({
             id: tag.tag_id as number,
@@ -86,9 +78,7 @@ export class TagService {
         }
 
         if (!isAdmin) {
-            tag.posts = tag.posts.filter(
-                (post) => (post.status = PostStatus.PUBLIC),
-            );
+            tag.posts = tag.posts.filter((post) => (post.status = PostStatus.PUBLIC));
         }
         tag.posts = tag.posts.slice(skip, skip + limit);
 
