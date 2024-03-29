@@ -11,15 +11,16 @@ import { UsersModule } from 'src/users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { type AllConfigType } from 'src/configs/types/config.type';
 import { MailModule } from 'src/mail/mail.moudle';
+import { GoogleStrategy } from './strategies/google.strategy';
+import { GithubStrategy } from './strategies/github.strategy';
+import { KakaoStrategy } from './strategies/kakao.strategy';
 
 @Module({
     imports: [
         PassportModule.register({ defaultStrategy: 'jwt' }),
         JwtModule.registerAsync({
             imports: [ConfigModule],
-            useFactory: async (
-                configService: ConfigService<AllConfigType>,
-            ) => ({
+            useFactory: async (configService: ConfigService<AllConfigType>) => ({
                 secret: configService.get('auth.secret', { infer: true }),
                 signOptions: {
                     expiresIn: configService.get('auth.expires', {
@@ -34,7 +35,7 @@ import { MailModule } from 'src/mail/mail.moudle';
         MailModule,
     ],
     controllers: [AuthController],
-    providers: [AuthService, JwtStrategy, JwtRefreshStrategy],
-    exports: [JwtStrategy, JwtRefreshStrategy],
+    providers: [AuthService, JwtStrategy, JwtRefreshStrategy, GoogleStrategy, GithubStrategy, KakaoStrategy],
+    exports: [JwtStrategy, JwtRefreshStrategy, AuthService],
 })
 export class AuthModule {}

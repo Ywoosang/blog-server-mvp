@@ -31,10 +31,14 @@ export interface MailConfig {
     defaultEmail?: string;
 }
 
-export interface GoogleConfig {
+interface SocialConfig {
     clientId?: string;
     clientSecret?: string;
 }
+
+export interface GoogleConfig extends SocialConfig {}
+export interface GithubConfig extends SocialConfig {}
+export interface KakaoConfig extends SocialConfig {}
 
 export interface AllConfigType {
     app: AppConfig;
@@ -42,4 +46,6 @@ export interface AllConfigType {
     database: DatabaseConfig;
     mail: MailConfig;
     google: GoogleConfig;
+    github: GithubConfig;
+    kakao: KakaoConfig;
 }
