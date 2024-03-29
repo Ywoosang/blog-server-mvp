@@ -33,7 +33,7 @@ import kakaoConfig from './configs/kakao.config';
             isGlobal: true,
             load:
                 process.env.NODE_ENV === 'test'
-                    ? [appConfig, authConfig]
+                    ? [appConfig, authConfig, googleConfig, githubConfig, kakaoConfig]
                     : [appConfig, authConfig, databaseConfig, mailConfig, googleConfig, githubConfig, kakaoConfig],
             envFilePath: `.env`,
         }),
