@@ -13,9 +13,7 @@ import path from 'path';
         MulterModule.registerAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
-            useFactory: async (
-                configService: ConfigService<AllConfigType>,
-            ) => ({
+            useFactory: async (configService: ConfigService<AllConfigType>) => ({
                 storage: diskStorage({
                     destination: path.join(
                         configService.getOrThrow('app.workingDirectory', {
@@ -26,9 +24,7 @@ import path from 'path';
                     ),
                     filename: (req, file, callback) => {
                         // uuid + 확장자 형식으로 파일 저장
-                        const filename = `${uuid()}${path.extname(
-                            file.originalname,
-                        )}`;
+                        const filename = `${uuid()}${path.extname(file.originalname)}`;
                         callback(null, filename);
                     },
                 }),

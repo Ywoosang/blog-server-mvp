@@ -1,8 +1,4 @@
-import {
-    ConflictException,
-    Injectable,
-    NotFoundException,
-} from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NullableType } from 'src/utils/types/nullable.type';
 import { Repository } from 'typeorm';
@@ -23,12 +19,9 @@ export class CategoryService {
     async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
         const { name } = createCategoryDto;
         const category = await this.findOneByName(name);
-        if (category)
-            throw new ConflictException('이미 존재하는 카테고리입니다.');
+        if (category) throw new ConflictException('이미 존재하는 카테고리입니다.');
 
-        return this.categoryRepository.save(
-            this.categoryRepository.create(createCategoryDto),
-        );
+        return this.categoryRepository.save(this.categoryRepository.create(createCategoryDto));
     }
 
     async findAll(): Promise<{ categories: Category[] }> {
@@ -45,16 +38,10 @@ export class CategoryService {
             .leftJoin(
                 'post',
                 'post',
-                isAdmin
-                    ? 'category.id = post.categoryId'
-                    : 'category.id = post.categoryId AND post.status = :status',
+                isAdmin ? 'category.id = post.categoryId' : 'category.id = post.categoryId AND post.status = :status',
                 { status: PostStatus.PUBLIC },
             )
-            .select([
-                'category.id AS id',
-                'category.name AS name',
-                'COALESCE(COUNT(post.id),0) AS postCount',
-            ])
+            .select(['category.id AS id', 'category.name AS name', 'COALESCE(COUNT(post.id),0) AS postCount'])
             .addGroupBy('category.id')
             .addGroupBy('category.name');
         const categories = await query.getRawMany();
@@ -99,19 +86,14 @@ export class CategoryService {
         }
 
         if (!isAdmin) {
-            category.posts = category.posts.filter(
-                (post) => (post.status = PostStatus.PUBLIC),
-            );
+            category.posts = category.posts.filter((post) => (post.status = PostStatus.PUBLIC));
         }
         category.posts = category.posts.slice(skip, skip + limit);
 
         return category;
     }
 
-    async update(
-        id: number,
-        updateCategoryDto: UpdateCategoryDto,
-    ): Promise<Category> {
+    async update(id: number, updateCategoryDto: UpdateCategoryDto): Promise<Category> {
         const { name } = updateCategoryDto;
         const category = await this.categoryRepository.findOne({
             where: { id },

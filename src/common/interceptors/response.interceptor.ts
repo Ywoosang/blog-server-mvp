@@ -1,9 +1,4 @@
-import {
-    Injectable,
-    type NestInterceptor,
-    type ExecutionContext,
-    type CallHandler,
-} from '@nestjs/common';
+import { Injectable, type NestInterceptor, type ExecutionContext, type CallHandler } from '@nestjs/common';
 import { type Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { type User } from 'src/users/entities/user.entity';
@@ -24,7 +19,7 @@ export class ResponseInterceptor implements NestInterceptor {
 
                         return el;
                     });
-                } else if (typeof data === 'object') {
+                } else if (data != null && typeof data === 'object') {
                     if (data.user) {
                         data.user = this.excludeFields(data.user as User);
                     } else if (!isLoginRequest) {

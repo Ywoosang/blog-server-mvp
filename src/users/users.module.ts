@@ -9,12 +9,7 @@ import { FilesModule } from 'src/files/files.module';
 import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([User, Comment]),
-        GravatarModule,
-        FilesModule,
-        JwtModule.register({}),
-    ],
+    imports: [TypeOrmModule.forFeature([User, Comment]), GravatarModule, FilesModule, JwtModule.register({})],
     controllers: [UsersController],
     providers: [UsersService],
     exports: [UsersService],

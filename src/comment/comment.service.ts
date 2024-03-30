@@ -19,10 +19,7 @@ export class CommentService {
         private readonly postService: PostService,
     ) {}
 
-    async create(
-        createCommentDto: CreateCommentDto,
-        user: User,
-    ): Promise<Comment> {
+    async create(createCommentDto: CreateCommentDto, user: User): Promise<Comment> {
         const { postId } = createCommentDto;
         const post = await this.postService.findOne({
             where: {
@@ -45,11 +42,7 @@ export class CommentService {
         return comment;
     }
 
-    async createReply(
-        createReplyDto: CreateReplyDto,
-        parentCommentId: number,
-        user: User,
-    ): Promise<Comment> {
+    async createReply(createReplyDto: CreateReplyDto, parentCommentId: number, user: User): Promise<Comment> {
         const { replyToId } = createReplyDto;
         const replyTo = await this.userRepository.findOne({
             where: {
@@ -83,9 +76,7 @@ export class CommentService {
         );
     }
 
-    async findOne(
-        findOptions: FindOneOptions<Comment>,
-    ): Promise<NullableType<Comment>> {
+    async findOne(findOptions: FindOneOptions<Comment>): Promise<NullableType<Comment>> {
         return await this.commentRepository.findOne(findOptions);
     }
 
@@ -140,10 +131,7 @@ export class CommentService {
         return comments;
     }
 
-    async update(
-        id: number,
-        updateCommentDto: UpdateCommentDto,
-    ): Promise<Comment> {
+    async update(id: number, updateCommentDto: UpdateCommentDto): Promise<Comment> {
         const { content } = updateCommentDto;
         const comment = await this.findOne({
             where: {

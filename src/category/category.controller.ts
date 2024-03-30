@@ -1,15 +1,4 @@
-import {
-    Controller,
-    Get,
-    Post,
-    Param,
-    Body,
-    Put,
-    Delete,
-    UseGuards,
-    Query,
-    ParseIntPipe,
-} from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Put, Delete, UseGuards, Query, ParseIntPipe } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { Category } from './entities/category.entity';
 import { AuthGuard } from '@nestjs/passport';
@@ -31,9 +20,7 @@ export class CategoryController {
      */
     @Post()
     @UseGuards(AuthGuard('jwt'), AdminGuard)
-    async create(
-        @Body() createCategoryDto: CreateCategoryDto,
-    ): Promise<Category> {
+    async create(@Body() createCategoryDto: CreateCategoryDto): Promise<Category> {
         return this.categoryService.create(createCategoryDto);
     }
 
@@ -95,11 +82,7 @@ export class CategoryController {
         @Param('id', ParseIntPipe) id: number,
         @Query() findCategoryPostsDto: FindCategoryPostsDto,
     ): Promise<NullableType<Category>> {
-        return this.categoryService.findOneWithPosts(
-            +id,
-            findCategoryPostsDto,
-            true,
-        );
+        return this.categoryService.findOneWithPosts(+id, findCategoryPostsDto, true);
     }
 
     /**

@@ -1,13 +1,4 @@
-import {
-    Body,
-    Controller,
-    Post,
-    HttpCode,
-    HttpStatus,
-    UseGuards,
-    Get,
-    Query,
-} from '@nestjs/common';
+import { Body, Controller, Post, HttpCode, HttpStatus, UseGuards, Get, Query, Req, Redirect } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthLoginDto } from './dto/auth-login.dto';
 import { AuthRegisterDto } from './dto/auth-register.dto';
@@ -17,6 +8,8 @@ import { AuthLoginResponseDto } from './dto/auth-login-response.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/utils/decorators/get-user.decorator';
 import { AuthEmailDto } from './dto/auth-email.dto';
+import { PassportRequest } from './interfaces/passport-request.interface';
+import { SocialData } from './types/social-data.type';
 
 @Controller('auth')
 export class AuthController {
@@ -30,9 +23,7 @@ export class AuthController {
      */
     @Post('/register')
     @HttpCode(HttpStatus.CREATED)
-    register(
-        @Body() registerDto: AuthRegisterDto,
-    ): Promise<NullableType<User>> {
+    register(@Body() registerDto: AuthRegisterDto): Promise<NullableType<User>> {
         return this.authService.register(registerDto);
     }
 
@@ -56,9 +47,7 @@ export class AuthController {
      */
     @Post('/send-email')
     @HttpCode(HttpStatus.OK)
-    async sendAuthEmail(
-        @Body() authEmailDto: AuthEmailDto,
-    ): Promise<{ message: string }> {
+    async sendAuthEmail(@Body() authEmailDto: AuthEmailDto): Promise<{ message: string }> {
         return this.authService.sendAuthEmail(authEmailDto);
     }
 
@@ -84,5 +73,44 @@ export class AuthController {
         return {
             accessToken,
         };
+    }
+
+    @Get('/google')
+    @UseGuards(AuthGuard('google'))
+    async googleAuth() {}
+
+    @Get('/google/login')
+    @UseGuards(AuthGuard('google'))
+    @Redirect()
+    @HttpCode(HttpStatus.OK)
+    async googleLogin(@Req() req: PassportRequest): Promise<any> {
+        const socialData: SocialData = req.user;
+        return this.authService.validateSocialLogin(socialData);
+    }
+
+    @Get('/github')
+    @UseGuards(AuthGuard('github'))
+    async githubAuth() {}
+
+    @Get('/github/login')
+    @UseGuards(AuthGuard('github'))
+    @Redirect()
+    @HttpCode(HttpStatus.OK)
+    async githubLogin(@Req() req: PassportRequest): Promise<any> {
+        const socialData: SocialData = req.user;
+        return this.authService.validateSocialLogin(socialData);
+    }
+
+    @Get('/kakao')
+    @UseGuards(AuthGuard('kakao'))
+    async kakaoAuth() {}
+
+    @Get('/kakao/login')
+    @UseGuards(AuthGuard('kakao'))
+    @Redirect()
+    @HttpCode(HttpStatus.OK)
+    async kakaoLogin(@Req() req: PassportRequest): Promise<any> {
+        const socialData: SocialData = req.user;
+        return this.authService.validateSocialLogin(socialData);
     }
 }

@@ -39,9 +39,7 @@ export class UsersService {
         );
     }
 
-    async findOne(
-        findOptions: FindOneOptions<User>,
-    ): Promise<NullableType<User>> {
+    async findOne(findOptions: FindOneOptions<User>): Promise<NullableType<User>> {
         return this.usersRepository.findOne(findOptions);
     }
 
@@ -52,13 +50,7 @@ export class UsersService {
     async findUserPublicProfileByUserId(userId: string) {
         const user = await this.usersRepository
             .createQueryBuilder('user')
-            .select([
-                'user.id',
-                'user.userId',
-                'user.nickname',
-                'user.profileImage',
-                'user.description',
-            ])
+            .select(['user.id', 'user.userId', 'user.nickname', 'user.profileImage', 'user.description'])
             .where('user.userId = :userId', { userId })
             .getOne();
         if (!user) throw new NotFoundException('사용자를 찾을 수 없습니다.');
@@ -66,27 +58,18 @@ export class UsersService {
         return user;
     }
 
-    async findUserActivities(
-        findUserActivitiesDto: FindUserActivitiesDto,
-        userId: string,
-    ): Promise<ActivityResponse> {
+    async findUserActivities(findUserActivitiesDto: FindUserActivitiesDto, userId: string): Promise<ActivityResponse> {
         // 활동내역
         // 댓글 작성 일자
         let { page, limit } = findUserActivitiesDto;
         page = page ? page : 1;
         limit = limit ? limit : POST_PER_PAGE;
         const skip = (page - 1) * limit;
-        console.log(userId);
         const [comments, total] = await this.commentRepository
             .createQueryBuilder('comment')
             .innerJoin('comment.user', 'user')
             .innerJoinAndSelect('comment.post', 'post')
-            .select([
-                'comment.id',
-                'comment.createdAt',
-                'post.title',
-                'post.id',
-            ])
+            .select(['comment.id', 'comment.createdAt', 'post.title', 'post.id'])
             .where('user.userId = :userId', { userId })
             // .orderBy('comment.createdAt', 'DESC')
             .offset(skip)
@@ -111,8 +94,7 @@ export class UsersService {
         const { profileImage } = updateUserDto;
         if (profileImage && user.profileImage != profileImage) {
             const filename = path.basename(profileImage);
-            updateUserDto.profileImage =
-                await this.filesService.uploadUserProfileImage(filename);
+            updateUserDto.profileImage = await this.filesService.uploadUserProfileImage(filename);
         }
 
         return this.usersRepository.save({

@@ -1,10 +1,4 @@
-import {
-    BadRequestException,
-    Controller,
-    Post,
-    UploadedFile,
-    UseInterceptors,
-} from '@nestjs/common';
+import { BadRequestException, Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FilesService } from './files.service';
 import { ConfigService } from '@nestjs/config';
@@ -19,9 +13,7 @@ export class FilesController {
 
     @Post('/image')
     @UseInterceptors(FileInterceptor('image'))
-    async uploadFile(
-        @UploadedFile() image: Express.Multer.File,
-    ): Promise<{ filename: string }> {
+    async uploadFile(@UploadedFile() image: Express.Multer.File): Promise<{ filename: string }> {
         if (!image) throw new BadRequestException('파일이 존재하지 않습니다.');
 
         return {

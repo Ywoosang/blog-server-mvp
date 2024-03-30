@@ -23,10 +23,7 @@ export class AuthCheckInterceptor implements NestInterceptor {
         private readonly configService: ConfigService<AllConfigType>,
     ) {}
 
-    async intercept(
-        context: ExecutionContext,
-        next: CallHandler,
-    ): Promise<Observable<any>> {
+    async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
         const request = context.switchToHttp().getRequest();
         const headers: IncomingHttpHeaders = request.headers;
         const token = this.extractTokenFromHeader(headers);
@@ -47,17 +44,13 @@ export class AuthCheckInterceptor implements NestInterceptor {
                 });
                 request.user = user;
             } catch (e) {
-                throw new UnauthorizedException(
-                    '로그인이 만료되었습니다. 다시 로그인해주세요.',
-                );
+                throw new UnauthorizedException('로그인이 만료되었습니다. 다시 로그인해주세요.');
             }
         }
         return next.handle();
     }
 
-    private extractTokenFromHeader(
-        headers: IncomingHttpHeaders,
-    ): string | undefined {
+    private extractTokenFromHeader(headers: IncomingHttpHeaders): string | undefined {
         const [type, token] = headers.authorization?.split(' ') ?? [];
         return type === 'Bearer' ? token : undefined;
     }

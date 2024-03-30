@@ -42,16 +42,11 @@ export class PostService {
         return { postCount };
     }
 
-    async findOne(
-        findOptions: FindOneOptions<Post>,
-    ): Promise<NullableType<Post>> {
+    async findOne(findOptions: FindOneOptions<Post>): Promise<NullableType<Post>> {
         return this.postRepository.findOne(findOptions);
     }
 
-    async findPostsPaginated(
-        findPostsDto: FindPostsDto,
-        isAdmin: boolean = false,
-    ): Promise<FindPostsResponseDto> {
+    async findPostsPaginated(findPostsDto: FindPostsDto, isAdmin: boolean = false): Promise<FindPostsResponseDto> {
         let { page, limit } = findPostsDto;
         page = page ? page : 1;
         limit = limit ? limit : POST_PER_PAGE;
@@ -89,15 +84,7 @@ export class PostService {
     }
 
     async create(createPostDto: CreatePostDto, user: User): Promise<Post> {
-        const {
-            title,
-            content,
-            description,
-            status,
-            categoryId,
-            tagNames,
-            fileNames,
-        } = createPostDto;
+        const { title, content, description, status, categoryId, tagNames, fileNames } = createPostDto;
 
         let category;
         if (categoryId) {
@@ -136,25 +123,14 @@ export class PostService {
             }
         }
 
-        post.content = this.filesService.uploadImageUrlInHtml(
-            post.content,
-            postId,
-        );
+        post.content = this.filesService.uploadImageUrlInHtml(post.content, postId);
         await this.postRepository.save(post);
 
         return post;
     }
 
     async update(id: number, updatePostDto: UpdatePostDto) {
-        const {
-            title,
-            content,
-            description,
-            status,
-            categoryId,
-            tagNames,
-            fileNames,
-        } = updatePostDto;
+        const { title, content, description, status, categoryId, tagNames, fileNames } = updatePostDto;
         const post = await this.findOne({
             where: {
                 id,
