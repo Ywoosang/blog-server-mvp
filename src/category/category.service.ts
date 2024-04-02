@@ -86,7 +86,7 @@ export class CategoryService {
         }
 
         if (!isAdmin) {
-            category.posts = category.posts.filter((post) => (post.status = PostStatus.PUBLIC));
+            category.posts = category.posts.filter((post) => post.status == PostStatus.PUBLIC);
         }
         category.posts = category.posts.slice(skip, skip + limit);
 
