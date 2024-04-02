@@ -164,7 +164,7 @@ export class PostService {
         }
 
         post.title = title;
-        post.content = content;
+        post.content = this.filesService.uploadImageUrlInHtml(content, id);
         post.description = description;
         post.status = status;
 
