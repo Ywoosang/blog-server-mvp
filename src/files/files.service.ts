@@ -65,6 +65,6 @@ export class FilesService {
     }
 
     uploadImageUrlInHtml(html: string, postId: number): string {
-        return html.replace(/static\/temp\//g, `static/images/posts/${postId}/`);
+        return html.replaceAll(/static\/temp\//g, `static/images/posts/${postId}/`);
     }
 }
