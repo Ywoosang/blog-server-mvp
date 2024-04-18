@@ -1,7 +1,7 @@
+import { AppTestModule } from '../app-test.module';
 import { ValidationPipe, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
-import { AppModule } from 'src/app.module';
 import { UsersService } from 'src/users/users.service';
 import { PostService } from 'src/post/post.service';
 import { PostStatus } from 'src/post/post-status.enum';
@@ -24,7 +24,7 @@ describe('LikeController (e2e)', () => {
     beforeAll(async () => {
         jest.setTimeout(1000000);
         const moduleFixture = await Test.createTestingModule({
-            imports: [AppModule]
+            imports: [AppTestModule],
         }).compile();
 
         const usersService = moduleFixture.get<UsersService>(UsersService);
@@ -96,7 +96,7 @@ describe('LikeController (e2e)', () => {
             const response = await request(app.getHttpServer()).get('/likes/posts/1').expect(200);
             const likes = response.body;
             expect(Array.isArray(likes)).toBe(true);
-            likes.forEach(like => {
+            likes.forEach((like) => {
                 expect(like).toHaveProperty('id');
                 expect(like).toHaveProperty('createdAt');
                 expect(like).toHaveProperty('user');

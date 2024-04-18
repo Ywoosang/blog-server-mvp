@@ -1,7 +1,7 @@
+import { AppTestModule } from '../app-test.module';
 import { ValidationPipe, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
-import { AppModule } from 'src/app.module';
 import { UsersService } from 'src/users/users.service';
 import { PostService } from 'src/post/post.service';
 import { PostStatus } from 'src/post/post-status.enum';
@@ -33,7 +33,7 @@ describe('PostController (e2e)', () => {
     beforeAll(async () => {
         jest.setTimeout(1000000);
         const moduleFixture = await Test.createTestingModule({
-            imports: [AppModule]
+            imports: [AppTestModule],
         }).compile();
 
         const usersService = moduleFixture.get<UsersService>(UsersService);
@@ -93,7 +93,7 @@ describe('PostController (e2e)', () => {
                     title,
                     content,
                     description,
-                    status: PostStatus.PUBLIC
+                    status: PostStatus.PUBLIC,
                 })
                 .expect(201);
             publicPostCount++;
@@ -106,7 +106,7 @@ describe('PostController (e2e)', () => {
                     title,
                     content,
                     description,
-                    status: PostStatus.PUBLIC
+                    status: PostStatus.PUBLIC,
                 })
                 .expect(401);
         });
@@ -119,7 +119,7 @@ describe('PostController (e2e)', () => {
                     title,
                     content,
                     description,
-                    status: PostStatus.PUBLIC
+                    status: PostStatus.PUBLIC,
                 })
                 .expect(403);
         });
@@ -132,7 +132,7 @@ describe('PostController (e2e)', () => {
                     title: '',
                     content: '내용1',
                     description,
-                    status: PostStatus.PUBLIC
+                    status: PostStatus.PUBLIC,
                 })
                 .expect(400);
         });
@@ -145,7 +145,7 @@ describe('PostController (e2e)', () => {
                     title: '제목1',
                     content: '',
                     description,
-                    status: PostStatus.PUBLIC
+                    status: PostStatus.PUBLIC,
                 })
                 .expect(400);
         });
@@ -157,7 +157,7 @@ describe('PostController (e2e)', () => {
                 .send({
                     title: '제목1',
                     content: '',
-                    status: PostStatus.PUBLIC
+                    status: PostStatus.PUBLIC,
                 })
                 .expect(400);
         });
@@ -190,7 +190,7 @@ describe('PostController (e2e)', () => {
             const data = response.body;
             expect(data).toHaveProperty('posts');
             expect(data).toHaveProperty('total');
-            data.posts.forEach(post => {
+            data.posts.forEach((post) => {
                 expect(post.status).toBe(PostStatus.PUBLIC);
             });
         });
@@ -207,7 +207,7 @@ describe('PostController (e2e)', () => {
         it('없는 페이지일 경우 빈 게시물 목록과 총 게시글 수를 반환한다.', async () => {
             await request(app.getHttpServer())
                 .get('/posts/public?page=10&limit=15')
-                .expect(response => {
+                .expect((response) => {
                     const data = response.body;
                     expect(data).toHaveProperty('posts');
                     expect(data).toHaveProperty('total');
@@ -294,7 +294,7 @@ describe('PostController (e2e)', () => {
                 .patch('/posts/1/status')
                 .set('Authorization', `Bearer ${accessTokenAdmin}`)
                 .send({
-                    status: PostStatus.PRIVATE
+                    status: PostStatus.PRIVATE,
                 })
                 .expect(204);
         });
@@ -304,7 +304,7 @@ describe('PostController (e2e)', () => {
                 .patch('/posts/12/status')
                 .set('Authorization', `Bearer ${accessTokenUser}`)
                 .send({
-                    status: PostStatus.PUBLIC
+                    status: PostStatus.PUBLIC,
                 })
                 .expect(403);
         });
@@ -314,7 +314,7 @@ describe('PostController (e2e)', () => {
                 .patch('/posts/100/status')
                 .set('Authorization', `Bearer ${accessTokenAdmin}`)
                 .send({
-                    status: PostStatus.PRIVATE
+                    status: PostStatus.PRIVATE,
                 })
                 .expect(404);
         });

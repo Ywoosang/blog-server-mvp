@@ -1,7 +1,7 @@
+import { AppTestModule } from '../app-test.module';
 import { ValidationPipe, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
-import { AppModule } from 'src/app.module';
 import { UsersService } from 'src/users/users.service';
 import { PostService } from 'src/post/post.service';
 import { PostStatus } from 'src/post/post-status.enum';
@@ -29,7 +29,7 @@ describe('CommentController (e2e)', () => {
     beforeAll(async () => {
         jest.setTimeout(1000000);
         const moduleFixture = await Test.createTestingModule({
-            imports: [AppModule]
+            imports: [AppTestModule],
         }).compile();
 
         const usersService = moduleFixture.get<UsersService>(UsersService);
@@ -72,7 +72,7 @@ describe('CommentController (e2e)', () => {
                 .set('Authorization', `Bearer ${accessTokenUser}`)
                 .send({
                     content,
-                    postId: 1
+                    postId: 1,
                 })
                 .expect(201);
         });
@@ -82,7 +82,7 @@ describe('CommentController (e2e)', () => {
                 .post('/comments')
                 .send({
                     content,
-                    postId: 1
+                    postId: 1,
                 })
                 .expect(401);
         });
@@ -93,7 +93,7 @@ describe('CommentController (e2e)', () => {
                 .set('Authorization', `Bearer ${accessTokenUser}`)
                 .send({
                     content: '',
-                    postId: 1
+                    postId: 1,
                 })
                 .expect(400);
         });
@@ -103,7 +103,7 @@ describe('CommentController (e2e)', () => {
                 .post('/comments')
                 .set('Authorization', `Bearer ${accessTokenUser}`)
                 .send({
-                    content
+                    content,
                 })
                 .expect(400);
         });
@@ -117,7 +117,7 @@ describe('CommentController (e2e)', () => {
                 .set('Authorization', `Bearer ${accessTokenUser}`)
                 .send({
                     content,
-                    replyToId: testUser.id
+                    replyToId: testUser.id,
                 })
                 .expect(201);
         });
@@ -128,7 +128,7 @@ describe('CommentController (e2e)', () => {
                 .set('Authorization', `Bearer ${accessTokenUser}`)
                 .send({
                     content,
-                    replyToId: testUser.id
+                    replyToId: testUser.id,
                 })
                 .expect(404);
         });
@@ -139,7 +139,7 @@ describe('CommentController (e2e)', () => {
                 .set('Authorization', `Bearer ${accessTokenUser}`)
                 .send({
                     content: '',
-                    replyToId: testUser.id
+                    replyToId: testUser.id,
                 })
                 .expect(400);
         });
@@ -157,7 +157,7 @@ describe('CommentController (e2e)', () => {
             expect(response.statusCode).toBe(200);
             const comments = response.body;
             expect(Array.isArray(comments)).toBe(true);
-            comments.forEach(comment => {
+            comments.forEach((comment) => {
                 expect(comment).toHaveProperty('id');
                 expect(comment).toHaveProperty('content');
                 expect(comment).toHaveProperty('replies');
@@ -172,7 +172,7 @@ describe('CommentController (e2e)', () => {
                 .put('/comments/1')
                 .set('Authorization', `Bearer ${accessTokenUser}`)
                 .send({
-                    content: '수정된 내용'
+                    content: '수정된 내용',
                 });
             expect(response.statusCode).toBe(200);
             expect(response.body.content).toBe('수정된 내용');
@@ -185,7 +185,7 @@ describe('CommentController (e2e)', () => {
                 .put(`/comments/${comment.id}`)
                 .set('Authorization', `Bearer ${accessTokenUser}`)
                 .send({
-                    content: '수정된 내용'
+                    content: '수정된 내용',
                 })
                 .expect(403);
         });
@@ -195,7 +195,7 @@ describe('CommentController (e2e)', () => {
                 .put('/comments/1')
                 .set('Authorization', `Bearer ${accessTokenUser}`)
                 .send({
-                    content: ''
+                    content: '',
                 });
             expect(response.statusCode).toBe(400);
         });
@@ -216,7 +216,7 @@ describe('CommentController (e2e)', () => {
                 .delete(`/comments/${comment.id}`)
                 .set('Authorization', `Bearer ${accessTokenUser}`)
                 .send({
-                    content: '수정된 내용'
+                    content: '수정된 내용',
                 })
                 .expect(403);
         });

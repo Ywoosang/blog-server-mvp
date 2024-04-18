@@ -1,7 +1,7 @@
+import { AppTestModule } from '../app-test.module';
 import { ValidationPipe, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
-import { AppModule } from 'src/app.module';
 import validationOptions from 'src/utils/validation-options';
 import { ResponseInterceptor } from 'src/common/interceptors/response.interceptor';
 import { AuthService } from 'src/auth/auth.service';
@@ -14,7 +14,7 @@ describe('AuthController (e2e)', () => {
     beforeAll(async () => {
         jest.setTimeout(10000);
         const moduleFixture = await Test.createTestingModule({
-            imports: [AppModule]
+            imports: [AppTestModule],
         }).compile();
         authService = moduleFixture.get<AuthService>(AuthService);
 
@@ -36,7 +36,7 @@ describe('AuthController (e2e)', () => {
                     email: 'test@gmail.com',
                     userId: 'test1234',
                     nickname: '테스트사용자',
-                    description: '테스트사용자 입니다.'
+                    description: '테스트사용자 입니다.',
                 })
                 .expect(201);
             // 생성한 사용자의 이메일 hash 값 생성
@@ -44,14 +44,12 @@ describe('AuthController (e2e)', () => {
         });
 
         it('이메일이 존재할 경우 409 Conflict 에러를 반환한다.', async () => {
-            const response = await request(app.getHttpServer())
-                .post('/auth/register')
-                .send({
-                    email: 'test@gmail.com',
-                    userId: 'test1',
-                    nickname: '테스트사용자1',
-                    description: '테스트사용자 입니다.'
-                })
+            const response = await request(app.getHttpServer()).post('/auth/register').send({
+                email: 'test@gmail.com',
+                userId: 'test1',
+                nickname: '테스트사용자1',
+                description: '테스트사용자 입니다.',
+            });
             expect(response.statusCode).toBe(409);
             const errorDetails = response.body.details;
             expect(Array.isArray(errorDetails)).toBe(true);
@@ -61,14 +59,12 @@ describe('AuthController (e2e)', () => {
         });
 
         it('아이디가 존재할 경우 409 Conflict 에러를 반환한다.', async () => {
-            const response = await request(app.getHttpServer())
-                .post('/auth/register')
-                .send({
-                    email: 'test1@gmail.com',
-                    userId: 'test1234',
-                    nickname: '테스트사용자1',
-                    description: '테스트사용자 입니다.'
-                })
+            const response = await request(app.getHttpServer()).post('/auth/register').send({
+                email: 'test1@gmail.com',
+                userId: 'test1234',
+                nickname: '테스트사용자1',
+                description: '테스트사용자 입니다.',
+            });
             expect(response.statusCode).toBe(409);
             const errorDetails = response.body.details;
             expect(Array.isArray(errorDetails)).toBe(true);
@@ -78,14 +74,12 @@ describe('AuthController (e2e)', () => {
         });
 
         it('닉네임이 존재할 경우 409 Conflict 에러를 반환한다.', async () => {
-            const response = await request(app.getHttpServer())
-                .post('/auth/register')
-                .send({
-                    email: 'test1@gmail.com',
-                    userId: 'test1',
-                    nickname: '테스트사용자',
-                    description: '테스트사용자 입니다.'
-                })
+            const response = await request(app.getHttpServer()).post('/auth/register').send({
+                email: 'test1@gmail.com',
+                userId: 'test1',
+                nickname: '테스트사용자',
+                description: '테스트사용자 입니다.',
+            });
             expect(response.statusCode).toBe(409);
             const errorDetails = response.body.details;
             expect(Array.isArray(errorDetails)).toBe(true);
@@ -95,17 +89,15 @@ describe('AuthController (e2e)', () => {
         });
 
         it('이메일, 아이디, 닉네임이 각각 존재할 경우 각각 에러메시지를 포함해야 한다.', async () => {
-            const response = await request(app.getHttpServer())
-                .post('/auth/register')
-                .send({
-                    email: 'test@gmail.com',
-                    userId: 'test1234',
-                    nickname: '테스트사용자',
-                    description: '테스트사용자 입니다.'
-                })
+            const response = await request(app.getHttpServer()).post('/auth/register').send({
+                email: 'test@gmail.com',
+                userId: 'test1234',
+                nickname: '테스트사용자',
+                description: '테스트사용자 입니다.',
+            });
             const errorDetails = response.body.details;
             expect(errorDetails.length).toBe(3);
-            errorDetails.forEach(detail => {
+            errorDetails.forEach((detail) => {
                 expect(detail).toHaveProperty('field');
                 expect(detail).toHaveProperty('message');
             });
@@ -118,7 +110,7 @@ describe('AuthController (e2e)', () => {
                     email: 'test',
                     userId: 'ywoosang',
                     nickname: '테스트사용자',
-                    description: '테스트사용자 입니다.'
+                    description: '테스트사용자 입니다.',
                 })
                 .expect(400);
         });
@@ -130,7 +122,7 @@ describe('AuthController (e2e)', () => {
                     email: 'test@gmail.com',
                     userId: 't',
                     nickname: '테스트사용자',
-                    description: '테스트사용자 입니다.'
+                    description: '테스트사용자 입니다.',
                 })
                 .expect(400);
         });
@@ -142,7 +134,7 @@ describe('AuthController (e2e)', () => {
                     email: 'test@gmail.com',
                     userId: 'ywoosang',
                     nickname: '테',
-                    description: '테스트사용자 입니다.'
+                    description: '테스트사용자 입니다.',
                 })
                 .expect(400);
         });
@@ -151,11 +143,9 @@ describe('AuthController (e2e)', () => {
     describe('/auth/login (POST)', () => {
         let response;
         it('로그인이 성공할 경우 200 OK 를 반환한다.', async () => {
-            response = await request(app.getHttpServer())
-                .post('/auth/login')
-                .send({
-                    hash
-                })
+            response = await request(app.getHttpServer()).post('/auth/login').send({
+                hash,
+            });
             expect(response.statusCode).toBe(200);
         });
 
@@ -167,11 +157,9 @@ describe('AuthController (e2e)', () => {
         });
 
         it('유효하지 않은 요청이라면 422 UnprocessableEntity 에러를 반환한다.', async () => {
-            response = await request(app.getHttpServer())
-                .post('/auth/login')
-                .send({
-                    hash: 'abcd'
-                })
+            response = await request(app.getHttpServer()).post('/auth/login').send({
+                hash: 'abcd',
+            });
             expect(response.statusCode).toBe(422);
             expect(response.body.message).toBe('처리할 수 없는 요청입니다.');
         });
@@ -179,11 +167,9 @@ describe('AuthController (e2e)', () => {
         it('사용자를 찾을 수 없다면 404 NotFound 에러를 반환한다.', async () => {
             const anotherHash = await authService.generateHash('abc@gmail.com');
 
-            response = await request(app.getHttpServer())
-                .post('/auth/login')
-                .send({
-                    hash: anotherHash
-                })
+            response = await request(app.getHttpServer()).post('/auth/login').send({
+                hash: anotherHash,
+            });
             expect(response.statusCode).toBe(404);
             expect(response.body.message).toBe('사용자를 찾을 수 없습니다.');
         });

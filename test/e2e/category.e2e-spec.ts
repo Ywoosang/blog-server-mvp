@@ -1,7 +1,7 @@
+import { AppTestModule } from '../app-test.module';
 import { ValidationPipe, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
-import { AppModule } from 'src/app.module';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
 import { UsersRole } from 'src/users/users-role.enum';
@@ -27,7 +27,7 @@ describe('CategoryController (e2e)', () => {
 
     beforeAll(async () => {
         const moduleFixture = await Test.createTestingModule({
-            imports: [AppModule],
+            imports: [AppTestModule],
         }).compile();
 
         const usersService = moduleFixture.get<UsersService>(UsersService);

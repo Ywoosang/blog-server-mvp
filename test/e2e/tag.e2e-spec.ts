@@ -1,7 +1,7 @@
+import { AppTestModule } from '../app-test.module';
 import { ValidationPipe, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
-import { AppModule } from 'src/app.module';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
 import { UsersRole } from 'src/users/users-role.enum';
@@ -29,7 +29,7 @@ describe('TagController (e2e)', () => {
 
     beforeAll(async () => {
         const moduleFixture = await Test.createTestingModule({
-            imports: [AppModule]
+            imports: [AppTestModule],
         }).compile();
 
         const usersService = moduleFixture.get<UsersService>(UsersService);
@@ -77,7 +77,7 @@ describe('TagController (e2e)', () => {
                 .expect(200);
 
             const tags = response.body.tags;
-            tags.forEach(tag => {
+            tags.forEach((tag) => {
                 expect(tag.id).toBeDefined();
                 expect(tag.name).toBeDefined();
                 expect(tag.postCount).toEqual(postCount);
@@ -100,7 +100,7 @@ describe('TagController (e2e)', () => {
         it('공개 게시물이 하나 이상 있는 태그들을 반환한다.', async () => {
             const response = await request(app.getHttpServer()).get('/tags/public').expect(200);
             const tags = response.body.tags;
-            tags.forEach(tag => {
+            tags.forEach((tag) => {
                 expect(tag.id).toBeDefined();
                 expect(tag.name).toBeDefined();
                 expect(tag.postCount).toEqual(publicPostCount);

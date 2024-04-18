@@ -1,7 +1,7 @@
+import { AppTestModule } from '../app-test.module';
 import { ValidationPipe, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
-import { AppModule } from 'src/app.module';
 import { UsersService } from 'src/users/users.service';
 import UserSeeder from '../seeds/users.seed';
 import { User } from 'src/users/entities/user.entity';
@@ -19,7 +19,7 @@ describe('UserController (e2e)', () => {
 
     beforeAll(async () => {
         const moduleFixture = await Test.createTestingModule({
-            imports: [AppModule]
+            imports: [AppTestModule],
         }).compile();
 
         const authService = moduleFixture.get<AuthService>(AuthService);
@@ -99,7 +99,7 @@ describe('UserController (e2e)', () => {
                 .set('Authorization', `Bearer ${accessTokenUser}`)
                 .send({
                     nickname,
-                    description
+                    description,
                 })
                 .expect(200);
             const response = await request(app.getHttpServer())
@@ -115,7 +115,7 @@ describe('UserController (e2e)', () => {
                 .patch('/users/profile')
                 .set('Authorization', `Bearer ${accessTokenUser}`)
                 .send({
-                    email: USER_EMAIL_SECOND
+                    email: USER_EMAIL_SECOND,
                 })
                 .expect(200);
 
