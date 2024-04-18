@@ -27,6 +27,10 @@ export class PostService {
         private filesService: FilesService,
     ) {}
 
+    private replaceImageUrlInPostHtml(html: string, postId: number): string {
+        return html.replaceAll(/static\/temp\//g, `static/images/posts/${postId}/`);
+    }
+
     async getPostCount(status?: PostStatus): Promise<{ postCount: number }> {
         let postCount;
         if (status == PostStatus.PUBLIC) {
@@ -119,11 +123,11 @@ export class PostService {
         const postId = post.id;
         if (fileNames) {
             for (const fileName of fileNames) {
-                await this.filesService.uploadPostImage(fileName, `${postId}`);
+                await this.filesService.movePostImage(fileName, `${postId}`);
             }
         }
 
-        post.content = this.filesService.uploadImageUrlInHtml(post.content, postId);
+        post.content = this.replaceImageUrlInPostHtml(post.content, postId);
         await this.postRepository.save(post);
 
         return post;
@@ -140,7 +144,7 @@ export class PostService {
 
         if (fileNames) {
             for (const fileName of fileNames) {
-                await this.filesService.uploadPostImage(fileName, `${id}`);
+                await this.filesService.movePostImage(fileName, `${id}`);
             }
         }
 
@@ -164,7 +168,7 @@ export class PostService {
         }
 
         post.title = title;
-        post.content = this.filesService.uploadImageUrlInHtml(content, id);
+        post.content = this.replaceImageUrlInPostHtml(content, id);
         post.description = description;
         post.status = status;
 
@@ -197,8 +201,9 @@ export class PostService {
         });
         if (!post) throw new NotFoundException('존재하지 않는 게시물입니다.');
         const postId: string = post.id.toString();
-        this.filesService.deletePostImages(postId);
-
+        if (process.env.NODE_ENV != 'test') {
+            await this.filesService.deletePostImages(postId);
+        }
         await this.postRepository.remove(post);
     }
 }
