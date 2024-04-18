@@ -24,23 +24,40 @@ jobs:
       - name: e2e 테스트 실행
         run: npm run test:e2e
         env:
+          APP_BACKEND_DOMAIN: ${{ secrets.APP_BACKEND_DOMAIN }}
+          APP_FRONTEND_DOMAIN: ${{ secrets.APP_FRONTEND_DOMAIN }}
+          DATABASE_TYPE: ${{ secrets.DATABASE_TYPE }}
+          DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
+          DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
+          DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+          DATABASE_SYNCHRONIZE: ${{ secrets.DATABASE_SYNCHRONIZE }}
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          ADMIN_LOGIN_ID: ${{ secrets.ADMIN_LOGIN_ID }}
+          ADMIN_NICKNAME: ${{ secrets.ADMIN_NICKNAME }}
+          APP_PORT: ${{ secrets.APP_PORT }}
+          AUTH_CONFIRM_EMAIL_SECRET: ${{ secrets.AUTH_CONFIRM_EMAIL_SECRET }}
+          AUTH_EMAIL_TOKEN_EXPIRES_IN: ${{ secrets.AUTH_EMAIL_TOKEN_EXPIRES_IN }}
           AUTH_JWT_SECRET: ${{ secrets.AUTH_JWT_SECRET }}
           AUTH_JWT_TOKEN_EXPIRES_IN: ${{ secrets.AUTH_JWT_TOKEN_EXPIRES_IN }}
           AUTH_REFRESH_SECRET: ${{ secrets.AUTH_REFRESH_SECRET }}
           AUTH_REFRESH_TOKEN_EXPIRES_IN: ${{ secrets.AUTH_REFRESH_TOKEN_EXPIRES_IN }}
-          AUTH_CONFIRM_EMAIL_SECRET: ${{ secrets.AUTH_CONFIRM_EMAIL_SECRET }}
-          AUTH_EMAIL_TOKEN_EXPIRES_IN: ${{ secrets.AUTH_EMAIL_TOKEN_EXPIRES_IN }}
+          MAIL_DEFAULT_EMAIL: ${{ secrets.MAIL_DEFAULT_EMAIL }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          MAIL_SERVICE: ${{ secrets.MAIL_SERVICE }}
+          MAIL_USER: ${{ secrets.MAIL_USER }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_S3_REGION: ${{ secrets.AWS_S3_REGION }}
+          FILE_DRIVER: ${{ secrets.FILE_DRIVER }}
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           GITHUB_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
           GITHUB_CLIENT_SECRET: ${{ secrets.GH_CLIENT_SECRET }}
           KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
           KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
-          FILE_DRIVER: ${{ secrets.FILE_DRIVER }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-          AWS_S3_REGION: ${{ secrets.AWS_S3_REGION }}
 
   build-and-deploy:
     needs: test
