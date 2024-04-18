@@ -1,3 +1,5 @@
+import { FileDriver } from 'src/files/enum/file-driver.enum';
+
 export interface AppConfig {
     port?: number;
     backendDomain?: string;
@@ -31,9 +33,18 @@ export interface MailConfig {
     defaultEmail?: string;
 }
 
-interface SocialConfig {
+export interface SocialConfig {
     clientId?: string;
     clientSecret?: string;
+}
+
+export interface FilesConfig {
+    driver: FileDriver;
+    accessKeyId?: string;
+    secretAccessKey?: string;
+    awsS3Region?: string;
+    awsS3Bucket?: string;
+    maxFileSize: number;
 }
 
 export interface GoogleConfig extends SocialConfig {}
@@ -48,4 +59,5 @@ export interface AllConfigType {
     google: GoogleConfig;
     github: GithubConfig;
     kakao: KakaoConfig;
+    file: FilesConfig;
 }
