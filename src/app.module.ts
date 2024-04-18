@@ -17,25 +17,31 @@ import { MailerModule } from './mailer/mailer.module';
 import { DatabaseModule } from './database/database.module';
 import { DatabaseTestModule } from './database/database-test.module';
 
-import appConfig from 'src/configs/app.config';
-import authConfig from 'src/configs/auth.config';
-import databaseConfig from 'src/configs/database.config';
+import appConfig from './configs/app.config';
+import authConfig from './configs/auth.config';
+import databaseConfig from './configs/database.config';
 import mailConfig from './configs/mail.config';
 import googleConfig from './configs/google.config';
-
-import { HttpLoggerMiddleware } from './common/middlewares/http-logger.middleware';
 import githubConfig from './configs/github.config';
 import kakaoConfig from './configs/kakao.config';
+import fileConfig from './configs/files.config';
+
+import { HttpLoggerMiddleware } from './common/middlewares/http-logger.middleware';
 
 @Module({
     imports: [
         ConfigModule.forRoot({
             isGlobal: true,
-            load:
-                process.env.NODE_ENV === 'test'
-                    ? [appConfig, authConfig, googleConfig, githubConfig, kakaoConfig]
-                    : [appConfig, authConfig, databaseConfig, mailConfig, googleConfig, githubConfig, kakaoConfig],
-            envFilePath: `.env`,
+            load: [
+                appConfig,
+                authConfig,
+                databaseConfig,
+                mailConfig,
+                googleConfig,
+                githubConfig,
+                kakaoConfig,
+                fileConfig,
+            ],
         }),
         ServeStaticModule.forRoot({
             rootPath: path.join(__dirname, '..', 'public'),
